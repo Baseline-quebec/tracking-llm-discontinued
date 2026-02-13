@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 
-MatchType = Literal["llm", "embedding", "framework"]
+MatchType = Literal["llm", "embedding"]
 
 
 @dataclass(frozen=True)

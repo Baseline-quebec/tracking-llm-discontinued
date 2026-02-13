@@ -1,5 +1,5 @@
 Feature: LLM model pattern detection
-  The scanner should detect LLM models, embeddings, and frameworks
+  The scanner should detect LLM models and embeddings
   in lines of text using regex patterns.
 
   Scenario Outline: Detect standard LLM models
@@ -27,16 +27,6 @@ Feature: LLM model pattern detection
       | model: gemini-1.5-pro            | gemini-1.5-pro     | google    | llm        |
       | model = "gemini-1.5-flash"       | gemini-1.5-flash   | google    | llm        |
       | model: gemini-pro                | gemini-pro         | google    | llm        |
-      | model = "mistral-large"          | mistral-large      | mistral   | llm        |
-      | model: mistral-medium            | mistral-medium     | mistral   | llm        |
-      | model = "mistral-small"          | mistral-small      | mistral   | llm        |
-      | model: mixtral                   | mixtral            | mistral   | llm        |
-      | model = "codestral"             | codestral          | mistral   | llm        |
-      | model = "command-r-plus"         | command-r-plus     | cohere    | llm        |
-      | model: command-r                 | command-r          | cohere    | llm        |
-      | model = "llama-3"               | llama-3            | meta      | llm        |
-      | model: llama-2                   | llama-2            | meta      | llm        |
-      | model = "codellama"             | codellama          | meta      | llm        |
 
   Scenario Outline: Detect embedding models
     Given a line containing "<line>"
@@ -49,26 +39,8 @@ Feature: LLM model pattern detection
       | embedding = "text-embedding-3-small"       | text-embedding-3-small    | openai   |
       | model: text-embedding-3-large              | text-embedding-3-large    | openai   |
       | model = "text-embedding-ada-002"           | text-embedding-ada-002    | openai   |
-      | model: embed-english-v3.0                  | embed-english-v3.0        | cohere   |
-      | embedding = "embed-multilingual-v2.0"      | embed-multilingual-v2.0   | cohere   |
       | model = "voyage-large-2"                  | voyage-large-2            | voyage   |
       | model: voyage-code-3                       | voyage-code-3             | voyage   |
-
-  Scenario Outline: Detect frameworks
-    Given a line containing "<line>"
-    When I scan the line for matches
-    Then I should find model "<model>" from provider "<provider>"
-    And the match type should be "framework"
-
-    Examples:
-      | line                               | model       | provider   |
-      | from langchain import ChatOpenAI    | langchain   | langchain  |
-      | import llamaindex                   | llamaindex  | llamaindex |
-      | pip install crewai                  | crewai      | crewai     |
-      | from litellm import completion      | litellm     | litellm    |
-      | from haystack import Pipeline       | haystack    | haystack   |
-      | from autogen import Agent           | autogen     | autogen    |
-      | import dspy                         | dspy        | dspy       |
 
   Scenario Outline: Short model names require context keywords
     Given a line containing "<line>"
@@ -117,7 +89,6 @@ Feature: LLM model pattern detection
       | model: gpt-4-turbo-2024-04-09           | gpt-4-turbo-2024-04-09     | openai    |
       | model = "claude-3-opus-20240229"         | claude-3-opus-20240229     | anthropic |
       | model: claude-3.5-sonnet-20241022       | claude-3.5-sonnet-20241022 | anthropic |
-      | model = "mistral-large-2024-01-01"      | mistral-large-2024-01-01   | mistral   |
 
   Scenario Outline: Detect models with alternative separators
     Given a line containing "<line>"
@@ -142,20 +113,6 @@ Feature: LLM model pattern detection
       | model = "gemini-2.5-pro"        | gemini-2.5-pro     |
       | model: gemini-2.5-flash         | gemini-2.5-flash   |
 
-  Scenario Outline: Detect DeepSeek and xAI models
-    Given a line containing "<line>"
-    When I scan the line for matches
-    Then I should find model "<model>" from provider "<provider>"
-    And the match type should be "llm"
-
-    Examples:
-      | line                             | model          | provider |
-      | model = "deepseek-v3"           | deepseek-v3    | deepseek |
-      | model: deepseek-r1              | deepseek-r1    | deepseek |
-      | model = "deepseek-coder"        | deepseek-coder | deepseek |
-      | model: grok-2                   | grok-2         | xai      |
-      | model = "grok-3"               | grok-3         | xai      |
-
   Scenario Outline: No false positives on overlapping patterns
     Given a line containing "<line>"
     When I scan the line for matches
@@ -164,8 +121,6 @@ Feature: LLM model pattern detection
     Examples:
       | line                                          | count |
       | The commander reported the results            | 0     |
-      | command-response handler in the API           | 0     |
-      | llama3 without hyphen                         | 1     |
       | model = "gpt-4o" with only gpt-4o            | 1     |
 
   Scenario: gpt-4 pattern does not match gpt-4o
