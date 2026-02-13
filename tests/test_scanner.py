@@ -46,9 +46,3 @@ def check_scan_match_at_least(scan_result: ScanResult, count: int) -> None:
     )
 
 
-@then(
-    parsers.cfparse('the results should contain provider "{provider}"'),
-)
-def check_result_contains_provider(scan_result: ScanResult, provider: str) -> None:
-    providers = [m.provider for m in scan_result.matches]
-    assert provider in providers, f"Expected provider '{provider}' in {providers}"

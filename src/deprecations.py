@@ -1,18 +1,23 @@
 """Registry of deprecated/retiring LLM models with lifecycle data.
 
 Sources:
-    https://platform.openai.com/docs/deprecations
-    https://learn.microsoft.com/en-us/azure/ai-services/openai/concepts/model-retirements
+    OpenAI: https://platform.openai.com/docs/deprecations
+    Anthropic: https://platform.claude.com/docs/en/about-claude/model-deprecations
+    Google: https://ai.google.dev/gemini-api/docs/deprecations
 """
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from datetime import date
 from typing import Literal
 
 
 DeprecationStatus = Literal["retiring", "deprecated", "shutdown"]
+
+# Matches date suffixes like -20240229, -2024-08-06, -20241022
+_DATE_SUFFIX_RE = re.compile(r"-\d{4}-?\d{2}-?\d{2}$")
 
 
 @dataclass(frozen=True)
@@ -94,6 +99,60 @@ def _build_registry() -> dict[str, ModelLifecycle]:
         note="No retirement before April 2027",
     )
 
+    # --- Anthropic: Shutdown (already retired) ---
+    _add(
+        "claude-3.5-sonnet",
+        "anthropic",
+        "shutdown",
+        "2025-10-28",
+        "claude-sonnet-4",
+        note="Both v1 (20240620) and v2 (20241022) retired",
+    )
+    _add("claude-3-opus", "anthropic", "shutdown", "2026-01-05", "claude-opus-4")
+    _add("claude-3-sonnet", "anthropic", "shutdown", "2025-07-21", "claude-sonnet-4")
+
+    # --- Anthropic: Deprecated (retirement date set) ---
+    _add(
+        "claude-3.5-haiku",
+        "anthropic",
+        "deprecated",
+        "2026-02-19",
+        "claude-haiku-4-5",
+    )
+
+    # --- Google: Retiring ---
+    _add(
+        "gemini-2.0-flash",
+        "google",
+        "retiring",
+        "2026-03-31",
+        "gemini-2.5-flash",
+    )
+    _add(
+        "gemini-1.5-pro",
+        "google",
+        "shutdown",
+        "2025-09-23",
+        "gemini-2.5-pro",
+        note="gemini-1.5-pro-001/002 retired",
+    )
+    _add(
+        "gemini-1.5-flash",
+        "google",
+        "shutdown",
+        "2025-09-23",
+        "gemini-2.5-flash",
+        note="gemini-1.5-flash-001/002 retired",
+    )
+    _add(
+        "gemini-pro",
+        "google",
+        "shutdown",
+        "2025-02-15",
+        "gemini-2.5-pro",
+        note="Original Gemini 1.0 Pro, retired",
+    )
+
     return registry
 
 
@@ -103,6 +162,18 @@ DEPRECATION_REGISTRY: dict[str, ModelLifecycle] = _build_registry()
 def check_deprecation(model: str) -> ModelLifecycle | None:
     """Look up deprecation info for a model.
 
+    Handles date-suffixed model names (e.g. "gpt-4o-2024-08-06" → "gpt-4o")
+    by stripping the suffix and retrying the lookup.
+
     Returns ModelLifecycle if the model is deprecated/retiring, None otherwise.
     """
-    return DEPRECATION_REGISTRY.get(model)
+    result = DEPRECATION_REGISTRY.get(model)
+    if result is not None:
+        return result
+
+    # Try stripping date suffix (e.g. "claude-3.5-sonnet-20241022" → "claude-3.5-sonnet")
+    base = _DATE_SUFFIX_RE.sub("", model)
+    if base != model:
+        return DEPRECATION_REGISTRY.get(base)
+
+    return None

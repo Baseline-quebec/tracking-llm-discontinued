@@ -1,4 +1,4 @@
-"""Regex patterns for detecting LLM models, embeddings, and frameworks."""
+"""Regex patterns for detecting LLM models and embeddings."""
 
 from __future__ import annotations
 
@@ -23,7 +23,7 @@ class ModelPattern:
 
 # Context keywords required for short model names (e.g. "o1", "o3")
 CONTEXT_KEYWORDS: re.Pattern[str] = re.compile(
-    r"model|llm|openai|api|chat|completion|gpt|anthropic|claude|gemini|"
+    r"model|llm|openai|api|chat|completion|gpt|anthropic|claude|gemini|google|"
     r"embedding|embed|vector|provider|ai[\._\-]|engine",
     re.IGNORECASE,
 )
@@ -91,46 +91,12 @@ def _build_patterns() -> list[ModelPattern]:
     _add("google", "llm", r"\bgemini-1[\.-]5-flash(?:-\d{3})?\b")
     _add("google", "llm", r"\bgemini-pro\b")
 
-    # --- DeepSeek ---
-    _add("deepseek", "llm", r"\bdeepseek-(?:v3|r1|coder)\b")
-
-    # --- xAI ---
-    _add("xai", "llm", r"\bgrok-[23]\b")
-
-    # --- Meta ---
-    _add("meta", "llm", r"\bllama-?3(?:\.?[123])?\b")
-    _add("meta", "llm", r"\bllama-?2\b")
-    _add("meta", "llm", r"\bcodellama\b")
-
-    # --- Mistral ---
-    _add("mistral", "llm", r"\bmistral-large(?:-\d{4}-\d{2}-\d{2})?\b")
-    _add("mistral", "llm", r"\bmistral-medium(?:-\d{4}-\d{2}-\d{2})?\b")
-    _add("mistral", "llm", r"\bmistral-small(?:-\d{4}-\d{2}-\d{2})?\b")
-    _add("mistral", "llm", r"\bmixtral\b")
-    _add("mistral", "llm", r"\bcodestral\b")
-
-    # --- Cohere ---
-    _add("cohere", "llm", r"\bcommand-r-plus\b")
-    _add("cohere", "llm", r"\bcommand-r\b")
-
     # --- OpenAI Embeddings ---
     _add("openai", "embedding", r"\btext-embedding-3-(?:small|large)\b")
     _add("openai", "embedding", r"\btext-embedding-ada-002\b")
 
-    # --- Cohere Embeddings ---
-    _add("cohere", "embedding", r"\bembed-(?:english|multilingual)-v[23]\.0\b")
-
     # --- Voyage Embeddings ---
     _add("voyage", "embedding", r"\bvoyage-(?:large|code|lite)-\d+\b")
-
-    # --- Frameworks ---
-    _add("langchain", "framework", r"\blangchain\b")
-    _add("llamaindex", "framework", r"\bllamaindex\b")
-    _add("haystack", "framework", r"\bhaystack\b")
-    _add("autogen", "framework", r"\bautogen\b")
-    _add("crewai", "framework", r"\bcrewai\b")
-    _add("dspy", "framework", r"\bdspy\b")
-    _add("litellm", "framework", r"\blitellm\b")
 
     return patterns
 
@@ -141,7 +107,7 @@ MODEL_PATTERNS: list[ModelPattern] = _build_patterns()
 def find_matches_in_line(
     line: str,
 ) -> list[tuple[str, str, MatchType]]:
-    """Find all model/framework matches in a single line of text.
+    """Find all model/embedding matches in a single line of text.
 
     Returns a list of (provider, model_name, match_type) tuples.
     """

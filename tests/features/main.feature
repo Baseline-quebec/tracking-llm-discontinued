@@ -46,9 +46,9 @@ Feature: CLI entry point and orchestration
     Given a temporary directory with the following files:
       | path                                  | content                                                                                                    |
       | config.yml                            | completion_model: "gpt-4o-mini"\nfallback_model: "gpt-4o"\nembedding_model: "text-embedding-ada-002"       |
-      | src/chatbot/chain.py                  | from langchain.chains import RetrievalQA\nllm = ChatOpenAI(model="gpt-4o-mini")                            |
-      | src/chatbot/embedding.py              | from langchain_openai import OpenAIEmbeddings\nembedding = OpenAIEmbeddings(model="text-embedding-ada-002") |
-      | tests/unit_testing/test_chain.py      | mock_llm = ChatOpenAI(model="gpt-4", temperature=0)                                                       |
+      | src/chatbot/chain.py                  | from openai import OpenAI\nllm = OpenAI(model="gpt-4o-mini")                                              |
+      | src/chatbot/embedding.py              | from openai import OpenAI\nembedding = OpenAI(model="text-embedding-ada-002")                              |
+      | tests/unit_testing/test_chain.py      | mock_llm = OpenAI(model="gpt-4", temperature=0)                                                           |
     When I scan and check deprecations for repo "librairies-martin-chatbot"
     Then I should find at least 4 deprecated references
     And deprecated models should include "gpt-4o-mini"
@@ -61,7 +61,7 @@ Feature: CLI entry point and orchestration
       | path                                              | content                                                          |
       | apps/backend/src/yvan/containers/config.py        | model: ClassVar[str] = "gpt-5.1"                                 |
       | apps/backend/src/yvan/infra/embedding/openai.py   | embedding_model = "text-embedding-3-large"                       |
-      | apps/backend/pyproject.toml                       | [tool.poetry.dependencies]\nlangchain = "^0.3"                   |
+      | apps/backend/pyproject.toml                       | [tool.poetry.dependencies]\nopenai = "^1.0"                      |
     When I scan and check deprecations for repo "yvan"
     Then I should find 0 deprecated references
 

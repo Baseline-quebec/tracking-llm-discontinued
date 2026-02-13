@@ -63,7 +63,7 @@ def main(argv: list[str] | None = None) -> None:
 
     # Step 1: Scan for model references
     result = scan_directory(scan_path, args.repo_name)
-    logger.info("Found %d model/framework references in %s", result.match_count, args.repo_name)
+    logger.info("Found %d model references in %s", result.match_count, args.repo_name)
 
     # Step 2: Check for deprecated models
     alerts = _find_deprecated(result.matches)
