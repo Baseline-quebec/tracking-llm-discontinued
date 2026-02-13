@@ -160,11 +160,12 @@ Mise à jour manuelle :
 PYTHONPATH=. python -m src.update_registry
 ```
 
-### Secrets du repo
+### Configuration du repo
 
 | Nom | Type | Description |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Secret | Clé API Anthropic pour la validation Claude dans le workflow de mise à jour |
+| `REGISTRY_ASSIGNEES` | Variable | Noms d'utilisateur GitHub assignés aux issues d'échec du flux (séparés par des virgules) |
 
 ### Utilisation locale
 

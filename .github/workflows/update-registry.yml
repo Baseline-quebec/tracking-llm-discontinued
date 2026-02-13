@@ -35,6 +35,7 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
           GH_TOKEN: ${{ github.token }}
+          REGISTRY_ASSIGNEES: ${{ vars.REGISTRY_ASSIGNEES || '' }}
 
       - name: Creer une PR si le registre a change
         id: create-pr

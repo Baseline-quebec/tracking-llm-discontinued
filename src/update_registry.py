@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+import os
 import re
 import subprocess
 from pathlib import Path
@@ -69,9 +70,10 @@ def _create_feed_failure_issue(error_detail: str) -> None:
         body,
         "--label",
         _ISSUE_LABEL,
-        "--assignee",
-        "Dpothier,jsleb333",
     ]
+    assignees = os.environ.get("REGISTRY_ASSIGNEES", "")
+    if assignees:
+        cmd.extend(["--assignee", assignees])
 
     try:
         result = subprocess.run(
