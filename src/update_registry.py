@@ -16,7 +16,7 @@ from pathlib import Path
 from src.deprecation_feed import fetch_deprecations
 from src.deprecations import (
     _DEFAULT_REGISTRY_PATH,
-    ModelLifecycle,
+    DeprecatedModel,
     load_registry,
     merge_registries,
     save_registry,
@@ -71,7 +71,7 @@ def _create_feed_failure_issue(error_detail: str) -> None:
         "--label",
         _ISSUE_LABEL,
     ]
-    assignees = os.environ.get("REGISTRY_ASSIGNEES", "")
+    assignees = os.environ.get("LLM_SCAN_ASSIGNEES", "")
     if assignees:
         cmd.extend(["--assignee", assignees])
 
@@ -95,21 +95,20 @@ _README_MARKER_START = "<!-- REGISTRY_START -->"
 _README_MARKER_END = "<!-- REGISTRY_END -->"
 
 
-def _generate_registry_table(registry: dict[str, ModelLifecycle]) -> str:
+def _generate_registry_table(registry: dict[str, DeprecatedModel]) -> str:
     """Genere le tableau Markdown des modeles deprecies pour le README."""
-    sorted_entries = sorted(registry.values(), key=lambda lc: (lc.provider, lc.model))
+    sorted_entries = sorted(registry.values(), key=lambda dm: (dm.provider, dm.model))
     lines = [
-        "| Model | Provider | Status | Shutdown date | Replacement |",
-        "|---|---|---|---|---|",
+        "| Model | Provider | Status | Shutdown date |",
+        "|---|---|---|---|",
     ]
-    for lc in sorted_entries:
-        shutdown = lc.shutdown_date.isoformat() if lc.shutdown_date else ""
-        replacement = lc.replacement or ""
-        lines.append(f"| {lc.model} | {lc.provider} | {lc.status} | {shutdown} | {replacement} |")
+    for dm in sorted_entries:
+        shutdown = dm.shutdown_date.isoformat() if dm.shutdown_date else ""
+        lines.append(f"| {dm.model} | {dm.provider} | {dm.status} | {shutdown} |")
     return "\n".join(lines)
 
 
-def update_readme(registry: dict[str, ModelLifecycle], readme_path: Path) -> bool:
+def update_readme(registry: dict[str, DeprecatedModel], readme_path: Path) -> bool:
     """Met a jour la section auto-generee du README avec le registre actuel.
 
     Args:
@@ -176,9 +175,6 @@ def update_registry(registry_path: Path) -> int:
 
     save_registry(merged, registry_path)
     logger.info("Registre sauvegarde dans %s", registry_path)
-
-    readme_path = registry_path.parent.parent / "README.md"
-    update_readme(merged, readme_path)
 
     return len(feed)
 

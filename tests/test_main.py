@@ -7,7 +7,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from pytest_bdd import given, parsers, scenarios, then, when
-from src.deprecations import ModelLifecycle
+
+from src.deprecations import DeprecatedModel
 from src.issue_reporter import DeprecationAlert
 from src.main import _build_deprecated_summary, _find_deprecated, _set_github_output, parse_args
 from src.models import ScanMatch
@@ -56,12 +57,11 @@ def given_scan_matches(models: str) -> list[ScanMatch]:
     target_fixture="dup_alerts",
 )
 def given_duplicate_alerts(model: str, count: int) -> list[DeprecationAlert]:
-    lifecycle = ModelLifecycle(
+    lifecycle = DeprecatedModel(
         model=model,
         provider="openai",
         status="retiring",
         shutdown_date=date(2026, 10, 1),
-        replacement="gpt-4.1",
     )
     return [
         DeprecationAlert(

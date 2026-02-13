@@ -5,7 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 from pytest_bdd import given, parsers, scenarios, then, when
-from src.deprecations import ModelLifecycle, check_deprecation
+
+from src.deprecations import DeprecatedModel, check_deprecation
 from src.issue_reporter import DeprecationAlert
 from src.scanner import scan_directory
 
@@ -25,7 +26,7 @@ def given_model_name(model: str) -> str:
     "I check its deprecation status",
     target_fixture="deprecation_result",
 )
-def check_deprecation_status(model_name: str) -> ModelLifecycle | None:
+def check_deprecation_status(model_name: str) -> DeprecatedModel | None:
     return check_deprecation(model_name)
 
 
@@ -46,7 +47,7 @@ def scan_and_check_deprecations(scan_dir: Path, repo_name: str) -> list[Deprecat
 @then(
     parsers.cfparse('the model should be "{status}"'),
 )
-def check_status(deprecation_result: ModelLifecycle | None, status: str) -> None:
+def check_status(deprecation_result: DeprecatedModel | None, status: str) -> None:
     assert deprecation_result is not None, "Expected model to be in deprecation registry"
     assert deprecation_result.status == status, (
         f"Expected status '{status}', got '{deprecation_result.status}'"
@@ -54,19 +55,9 @@ def check_status(deprecation_result: ModelLifecycle | None, status: str) -> None
 
 
 @then(
-    parsers.cfparse('the replacement should be "{replacement}"'),
-)
-def check_replacement(deprecation_result: ModelLifecycle | None, replacement: str) -> None:
-    assert deprecation_result is not None, "Expected model to be in deprecation registry"
-    assert deprecation_result.replacement == replacement, (
-        f"Expected replacement '{replacement}', got '{deprecation_result.replacement}'"
-    )
-
-
-@then(
     "the model should not be deprecated",
 )
-def check_not_deprecated(deprecation_result: ModelLifecycle | None) -> None:
+def check_not_deprecated(deprecation_result: DeprecatedModel | None) -> None:
     assert deprecation_result is None, (
         f"Expected model to NOT be in deprecation registry, got {deprecation_result}"
     )

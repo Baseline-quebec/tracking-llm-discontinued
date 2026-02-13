@@ -25,50 +25,44 @@ _DATE_SUFFIX_RE = re.compile(r"-\d{4}-?\d{2}-?\d{2}$")
 
 
 @dataclass(frozen=True)
-class ModelLifecycle:
-    """Lifecycle information for a deprecated or retiring model."""
+class DeprecatedModel:
+    """Information about a deprecated or retiring model."""
 
     model: str
     provider: str
     status: DeprecationStatus
     shutdown_date: date | None = None
-    replacement: str | None = None
-    note: str = ""
 
 
-def _entry_to_lifecycle(entry: dict[str, Any]) -> ModelLifecycle:
-    """Convert a JSON entry to a ModelLifecycle object."""
+def _entry_to_deprecated(entry: dict[str, Any]) -> DeprecatedModel:
+    """Convert a JSON entry to a DeprecatedModel object."""
     shutdown_str = entry.get("shutdown_date")
-    return ModelLifecycle(
+    return DeprecatedModel(
         model=entry["model"],
         provider=entry["provider"],
         status=entry["status"],
         shutdown_date=date.fromisoformat(shutdown_str) if shutdown_str else None,
-        replacement=entry.get("replacement"),
-        note=entry.get("note", ""),
     )
 
 
-def _lifecycle_to_dict(lc: ModelLifecycle) -> dict[str, Any]:
-    """Convert a ModelLifecycle object to a JSON-serializable dict."""
+def _deprecated_to_dict(dm: DeprecatedModel) -> dict[str, Any]:
+    """Convert a DeprecatedModel object to a JSON-serializable dict."""
     return {
-        "model": lc.model,
-        "provider": lc.provider,
-        "status": lc.status,
-        "shutdown_date": lc.shutdown_date.isoformat() if lc.shutdown_date else None,
-        "replacement": lc.replacement,
-        "note": lc.note,
+        "model": dm.model,
+        "provider": dm.provider,
+        "status": dm.status,
+        "shutdown_date": dm.shutdown_date.isoformat() if dm.shutdown_date else None,
     }
 
 
-def load_registry(path: Path | None = None) -> dict[str, ModelLifecycle]:
+def load_registry(path: Path | None = None) -> dict[str, DeprecatedModel]:
     """Load registry from JSON file.
 
     Args:
         path: Path to the registry JSON file. Defaults to data/registry.json.
 
     Returns:
-        Dictionary mapping model names to ModelLifecycle objects.
+        Dictionary mapping model names to DeprecatedModel objects.
     """
     registry_path = path or _DEFAULT_REGISTRY_PATH
     try:
@@ -76,35 +70,35 @@ def load_registry(path: Path | None = None) -> dict[str, ModelLifecycle]:
     except (OSError, json.JSONDecodeError) as exc:
         logger.warning("Could not load registry from %s: %s", registry_path, exc)
         return {}
-    registry: dict[str, ModelLifecycle] = {}
+    registry: dict[str, DeprecatedModel] = {}
     for entry in data.get("models", []):
-        lc = _entry_to_lifecycle(entry)
-        registry[lc.model] = lc
+        dm = _entry_to_deprecated(entry)
+        registry[dm.model] = dm
     return registry
 
 
-def save_registry(registry: dict[str, ModelLifecycle], path: Path) -> None:
+def save_registry(registry: dict[str, DeprecatedModel], path: Path) -> None:
     """Save registry to JSON file.
 
     Sorts entries by (provider, model) for clean diffs.
 
     Args:
-        registry: Dictionary mapping model names to ModelLifecycle objects.
+        registry: Dictionary mapping model names to DeprecatedModel objects.
         path: Path to write the registry JSON file.
     """
-    sorted_entries = sorted(registry.values(), key=lambda lc: (lc.provider, lc.model))
+    sorted_entries = sorted(registry.values(), key=lambda dm: (dm.provider, dm.model))
     data = {
         "updated_at": datetime.now(tz=UTC).isoformat(),
-        "models": [_lifecycle_to_dict(lc) for lc in sorted_entries],
+        "models": [_deprecated_to_dict(dm) for dm in sorted_entries],
     }
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
 def merge_registries(
-    static: dict[str, ModelLifecycle],
-    feed: list[ModelLifecycle],
-) -> dict[str, ModelLifecycle]:
+    static: dict[str, DeprecatedModel],
+    feed: list[DeprecatedModel],
+) -> dict[str, DeprecatedModel]:
     """Merge static registry with live feed data.
 
     Feed entries take priority over static entries for the same model.
@@ -115,16 +109,16 @@ def merge_registries(
     return merged
 
 
-DEPRECATION_REGISTRY: dict[str, ModelLifecycle] = load_registry()
+DEPRECATION_REGISTRY: dict[str, DeprecatedModel] = load_registry()
 
 
-def check_deprecation(model: str) -> ModelLifecycle | None:
+def check_deprecation(model: str) -> DeprecatedModel | None:
     """Look up deprecation info for a model.
 
     Handles date-suffixed model names (e.g. "gpt-4o-2024-08-06" -> "gpt-4o")
     by stripping the suffix and retrying the lookup.
 
-    Returns ModelLifecycle if the model is deprecated/retiring, None otherwise.
+    Returns DeprecatedModel if the model is deprecated/retiring, None otherwise.
     """
     result = DEPRECATION_REGISTRY.get(model)
     if result is not None:

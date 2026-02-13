@@ -5,6 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from pytest_bdd import parsers, scenarios, then, when
+
 from src.models import ScanResult
 from src.scanner import scan_directory
 
@@ -35,6 +36,3 @@ def check_scan_match_count(scan_result: ScanResult, count: int) -> None:
 def check_result_contains_model(scan_result: ScanResult, model: str) -> None:
     models = [m.model for m in scan_result.matches]
     assert model in models, f"Expected model '{model}' in {models}"
-
-
-

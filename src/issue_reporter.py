@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 
 if TYPE_CHECKING:
-    from src.deprecations import ModelLifecycle
+    from src.deprecations import DeprecatedModel
     from src.models import ScanMatch
 
 
@@ -32,7 +32,7 @@ class DeprecationAlert:
     """A deprecated model reference found in the codebase."""
 
     match: ScanMatch
-    lifecycle: ModelLifecycle
+    lifecycle: DeprecatedModel
 
 
 def create_issues(
@@ -186,48 +186,41 @@ def _create_issue(
     return False
 
 
-def _build_title(lifecycle: ModelLifecycle) -> str:
+def _build_title(lifecycle: DeprecatedModel) -> str:
     """Build the issue title."""
     status_emoji = {"retiring": "⚠️", "deprecated": "🚫", "shutdown": "🔴"}
     emoji = status_emoji.get(lifecycle.status, "⚠️")
-    return f"{emoji} Deprecated model: {lifecycle.model}"
+    return f"{emoji} Modèle déprécié : {lifecycle.model}"
 
 
 def _build_body(
-    lifecycle: ModelLifecycle,
+    lifecycle: DeprecatedModel,
     alerts: list[DeprecationAlert],
 ) -> str:
     """Build the issue body in Markdown."""
     lines = [
-        f"## Model `{lifecycle.model}` is {lifecycle.status}",
+        f"## Le modèle `{lifecycle.model}` est {lifecycle.status}",
         "",
-        f"**Provider:** {lifecycle.provider}",
-        f"**Status:** {lifecycle.status}",
+        f"**Provider :** {lifecycle.provider}",
+        f"**Statut :** {lifecycle.status}",
     ]
 
     if lifecycle.shutdown_date:
-        lines.append(f"**Shutdown date:** {lifecycle.shutdown_date.isoformat()}")
-    if lifecycle.replacement:
-        lines.append(f"**Recommended replacement:** `{lifecycle.replacement}`")
-    if lifecycle.note:
-        lines.append(f"**Note:** {lifecycle.note}")
+        lines.append(f"**Date d'arrêt :** {lifecycle.shutdown_date.isoformat()}")
 
-    lines.extend(["", "### Affected files", ""])
-    lines.append("| File | Line |")
-    lines.append("|------|------|")
+    lines.extend(["", "### Fichiers affectés", ""])
+    lines.append("| Fichier | Ligne |")
+    lines.append("|---------|-------|")
     lines.extend(f"| `{alert.match.file}` | {alert.match.line} |" for alert in alerts)
 
-    replacement_text = (
-        f"`{lifecycle.replacement}`" if lifecycle.replacement else "a supported model"
-    )
     lines.extend(
         [
             "",
-            "### Action required",
-            f"Migrate from `{lifecycle.model}` to {replacement_text} before the shutdown date.",
+            "### Action requise",
+            "Migrer vers un modèle supporté avant la date d'arrêt.",
             "",
             "---",
-            "*This issue was automatically created by the LLM Configuration Scanner.*",
+            "*Cette issue a été créée automatiquement par le LLM Configuration Scanner.*",
         ]
     )
 
