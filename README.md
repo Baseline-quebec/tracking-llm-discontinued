@@ -7,7 +7,6 @@ Action composite GitHub qui scanne les dépôts pour détecter les références 
 1. **Scanne** le code source et les fichiers de configuration pour trouver les références aux modèles LLM (OpenAI, Anthropic, Google)
 2. **Vérifie** contre un registre de dépréciation JSON (`data/registry.json`) les modèles dépréciés/en retrait/arrêtés
 3. **Crée des issues GitHub** pour chaque modèle déprécié trouvé, avec les fichiers affectés, les suggestions de remplacement et les dates d'arrêt
-4. **Notifie Slack** (optionnel) lorsque des modèles dépréciés sont détectés
 
 ## Sources de données
 
@@ -15,9 +14,6 @@ Action composite GitHub qui scanne les dépôts pour détecter les références 
 |---|---|
 | `data/registry.json` | Registre JSON des modèles dépréciés, commité dans le dépôt |
 | [deprecations.info](https://deprecations.info/) | Flux en direct fusionné dans le registre aux deux semaines via GitHub Actions |
-| [OpenAI deprecations](https://platform.openai.com/docs/deprecations) | Source officielle OpenAI |
-| [Anthropic deprecations](https://platform.claude.com/docs/en/about-claude/model-deprecations) | Source officielle Anthropic |
-| [Google deprecations](https://ai.google.dev/gemini-api/docs/deprecations) | Source officielle Google |
 
 Le registre est mis à jour aux deux semaines par `.github/workflows/update-registry.yml`. Le pipeline de scan lit uniquement le fichier JSON local — aucun appel réseau lors du scan. Si le flux est inaccessible, une issue GitHub est automatiquement créée.
 
@@ -89,8 +85,8 @@ jobs:
 
 | Nom | Type | Description |
 |---|---|---|
-| `LLM_SCAN_SLACK_WEBHOOK` | Secret | URL du webhook Slack entrant (optionnel) |
 | `LLM_SCAN_ASSIGNEES` | Variable | Noms d'utilisateur GitHub séparés par des virgules |
+| `ANTHROPIC_API_KEY` | Secret | Clé API Anthropic pour la validation Claude (optionnel) |
 
 ## Entrées/sorties de l'action
 
@@ -150,17 +146,18 @@ Tests BDD couvrant :
 
 ```
 data/
-  registry.json          # JSON registry of deprecated models
+  registry.json          # Registre JSON des modeles deprecies
 src/
-  patterns.py            # Regex patterns for model detection
-  scanner.py             # Directory traversal and file scanning
-  models.py              # Data models (ScanMatch, ScanResult)
-  deprecations.py        # Registry loader + date suffix handling
-  deprecation_feed.py    # Feed fetcher from deprecations.info
-  update_registry.py     # Script: fetch -> merge -> save (+ issue on failure)
-  issue_reporter.py      # GitHub issue creation via gh CLI
-  main.py                # CLI entry point and orchestration
+  patterns.py            # Patterns regex pour la detection de modeles
+  scanner.py             # Parcours de repertoire et scan de fichiers
+  models.py              # Modeles de donnees (ScanMatch, ScanResult)
+  deprecations.py        # Chargement du registre + gestion des suffixes de date
+  deprecation_feed.py    # Flux live depuis deprecations.info
+  update_registry.py     # Script : fetch -> merge -> save (+ issue en cas d'echec)
+  validate_patterns.py   # Validation de couverture regex pour les modeles du registre
+  issue_reporter.py      # Creation d'issues GitHub via gh CLI
+  main.py                # Point d'entree CLI et orchestration du scan
 .github/workflows/
-  ci.yml                 # CI: lint, tests, type checking
-  update-registry.yml    # Biweekly cron to update registry from feed
+  ci.yml                 # CI : lint, tests, type checking
+  update-registry.yml    # Cron bimensuel : mise a jour registre + validation Claude
 ```
