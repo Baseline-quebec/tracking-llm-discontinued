@@ -4,15 +4,23 @@ Sources:
     OpenAI: https://platform.openai.com/docs/deprecations
     Anthropic: https://platform.claude.com/docs/en/about-claude/model-deprecations
     Google: https://ai.google.dev/gemini-api/docs/deprecations
+    deprecations.info: https://deprecations.info/
 """
 
 from __future__ import annotations
 
+import json
+import logging
 import re
 from dataclasses import dataclass
-from datetime import date
-from typing import Literal
+from datetime import UTC, date, datetime
+from pathlib import Path
+from typing import Any, Literal
 
+
+logger = logging.getLogger(__name__)
+
+_DEFAULT_REGISTRY_PATH = Path(__file__).resolve().parent.parent / "data" / "registry.json"
 
 DeprecationStatus = Literal["retiring", "deprecated", "shutdown"]
 
@@ -32,137 +40,92 @@ class ModelLifecycle:
     note: str = ""
 
 
-def _build_registry() -> dict[str, ModelLifecycle]:
-    """Build the model deprecation registry."""
+def _entry_to_lifecycle(entry: dict[str, Any]) -> ModelLifecycle:
+    """Convert a JSON entry to a ModelLifecycle object."""
+    shutdown_str = entry.get("shutdown_date")
+    return ModelLifecycle(
+        model=entry["model"],
+        provider=entry["provider"],
+        status=entry["status"],
+        shutdown_date=date.fromisoformat(shutdown_str) if shutdown_str else None,
+        replacement=entry.get("replacement"),
+        note=entry.get("note", ""),
+    )
+
+
+def _lifecycle_to_dict(lc: ModelLifecycle) -> dict[str, Any]:
+    """Convert a ModelLifecycle object to a JSON-serializable dict."""
+    return {
+        "model": lc.model,
+        "provider": lc.provider,
+        "status": lc.status,
+        "shutdown_date": lc.shutdown_date.isoformat() if lc.shutdown_date else None,
+        "replacement": lc.replacement,
+        "note": lc.note,
+    }
+
+
+def load_registry(path: Path | None = None) -> dict[str, ModelLifecycle]:
+    """Load registry from JSON file.
+
+    Args:
+        path: Path to the registry JSON file. Defaults to data/registry.json.
+
+    Returns:
+        Dictionary mapping model names to ModelLifecycle objects.
+    """
+    registry_path = path or _DEFAULT_REGISTRY_PATH
+    try:
+        data = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        logger.warning("Could not load registry from %s: %s", registry_path, exc)
+        return {}
     registry: dict[str, ModelLifecycle] = {}
-
-    def _add(
-        model: str,
-        provider: str,
-        status: DeprecationStatus,
-        shutdown_date: str | None = None,
-        replacement: str | None = None,
-        note: str = "",
-    ) -> None:
-        registry[model] = ModelLifecycle(
-            model=model,
-            provider=provider,
-            status=status,
-            shutdown_date=date.fromisoformat(shutdown_date) if shutdown_date else None,
-            replacement=replacement,
-            note=note,
-        )
-
-    # --- OpenAI: Shutdown (already past end-of-life) ---
-    _add("o1-preview", "openai", "shutdown", "2025-07-28", "o3")
-    _add("o1-mini", "openai", "shutdown", "2025-10-27", "o4-mini")
-
-    # --- OpenAI: Deprecated (end-of-life approaching) ---
-    _add(
-        "gpt-3.5-turbo",
-        "openai",
-        "deprecated",
-        "2025-09-14",
-        "gpt-4.1-mini",
-        note="All gpt-3.5-turbo variants included",
-    )
-
-    # --- OpenAI: Retiring (announced, still functional) ---
-    _add("gpt-4", "openai", "retiring", "2026-06-06", "gpt-4.1")
-    _add("gpt-4-turbo", "openai", "retiring", "2026-06-06", "gpt-4.1")
-    _add("gpt-4-turbo-preview", "openai", "retiring", "2026-06-06", "gpt-4.1")
-    _add(
-        "gpt-4o",
-        "openai",
-        "retiring",
-        "2026-10-01",
-        "gpt-4.1",
-        note="Standard deployments retire 2026-03-31",
-    )
-    _add(
-        "gpt-4o-mini",
-        "openai",
-        "retiring",
-        "2026-10-01",
-        "gpt-4.1-mini",
-        note="Standard deployments retire 2026-03-31",
-    )
-    _add("o1", "openai", "retiring", "2026-07-15", "o3")
-
-    # --- OpenAI Embeddings: Retiring ---
-    _add(
-        "text-embedding-ada-002",
-        "openai",
-        "retiring",
-        "2027-04-15",
-        "text-embedding-3-small",
-        note="No retirement before April 2027",
-    )
-
-    # --- Anthropic: Shutdown (already retired) ---
-    _add(
-        "claude-3.5-sonnet",
-        "anthropic",
-        "shutdown",
-        "2025-10-28",
-        "claude-sonnet-4",
-        note="Both v1 (20240620) and v2 (20241022) retired",
-    )
-    _add("claude-3-opus", "anthropic", "shutdown", "2026-01-05", "claude-opus-4")
-    _add("claude-3-sonnet", "anthropic", "shutdown", "2025-07-21", "claude-sonnet-4")
-
-    # --- Anthropic: Deprecated (retirement date set) ---
-    _add(
-        "claude-3.5-haiku",
-        "anthropic",
-        "deprecated",
-        "2026-02-19",
-        "claude-haiku-4-5",
-    )
-
-    # --- Google: Retiring ---
-    _add(
-        "gemini-2.0-flash",
-        "google",
-        "retiring",
-        "2026-03-31",
-        "gemini-2.5-flash",
-    )
-    _add(
-        "gemini-1.5-pro",
-        "google",
-        "shutdown",
-        "2025-09-23",
-        "gemini-2.5-pro",
-        note="gemini-1.5-pro-001/002 retired",
-    )
-    _add(
-        "gemini-1.5-flash",
-        "google",
-        "shutdown",
-        "2025-09-23",
-        "gemini-2.5-flash",
-        note="gemini-1.5-flash-001/002 retired",
-    )
-    _add(
-        "gemini-pro",
-        "google",
-        "shutdown",
-        "2025-02-15",
-        "gemini-2.5-pro",
-        note="Original Gemini 1.0 Pro, retired",
-    )
-
+    for entry in data.get("models", []):
+        lc = _entry_to_lifecycle(entry)
+        registry[lc.model] = lc
     return registry
 
 
-DEPRECATION_REGISTRY: dict[str, ModelLifecycle] = _build_registry()
+def save_registry(registry: dict[str, ModelLifecycle], path: Path) -> None:
+    """Save registry to JSON file.
+
+    Sorts entries by (provider, model) for clean diffs.
+
+    Args:
+        registry: Dictionary mapping model names to ModelLifecycle objects.
+        path: Path to write the registry JSON file.
+    """
+    sorted_entries = sorted(registry.values(), key=lambda lc: (lc.provider, lc.model))
+    data = {
+        "updated_at": datetime.now(tz=UTC).isoformat(),
+        "models": [_lifecycle_to_dict(lc) for lc in sorted_entries],
+    }
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def merge_registries(
+    static: dict[str, ModelLifecycle],
+    feed: list[ModelLifecycle],
+) -> dict[str, ModelLifecycle]:
+    """Merge static registry with live feed data.
+
+    Feed entries take priority over static entries for the same model.
+    """
+    merged = dict(static)
+    for entry in feed:
+        merged[entry.model] = entry
+    return merged
+
+
+DEPRECATION_REGISTRY: dict[str, ModelLifecycle] = load_registry()
 
 
 def check_deprecation(model: str) -> ModelLifecycle | None:
     """Look up deprecation info for a model.
 
-    Handles date-suffixed model names (e.g. "gpt-4o-2024-08-06" → "gpt-4o")
+    Handles date-suffixed model names (e.g. "gpt-4o-2024-08-06" -> "gpt-4o")
     by stripping the suffix and retrying the lookup.
 
     Returns ModelLifecycle if the model is deprecated/retiring, None otherwise.
@@ -171,7 +134,7 @@ def check_deprecation(model: str) -> ModelLifecycle | None:
     if result is not None:
         return result
 
-    # Try stripping date suffix (e.g. "claude-3.5-sonnet-20241022" → "claude-3.5-sonnet")
+    # Try stripping date suffix (e.g. "claude-3.5-sonnet-20241022" -> "claude-3.5-sonnet")
     base = _DATE_SUFFIX_RE.sub("", model)
     if base != model:
         return DEPRECATION_REGISTRY.get(base)
