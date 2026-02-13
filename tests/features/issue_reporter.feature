@@ -1,6 +1,7 @@
 Feature: GitHub Issue creation for deprecated models
   The issue reporter should create well-formatted GitHub issues
   for deprecated models, with deduplication and dry-run support.
+  Issue content is in French.
 
   Scenario: Build title for retiring model
     Given a model lifecycle for "gpt-4o" with status "retiring"
@@ -24,9 +25,9 @@ Feature: GitHub Issue creation for deprecated models
     Given a deprecation alert for "gpt-4o" in file "config.py" at line 5
     When I build the issue body
     Then the body should contain "gpt-4o"
-    And the body should contain "### Affected files"
+    And the body should contain "### Fichiers affectés"
     And the body should contain "config.py"
-    And the body should contain "### Action required"
+    And the body should contain "### Action requise"
 
   Scenario: Dry run does not call gh CLI
     Given a list of deprecation alerts for models "gpt-4o,gpt-3.5-turbo"

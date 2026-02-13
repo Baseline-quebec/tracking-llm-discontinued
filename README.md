@@ -6,7 +6,7 @@ Action composite GitHub qui scanne les dépôts pour détecter les références 
 
 1. **Scanne** le code source et les fichiers de configuration pour trouver les références aux modèles LLM (OpenAI, Anthropic, Google)
 2. **Vérifie** contre un registre de dépréciation JSON (`data/registry.json`) les modèles dépréciés/en retrait/arrêtés
-3. **Crée des issues GitHub** pour chaque modèle déprécié trouvé, avec les fichiers affectés, les suggestions de remplacement et les dates d'arrêt
+3. **Crée des issues GitHub** pour chaque modèle déprécié trouvé, avec les fichiers affectés et les dates d'arrêt
 
 ### Workflow de scan (repos consommateurs)
 
@@ -16,7 +16,7 @@ flowchart LR
     B --> C[Action composite<br>tracking-llm-discontinued]
     C --> D[Scan des fichiers<br>patterns.py + scanner.py]
     D --> E{Modèles<br>dépréciés?}
-    E -->|Oui| F[Créer issues GitHub<br>avec remplacement suggéré]
+    E -->|Oui| F[Créer issues GitHub<br>avec date d'arrêt]
     E -->|Non| G[Aucune action]
 ```
 
@@ -28,10 +28,10 @@ flowchart TD
     B --> C{Flux<br>accessible?}
     C -->|Non| D[Créer issue<br>d'échec]
     C -->|Oui| E[Fusionner avec<br>registry.json]
-    E --> F[Mettre à jour<br>le README]
-    F --> G{Changements<br>détectés?}
-    G -->|Non| H[Fin]
-    G -->|Oui| I[Créer PR]
+    E --> F{Changements<br>détectés?}
+    F -->|Non| G[Fin]
+    F -->|Oui| H[Mettre à jour<br>le README]
+    H --> I[Créer PR]
     I --> J[Claude Code valide<br>et ajuste les regex]
     J --> K[Auto-merge PR]
 ```
@@ -48,26 +48,26 @@ flowchart TD
 ## Modèles dépréciés suivis
 
 <!-- REGISTRY_START -->
-| Model | Provider | Status | Shutdown date | Replacement |
-|---|---|---|---|---|
-| claude-3-opus | anthropic | shutdown | 2026-01-05 | claude-opus-4 |
-| claude-3-sonnet | anthropic | shutdown | 2025-07-21 | claude-sonnet-4 |
-| claude-3.5-haiku | anthropic | deprecated | 2026-02-19 | claude-haiku-4-5 |
-| claude-3.5-sonnet | anthropic | shutdown | 2025-10-28 | claude-sonnet-4 |
-| gemini-1.5-flash | google | shutdown | 2025-09-23 | gemini-2.5-flash |
-| gemini-1.5-pro | google | shutdown | 2025-09-23 | gemini-2.5-pro |
-| gemini-2.0-flash | google | retiring | 2026-03-31 | gemini-2.5-flash |
-| gemini-pro | google | shutdown | 2025-02-15 | gemini-2.5-pro |
-| gpt-3.5-turbo | openai | deprecated | 2025-09-14 | gpt-4.1-mini |
-| gpt-4 | openai | retiring | 2026-06-06 | gpt-4.1 |
-| gpt-4-turbo | openai | retiring | 2026-06-06 | gpt-4.1 |
-| gpt-4-turbo-preview | openai | retiring | 2026-06-06 | gpt-4.1 |
-| gpt-4o | openai | retiring | 2026-10-01 | gpt-4.1 |
-| gpt-4o-mini | openai | retiring | 2026-10-01 | gpt-4.1-mini |
-| o1 | openai | retiring | 2026-07-15 | o3 |
-| o1-mini | openai | shutdown | 2025-10-27 | o4-mini |
-| o1-preview | openai | shutdown | 2025-07-28 | o3 |
-| text-embedding-ada-002 | openai | retiring | 2027-04-15 | text-embedding-3-small |
+| Model | Provider | Status | Shutdown date |
+|---|---|---|---|
+| claude-3-opus | anthropic | shutdown | 2026-01-05 |
+| claude-3-sonnet | anthropic | shutdown | 2025-07-21 |
+| claude-3.5-haiku | anthropic | deprecated | 2026-02-19 |
+| claude-3.5-sonnet | anthropic | shutdown | 2025-10-28 |
+| gemini-1.5-flash | google | shutdown | 2025-09-23 |
+| gemini-1.5-pro | google | shutdown | 2025-09-23 |
+| gemini-2.0-flash | google | retiring | 2026-03-31 |
+| gemini-pro | google | shutdown | 2025-02-15 |
+| gpt-3.5-turbo | openai | deprecated | 2025-09-14 |
+| gpt-4 | openai | retiring | 2026-06-06 |
+| gpt-4-turbo | openai | retiring | 2026-06-06 |
+| gpt-4-turbo-preview | openai | retiring | 2026-06-06 |
+| gpt-4o | openai | retiring | 2026-10-01 |
+| gpt-4o-mini | openai | retiring | 2026-10-01 |
+| o1 | openai | retiring | 2026-07-15 |
+| o1-mini | openai | shutdown | 2025-10-27 |
+| o1-preview | openai | shutdown | 2025-07-28 |
+| text-embedding-ada-002 | openai | retiring | 2027-04-15 |
 <!-- REGISTRY_END -->
 
 ---
@@ -147,8 +147,8 @@ Le pipeline de scan lit uniquement le fichier JSON local — aucun appel réseau
 Le registre est mis à jour automatiquement aux deux semaines (lundi à 06:00 UTC) par `.github/workflows/update-registry.yml`. Le workflow :
 
 1. Récupère le flux depuis [deprecations.info](https://deprecations.info/)
-2. Fusionne avec le registre existant et met à jour le README
-3. Crée une PR avec les changements
+2. Fusionne avec le registre existant
+3. Si des changements sont détectés : met à jour le README et crée une PR
 4. Claude Code valide et ajuste les patterns regex si nécessaire
 5. La PR est auto-mergée
 
@@ -165,7 +165,7 @@ PYTHONPATH=. python -m src.update_registry
 | Nom | Type | Description |
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Repository secret | Clé API Anthropic pour la validation Claude dans le workflow de mise à jour |
-| `REGISTRY_ASSIGNEES` | Repository variable | Noms d'utilisateur GitHub assignés aux issues d'échec du flux (séparés par des virgules) |
+| `LLM_SCAN_ASSIGNEES` | Organization variable | Noms d'utilisateur GitHub assignés aux issues (partagée avec les repos consommateurs) |
 
 ### Utilisation locale
 

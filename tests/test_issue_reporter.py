@@ -6,7 +6,8 @@ from datetime import date
 from unittest.mock import patch
 
 from pytest_bdd import given, parsers, scenarios, then, when
-from src.deprecations import ModelLifecycle
+
+from src.deprecations import DeprecatedModel
 from src.issue_reporter import (
     DeprecationAlert,
     _build_body,
@@ -24,14 +25,12 @@ def _make_lifecycle(
     model: str,
     status: str = "retiring",
     provider: str = "openai",
-    replacement: str = "gpt-4.1",
-) -> ModelLifecycle:
-    return ModelLifecycle(
+) -> DeprecatedModel:
+    return DeprecatedModel(
         model=model,
         provider=provider,
         status=status,
         shutdown_date=date(2026, 10, 1),
-        replacement=replacement,
     )
 
 
@@ -60,7 +59,7 @@ def _make_alert(
     parsers.cfparse('a model lifecycle for "{model}" with status "{status}"'),
     target_fixture="lifecycle",
 )
-def given_lifecycle(model: str, status: str) -> ModelLifecycle:
+def given_lifecycle(model: str, status: str) -> DeprecatedModel:
     return _make_lifecycle(model, status=status)
 
 
@@ -111,7 +110,7 @@ def given_assignees(assignees_str: str) -> list[str]:
     "I build the issue title",
     target_fixture="title",
 )
-def build_title(lifecycle: ModelLifecycle) -> str:
+def build_title(lifecycle: DeprecatedModel) -> str:
     return _build_title(lifecycle)
 
 

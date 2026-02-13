@@ -1,19 +1,18 @@
 Feature: Model deprecation detection
   The scanner should identify deprecated or retiring models
-  and provide lifecycle information including shutdown dates and replacements.
+  and provide deprecation information including shutdown dates.
 
   Scenario Outline: Detect deprecated models
     Given a model name "<model>"
     When I check its deprecation status
     Then the model should be "<status>"
-    And the replacement should be "<replacement>"
 
     Examples:
-      | model                  | status     | replacement           |
-      | gpt-3.5-turbo          | deprecated | gpt-4.1-mini          |
-      | gpt-4o                 | retiring   | gpt-4.1               |
-      | o1-preview             | shutdown   | o3                    |
-      | text-embedding-ada-002 | retiring   | text-embedding-3-small |
+      | model                  | status     |
+      | gpt-3.5-turbo          | deprecated |
+      | gpt-4o                 | retiring   |
+      | o1-preview             | shutdown   |
+      | text-embedding-ada-002 | retiring   |
 
   Scenario Outline: Date-suffixed models match base deprecation
     Given a model name "<model>"

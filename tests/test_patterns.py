@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pytest_bdd import given, parsers, scenarios, then, when
+
 from src.patterns import find_matches_in_line
 
 

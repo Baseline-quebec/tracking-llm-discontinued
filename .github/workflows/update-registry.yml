@@ -35,15 +35,31 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
           GH_TOKEN: ${{ github.token }}
-          REGISTRY_ASSIGNEES: ${{ vars.REGISTRY_ASSIGNEES || '' }}
+          LLM_SCAN_ASSIGNEES: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
 
-      - name: Creer une PR si le registre a change
+      - name: Detecter les changements du registre
+        id: detect-changes
+        run: |
+          if git diff --quiet data/registry.json; then
+            echo "Aucun changement dans le registre"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changements detectes dans le registre"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Mettre a jour le README
+        if: steps.detect-changes.outputs.changed == 'true'
+        run: python -c "from src.update_registry import update_readme; from src.deprecations import load_registry; from pathlib import Path; update_readme(load_registry(), Path('README.md'))"
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+
+      - name: Creer une PR
         id: create-pr
+        if: steps.detect-changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git diff --quiet data/registry.json README.md && echo "Aucun changement" && exit 0
-
           BRANCH="chore/update-registry-$(date +%Y-%m-%d)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"

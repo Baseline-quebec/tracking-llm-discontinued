@@ -108,7 +108,6 @@ def _build_deprecated_summary(alerts: list[DeprecationAlert]) -> list[dict[str, 
             "model": alert.lifecycle.model,
             "provider": alert.lifecycle.provider,
             "status": alert.lifecycle.status,
-            "replacement": alert.lifecycle.replacement or "",
         }
         if alert.lifecycle.shutdown_date:
             entry["shutdown_date"] = alert.lifecycle.shutdown_date.isoformat()
@@ -133,9 +132,8 @@ def _print_summary(matches: list[ScanMatch], alerts: list[DeprecationAlert]) -> 
                 continue
             seen.add(alert.lifecycle.model)
             lc = alert.lifecycle
-            replacement = f" → {lc.replacement}" if lc.replacement else ""
             shutdown = f" (shutdown: {lc.shutdown_date})" if lc.shutdown_date else ""
-            logger.info("  - %s [%s]%s%s", lc.model, lc.status, replacement, shutdown)
+            logger.info("  - %s [%s]%s", lc.model, lc.status, shutdown)
 
 
 def _set_github_output(name: str, value: str) -> None:

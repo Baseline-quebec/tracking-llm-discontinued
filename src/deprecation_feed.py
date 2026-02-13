@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 
 
 if TYPE_CHECKING:
-    from src.deprecations import DeprecationStatus, ModelLifecycle
+    from src.deprecations import DeprecatedModel, DeprecationStatus
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +28,10 @@ PROVIDER_MAP: dict[str, str] = {
 }
 
 
-def fetch_deprecations() -> list[ModelLifecycle]:
+def fetch_deprecations() -> list[DeprecatedModel]:
     """Fetch deprecation data from deprecations.info.
 
-    Returns a list of ModelLifecycle objects for tracked providers.
+    Returns a list of DeprecatedModel objects for tracked providers.
     Returns an empty list on any network or parsing error (silent fallback).
     """
     try:
@@ -45,11 +45,11 @@ def fetch_deprecations() -> list[ModelLifecycle]:
     return _parse_feed(data)
 
 
-def _parse_feed(data: list[dict[str, Any]]) -> list[ModelLifecycle]:
-    """Parse raw JSON entries into ModelLifecycle objects."""
-    from src.deprecations import ModelLifecycle
+def _parse_feed(data: list[dict[str, Any]]) -> list[DeprecatedModel]:
+    """Parse raw JSON entries into DeprecatedModel objects."""
+    from src.deprecations import DeprecatedModel
 
-    results: list[ModelLifecycle] = []
+    results: list[DeprecatedModel] = []
     for entry in data:
         provider_raw = entry.get("provider", "")
         internal_provider = PROVIDER_MAP.get(provider_raw)
@@ -61,8 +61,6 @@ def _parse_feed(data: list[dict[str, Any]]) -> list[ModelLifecycle]:
             continue
 
         shutdown_date = _parse_date(entry.get("shutdown_date"))
-        replacement_models = entry.get("replacement_models")
-        replacement = replacement_models[0] if replacement_models else None
 
         # Determine status from dates
         status: DeprecationStatus
@@ -75,12 +73,11 @@ def _parse_feed(data: list[dict[str, Any]]) -> list[ModelLifecycle]:
             status = "deprecated"
 
         results.append(
-            ModelLifecycle(
+            DeprecatedModel(
                 model=model_id,
                 provider=internal_provider,
                 status=status,
                 shutdown_date=shutdown_date,
-                replacement=replacement,
             )
         )
 

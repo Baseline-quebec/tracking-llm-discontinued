@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+
 from src.deprecations import DEPRECATION_REGISTRY
 from src.patterns import find_matches_in_line
 

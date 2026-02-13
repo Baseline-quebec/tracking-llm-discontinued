@@ -8,15 +8,8 @@ name: LLM Configuration Scan
 
 on:
   push:
-    branches: [main]
-    paths:
-      - "**/*.py"
-      - "**/*.yml"
-      - "**/*.yaml"
-      - "**/*.json"
-      - "**/*.toml"
-      - "**/*.env"
-      - "**/Dockerfile"
+    tags:
+      - "v*"
   schedule:
     - cron: "0 8 1,15 * *"  # Bi-weekly: 1st and 15th of each month at 8:00 UTC
   workflow_dispatch:
