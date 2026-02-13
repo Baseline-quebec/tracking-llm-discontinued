@@ -50,19 +50,10 @@ def _build_patterns() -> list[ModelPattern]:
         )
 
     # --- OpenAI LLM ---
-    # Order matters: specific patterns (gpt-5.1) must precede general ones (gpt-5)
-    # to avoid double-matching. General patterns use negative lookaheads to exclude
-    # the specific variants.
     _add(
         "openai",
         "llm",
-        r"\bgpt-5\.?[12]?(?:-(?:mini|nano|pro|codex|chat))?(?:-\d{4}-\d{2}-\d{2})?\b",
-    )
-    # gpt-5 base: (?!\.[12]) prevents matching "gpt-5" inside "gpt-5.1" or "gpt-5.2"
-    _add(
-        "openai",
-        "llm",
-        r"\bgpt-5(?!\.[12])(?:-(?:mini|nano|pro|codex|chat))?(?:-\d{4}-\d{2}-\d{2})?\b",
+        r"\bgpt-5(?:\.[12])?(?:-(?:mini|nano|pro|codex|chat))?(?:-\d{4}-\d{2}-\d{2})?\b",
     )
     _add("openai", "llm", r"\bgpt-4\.1(?:-(?:mini|nano))?(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4o(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")

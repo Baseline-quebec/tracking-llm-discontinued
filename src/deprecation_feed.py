@@ -25,8 +25,6 @@ PROVIDER_MAP: dict[str, str] = {
     "OpenAI": "openai",
     "Anthropic": "anthropic",
     "Google": "google",
-    "AWS Bedrock": "aws-bedrock",
-    "Azure": "azure-openai",
 }
 
 

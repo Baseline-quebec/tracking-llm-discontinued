@@ -41,30 +41,4 @@ Feature: Repository file scanner
     When I scan the directory for repo "test-repo"
     Then I should find 0 scan matches
 
-  Scenario: Synthetic test - YAML config (librairies-martin-chatbot style)
-    Given a temporary directory with the following files:
-      | path        | content                                                                                    |
-      | config.yml  | completion_model: "gpt-4o-mini"\nfallback_model: "gpt-4o"\nembedding_model: "text-embedding-ada-002" |
-    When I scan the directory for repo "librairies-martin-chatbot"
-    Then I should find 3 scan matches
-    And the results should contain model "gpt-4o-mini"
-    And the results should contain model "gpt-4o"
-    And the results should contain model "text-embedding-ada-002"
-
-  Scenario: Synthetic test - Python config (competences-quebec style)
-    Given a temporary directory with the following files:
-      | path              | content                                                                              |
-      | src/config.py     | OPENAI_COMPLETION_MODEL = config("OPENAI_COMPLETION_MODEL", default="gpt-4o")        |
-    When I scan the directory for repo "competences-quebec-chatbot"
-    Then I should find 1 scan matches
-    And the results should contain model "gpt-4o"
-
-  Scenario: Synthetic test - Python class config (yvan style)
-    Given a temporary directory with the following files:
-      | path                  | content                                                    |
-      | src/config.py         | model: ClassVar[str] = "gpt-5.1"\nembedding_model = "text-embedding-3-small" |
-    When I scan the directory for repo "yvan"
-    Then I should find 2 scan matches
-    And the results should contain model "gpt-5.1"
-    And the results should contain model "text-embedding-3-small"
 

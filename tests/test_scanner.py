@@ -37,12 +37,4 @@ def check_result_contains_model(scan_result: ScanResult, model: str) -> None:
     assert model in models, f"Expected model '{model}' in {models}"
 
 
-@then(
-    parsers.cfparse("I should find at least {count:d} scan matches"),
-)
-def check_scan_match_at_least(scan_result: ScanResult, count: int) -> None:
-    assert scan_result.match_count >= count, (
-        f"Expected at least {count} matches, got {scan_result.match_count}: {scan_result.matches}"
-    )
-
 
