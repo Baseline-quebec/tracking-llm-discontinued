@@ -8,15 +8,6 @@ Action composite GitHub qui scanne les dépôts pour détecter les références 
 2. **Vérifie** contre un registre de dépréciation JSON (`data/registry.json`) les modèles dépréciés/en retrait/arrêtés
 3. **Crée des issues GitHub** pour chaque modèle déprécié trouvé, avec les fichiers affectés, les suggestions de remplacement et les dates d'arrêt
 
-## Sources de données
-
-| Source | Description |
-|---|---|
-| `data/registry.json` | Registre JSON des modèles dépréciés, commité dans le dépôt |
-| [deprecations.info](https://deprecations.info/) | Flux en direct fusionné dans le registre aux deux semaines via GitHub Actions |
-
-Le registre est mis à jour aux deux semaines par `.github/workflows/update-registry.yml`. Le pipeline de scan lit uniquement le fichier JSON local — aucun appel réseau lors du scan. Si le flux est inaccessible, une issue GitHub est automatiquement créée.
-
 ## Modèles supportés
 
 | Fournisseur | Modèles détectés |
@@ -51,11 +42,13 @@ Le registre est mis à jour aux deux semaines par `.github/workflows/update-regi
 | text-embedding-ada-002 | openai | retiring | 2027-04-15 | text-embedding-3-small |
 <!-- REGISTRY_END -->
 
-## Utilisation
+---
 
-### 1. Ajouter le workflow à votre dépôt
+## Utiliser l'action dans votre dépôt
 
-Copiez `template-workflow.yml` dans `.github/workflows/llm-scan.yml` de votre dépôt cible :
+### 1. Ajouter le workflow
+
+Copiez `template-workflow.yml` dans `.github/workflows/llm-scan.yml` de votre dépôt :
 
 ```yaml
 name: LLM Configuration Scan
@@ -64,7 +57,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "0 8 1,15 * *"  # Bi-weekly: 1st and 15th of each month
+    - cron: "0 8 1,15 * *"  # 1er et 15 de chaque mois
   workflow_dispatch:
 
 jobs:
@@ -81,16 +74,15 @@ jobs:
           assignees: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
 ```
 
-### 2. Configurer les secrets/variables de l'organisation
+### 2. Configurer les variables
 
 | Nom | Type | Description |
 |---|---|---|
-| `LLM_SCAN_ASSIGNEES` | Variable | Noms d'utilisateur GitHub séparés par des virgules |
-| `ANTHROPIC_API_KEY` | Secret | Clé API Anthropic pour la validation Claude (optionnel) |
+| `LLM_SCAN_ASSIGNEES` | Variable (org ou repo) | Noms d'utilisateur GitHub séparés par des virgules |
 
-## Entrées/sorties de l'action
+Aucun secret n'est requis pour les repos consommateurs. L'action utilise le `GITHUB_TOKEN` automatique pour créer les issues.
 
-### Entrées
+### 3. Entrées de l'action
 
 | Entrée | Requis | Défaut | Description |
 |---|---|---|---|
@@ -98,7 +90,7 @@ jobs:
 | `assignees` | Non | `""` | Assignés séparés par des virgules |
 | `dry-run` | Non | `false` | Scanner seulement, ne pas créer d'issues |
 
-### Sorties
+### 4. Sorties de l'action
 
 | Sortie | Description |
 |---|---|
@@ -107,27 +99,52 @@ jobs:
 | `issues-created` | Nombre d'issues GitHub créées |
 | `deprecated-summary` | Résumé JSON des modèles dépréciés |
 
-## Mise à jour du registre
+---
 
-Le registre est mis à jour automatiquement aux deux semaines (lundi à 06:00 UTC). Vous pouvez aussi le déclencher manuellement :
+## Développement et maintenance du repo
+
+Cette section concerne les mainteneurs du repo `tracking-llm-discontinued`.
+
+### Source de données
+
+| Source | Description |
+|---|---|
+| `data/registry.json` | Registre JSON des modèles dépréciés, commité dans le dépôt |
+| [deprecations.info](https://deprecations.info/) | Flux en direct fusionné dans le registre aux deux semaines via GitHub Actions |
+
+Le pipeline de scan lit uniquement le fichier JSON local — aucun appel réseau lors du scan.
+
+### Mise à jour du registre
+
+Le registre est mis à jour automatiquement aux deux semaines (lundi à 06:00 UTC) par `.github/workflows/update-registry.yml`. Le workflow :
+
+1. Récupère le flux depuis [deprecations.info](https://deprecations.info/)
+2. Fusionne avec le registre existant et met à jour le README
+3. Crée une PR avec les changements
+4. Claude Code valide et ajuste les patterns regex si nécessaire
+5. La PR est auto-mergée
+
+Si le flux est inaccessible, une issue GitHub est créée et assignée aux mainteneurs.
+
+Mise à jour manuelle :
 
 ```bash
-# Manually update the registry
 PYTHONPATH=. python -m src.update_registry
-
-# Specify a custom registry path
-PYTHONPATH=. python -m src.update_registry --registry-path data/registry.json
 ```
 
-Si le flux est inaccessible, une issue GitHub est créée avec les détails en français, assignée aux mainteneurs.
+### Secrets du repo
 
-## Utilisation locale
+| Nom | Type | Description |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Secret | Clé API Anthropic pour la validation Claude dans le workflow de mise à jour |
+
+### Utilisation locale
 
 ```bash
 PYTHONPATH=. python -m src.main --repo-name "my-repo" --scan-path /path/to/repo --dry-run
 ```
 
-## Tests
+### Tests
 
 ```bash
 pip install pytest pytest-bdd
@@ -137,12 +154,12 @@ python -m pytest tests/ -v --rootdir=.
 Tests BDD couvrant :
 - Détection de patterns (modèles LLM, embeddings, suffixes de date, faux positifs)
 - Scanner (parcours de répertoires, déduplication, exclusions)
-- Registre de dépréciation (modèles dépréciés vs actifs, gestion des suffixes de date, vérifications de cohérence)
-- Mise à jour du registre (ajout de nouveaux modèles, écrasement d'existants, gestion de flux vide)
-- Rapporteur d'issues (formatage titre/corps, regroupement, dry-run, validation des assignés)
-- Orchestration CLI (parsing d'arguments, pipelines bout-en-bout)
+- Registre de dépréciation (modèles dépréciés vs actifs, gestion des suffixes de date, cohérence)
+- Mise à jour du registre (ajout, écrasement, flux vide)
+- Rapporteur d'issues (formatage, regroupement, dry-run, validation des assignés)
+- Orchestration CLI (pipelines bout-en-bout)
 
-## Architecture
+### Architecture
 
 ```
 data/
