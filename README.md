@@ -164,8 +164,8 @@ PYTHONPATH=. python -m src.update_registry
 
 | Nom | Type | Description |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Secret | Clé API Anthropic pour la validation Claude dans le workflow de mise à jour |
-| `REGISTRY_ASSIGNEES` | Variable | Noms d'utilisateur GitHub assignés aux issues d'échec du flux (séparés par des virgules) |
+| `ANTHROPIC_API_KEY` | Repository secret | Clé API Anthropic pour la validation Claude dans le workflow de mise à jour |
+| `REGISTRY_ASSIGNEES` | Repository variable | Noms d'utilisateur GitHub assignés aux issues d'échec du flux (séparés par des virgules) |
 
 ### Utilisation locale
 
