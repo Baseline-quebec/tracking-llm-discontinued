@@ -8,12 +8,14 @@ from __future__ import annotations
 
 import argparse
 import logging
+import re
 import subprocess
 from pathlib import Path
 
 from src.deprecation_feed import fetch_deprecations
 from src.deprecations import (
     _DEFAULT_REGISTRY_PATH,
+    ModelLifecycle,
     load_registry,
     merge_registries,
     save_registry,
@@ -87,6 +89,61 @@ def _create_feed_failure_issue(error_detail: str) -> None:
         logger.warning("Erreur lors de la creation de l'issue : %s", exc)
 
 
+_README_MARKER_START = "<!-- REGISTRY_START -->"
+_README_MARKER_END = "<!-- REGISTRY_END -->"
+
+
+def _generate_registry_table(registry: dict[str, ModelLifecycle]) -> str:
+    """Genere le tableau Markdown des modeles deprecies pour le README."""
+    sorted_entries = sorted(registry.values(), key=lambda lc: (lc.provider, lc.model))
+    lines = [
+        "| Model | Provider | Status | Shutdown date | Replacement |",
+        "|---|---|---|---|---|",
+    ]
+    for lc in sorted_entries:
+        shutdown = lc.shutdown_date.isoformat() if lc.shutdown_date else ""
+        replacement = lc.replacement or ""
+        lines.append(f"| {lc.model} | {lc.provider} | {lc.status} | {shutdown} | {replacement} |")
+    return "\n".join(lines)
+
+
+def update_readme(registry: dict[str, ModelLifecycle], readme_path: Path) -> bool:
+    """Met a jour la section auto-generee du README avec le registre actuel.
+
+    Args:
+        registry: Le registre de deprecation.
+        readme_path: Chemin vers le fichier README.md.
+
+    Returns:
+        True si le README a ete modifie, False sinon.
+    """
+    try:
+        content = readme_path.read_text(encoding="utf-8")
+    except OSError:
+        logger.warning("Impossible de lire %s", readme_path)
+        return False
+
+    table = _generate_registry_table(registry)
+    new_section = f"{_README_MARKER_START}\n{table}\n{_README_MARKER_END}"
+
+    pattern = re.compile(
+        rf"{re.escape(_README_MARKER_START)}.*?{re.escape(_README_MARKER_END)}",
+        re.DOTALL,
+    )
+
+    if not pattern.search(content):
+        logger.warning("Marqueurs README introuvables dans %s", readme_path)
+        return False
+
+    new_content = pattern.sub(new_section, content)
+    if new_content == content:
+        return False
+
+    readme_path.write_text(new_content, encoding="utf-8")
+    logger.info("README mis a jour dans %s", readme_path)
+    return True
+
+
 def update_registry(registry_path: Path) -> int:
     """Recupere le flux, fusionne avec le registre existant et sauvegarde.
 
@@ -117,6 +174,10 @@ def update_registry(registry_path: Path) -> int:
 
     save_registry(merged, registry_path)
     logger.info("Registre sauvegarde dans %s", registry_path)
+
+    readme_path = registry_path.parent.parent / "README.md"
+    update_readme(merged, readme_path)
+
     return len(feed)
 
 

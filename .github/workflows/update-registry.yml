@@ -39,19 +39,19 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git diff --quiet data/registry.json && echo "Aucun changement" && exit 0
+          git diff --quiet data/registry.json README.md && echo "Aucun changement" && exit 0
 
           BRANCH="chore/update-registry-$(date +%Y-%m-%d)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
-          git add data/registry.json
+          git add data/registry.json README.md
           git commit -m "chore: mise a jour du registre depuis deprecations.info"
           git push -u origin "$BRANCH"
 
           gh pr create \
             --title "chore: mise a jour du registre de deprecation" \
-            --body "Mise a jour automatique du registre depuis [deprecations.info](https://deprecations.info/)." \
+            --body "Mise a jour automatique du registre et du README depuis [deprecations.info](https://deprecations.info/)." \
             --head "$BRANCH" \
             --base main
 

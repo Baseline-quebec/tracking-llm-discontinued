@@ -18,7 +18,7 @@ on:
       - "**/*.env"
       - "**/Dockerfile"
   schedule:
-    - cron: "0 8 * * 1"  # Every Monday at 8:00 UTC
+    - cron: "0 8 1,15 * *"  # Bi-weekly: 1st and 15th of each month at 8:00 UTC
   workflow_dispatch:
 
 concurrency:
