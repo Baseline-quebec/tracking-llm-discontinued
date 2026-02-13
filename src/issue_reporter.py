@@ -93,7 +93,7 @@ def _validate_assignees(assignees: list[str]) -> list[str] | None:
 
 def _ensure_label() -> None:
     """Create the deprecated-model label if it doesn't exist."""
-    result = subprocess.run(  # noqa: S603
+    result = subprocess.run(
         [
             "gh",
             "label",
@@ -120,7 +120,7 @@ def _issue_exists(model: str) -> bool:
         logger.warning("Suspicious model name, skipping search: %s", model)
         return False
 
-    result = subprocess.run(  # noqa: S603
+    result = subprocess.run(
         [
             "gh",
             "issue",
@@ -172,7 +172,7 @@ def _create_issue(
     if assignees:
         cmd.extend(["--assignee", ",".join(assignees)])
 
-    result = subprocess.run(  # noqa: S603
+    result = subprocess.run(
         cmd,
         capture_output=True,
         text=True,

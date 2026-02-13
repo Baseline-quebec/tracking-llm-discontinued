@@ -1,0 +1,44 @@
+target-version = "py312"
+line-length = 99
+fix = true
+
+[lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "N",     # pep8-naming
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "S",     # flake8-bandit
+    "D",     # pydocstyle
+    "ANN",   # flake8-annotations
+    "RUF",   # ruff-specific
+]
+ignore = [
+    "ANN002",  # Missing type annotation for *args
+    "ANN003",  # Missing type annotation for **kwargs
+    "D100",    # Missing docstring in public module
+    "D104",    # Missing docstring in public package
+    "E501",    # Line too long (handled by formatter)
+    "S603",    # subprocess call - check for untrusted input
+    "S607",    # Starting a process with a partial executable path
+]
+
+[lint.per-file-ignores]
+"tests/*" = [
+    "S101",    # Use of assert
+    "D100",    # Missing docstring in public module
+    "D103",    # Missing docstring in public function
+    "ANN",     # Type annotations not required in tests
+    "S108",    # Probable insecure usage of tmp
+    "ARG001",  # Unused function argument (fixtures)
+    "ARG002",  # Unused method argument
+]
+
+[lint.pydocstyle]
+convention = "google"
+
+[lint.isort]
+lines-after-imports = 2

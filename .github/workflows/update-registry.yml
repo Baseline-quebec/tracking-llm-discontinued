@@ -1,0 +1,44 @@
+name: Mise a jour du registre de deprecation
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"  # Chaque lundi a 06:00 UTC (filtre aux semaines paires)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ignorer les semaines impaires (execution aux 2 semaines)
+        if: github.event_name == 'schedule'
+        run: |
+          week=$(date +%V)
+          if [ $((week % 2)) -ne 0 ]; then
+            echo "Semaine impaire $week, on passe"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Mettre a jour le registre depuis deprecations.info
+        run: python -m src.update_registry
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Commiter si modifie
+        run: |
+          git diff --quiet data/registry.json && exit 0
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/registry.json
+          git commit -m "chore: mise a jour du registre depuis deprecations.info"
+          git push

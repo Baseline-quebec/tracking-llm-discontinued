@@ -1,0 +1,149 @@
+{
+  "updated_at": "2026-02-13T00:00:00Z",
+  "models": [
+    {
+      "model": "claude-3-opus",
+      "provider": "anthropic",
+      "status": "shutdown",
+      "shutdown_date": "2026-01-05",
+      "replacement": "claude-opus-4",
+      "note": ""
+    },
+    {
+      "model": "claude-3-sonnet",
+      "provider": "anthropic",
+      "status": "shutdown",
+      "shutdown_date": "2025-07-21",
+      "replacement": "claude-sonnet-4",
+      "note": ""
+    },
+    {
+      "model": "claude-3.5-haiku",
+      "provider": "anthropic",
+      "status": "deprecated",
+      "shutdown_date": "2026-02-19",
+      "replacement": "claude-haiku-4-5",
+      "note": ""
+    },
+    {
+      "model": "claude-3.5-sonnet",
+      "provider": "anthropic",
+      "status": "shutdown",
+      "shutdown_date": "2025-10-28",
+      "replacement": "claude-sonnet-4",
+      "note": "Both v1 (20240620) and v2 (20241022) retired"
+    },
+    {
+      "model": "gemini-1.5-flash",
+      "provider": "google",
+      "status": "shutdown",
+      "shutdown_date": "2025-09-23",
+      "replacement": "gemini-2.5-flash",
+      "note": "gemini-1.5-flash-001/002 retired"
+    },
+    {
+      "model": "gemini-1.5-pro",
+      "provider": "google",
+      "status": "shutdown",
+      "shutdown_date": "2025-09-23",
+      "replacement": "gemini-2.5-pro",
+      "note": "gemini-1.5-pro-001/002 retired"
+    },
+    {
+      "model": "gemini-2.0-flash",
+      "provider": "google",
+      "status": "retiring",
+      "shutdown_date": "2026-03-31",
+      "replacement": "gemini-2.5-flash",
+      "note": ""
+    },
+    {
+      "model": "gemini-pro",
+      "provider": "google",
+      "status": "shutdown",
+      "shutdown_date": "2025-02-15",
+      "replacement": "gemini-2.5-pro",
+      "note": "Original Gemini 1.0 Pro, retired"
+    },
+    {
+      "model": "gpt-3.5-turbo",
+      "provider": "openai",
+      "status": "deprecated",
+      "shutdown_date": "2025-09-14",
+      "replacement": "gpt-4.1-mini",
+      "note": "All gpt-3.5-turbo variants included"
+    },
+    {
+      "model": "gpt-4",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-06-06",
+      "replacement": "gpt-4.1",
+      "note": ""
+    },
+    {
+      "model": "gpt-4-turbo",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-06-06",
+      "replacement": "gpt-4.1",
+      "note": ""
+    },
+    {
+      "model": "gpt-4-turbo-preview",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-06-06",
+      "replacement": "gpt-4.1",
+      "note": ""
+    },
+    {
+      "model": "gpt-4o",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-01",
+      "replacement": "gpt-4.1",
+      "note": "Standard deployments retire 2026-03-31"
+    },
+    {
+      "model": "gpt-4o-mini",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-01",
+      "replacement": "gpt-4.1-mini",
+      "note": "Standard deployments retire 2026-03-31"
+    },
+    {
+      "model": "o1",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-07-15",
+      "replacement": "o3",
+      "note": ""
+    },
+    {
+      "model": "o1-mini",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-10-27",
+      "replacement": "o4-mini",
+      "note": ""
+    },
+    {
+      "model": "o1-preview",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-07-28",
+      "replacement": "o3",
+      "note": ""
+    },
+    {
+      "model": "text-embedding-ada-002",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2027-04-15",
+      "replacement": "text-embedding-3-small",
+      "note": "No retirement before April 2027"
+    }
+  ]
+}
