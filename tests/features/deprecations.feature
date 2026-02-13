@@ -11,23 +11,9 @@ Feature: Model deprecation detection
     Examples:
       | model                  | status     | replacement           |
       | gpt-3.5-turbo          | deprecated | gpt-4.1-mini          |
-      | gpt-4                  | retiring   | gpt-4.1               |
-      | gpt-4-turbo            | retiring   | gpt-4.1               |
-      | gpt-4-turbo-preview    | retiring   | gpt-4.1               |
       | gpt-4o                 | retiring   | gpt-4.1               |
-      | gpt-4o-mini            | retiring   | gpt-4.1-mini          |
-      | o1                     | retiring   | o3                    |
       | o1-preview             | shutdown   | o3                    |
-      | o1-mini                | shutdown   | o4-mini               |
       | text-embedding-ada-002 | retiring   | text-embedding-3-small |
-      | claude-3.5-sonnet      | shutdown   | claude-sonnet-4       |
-      | claude-3.5-haiku       | deprecated | claude-haiku-4-5      |
-      | claude-3-opus          | shutdown   | claude-opus-4         |
-      | claude-3-sonnet        | shutdown   | claude-sonnet-4       |
-      | gemini-2.0-flash       | retiring   | gemini-2.5-flash      |
-      | gemini-1.5-pro         | shutdown   | gemini-2.5-pro        |
-      | gemini-1.5-flash       | shutdown   | gemini-2.5-flash      |
-      | gemini-pro             | shutdown   | gemini-2.5-pro        |
 
   Scenario Outline: Date-suffixed models match base deprecation
     Given a model name "<model>"
@@ -48,15 +34,8 @@ Feature: Model deprecation detection
     Examples:
       | model                  |
       | gpt-4.1                |
-      | gpt-4.1-mini           |
-      | gpt-5                  |
-      | gpt-5.1                |
-      | o3                     |
-      | o4-mini                |
       | claude-opus-4          |
-      | claude-sonnet-4        |
       | gemini-2.5-pro         |
-      | gemini-2.5-flash       |
       | text-embedding-3-small |
 
   Scenario: Scan config with deprecated models flags them

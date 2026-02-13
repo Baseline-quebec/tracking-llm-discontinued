@@ -35,6 +35,7 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
           GH_TOKEN: ${{ github.token }}
+          REGISTRY_ASSIGNEES: ${{ vars.REGISTRY_ASSIGNEES || '' }}
 
       - name: Creer une PR si le registre a change
         id: create-pr
@@ -57,28 +58,33 @@ jobs:
             --head "$BRANCH" \
             --base main
 
-          PR_URL=$(gh pr view "$BRANCH" --json url -q .url)
-          echo "pr-url=$PR_URL" >> "$GITHUB_OUTPUT"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
-          gh pr merge "$BRANCH" --squash --auto --delete-branch
-
-      - name: Valider la couverture regex avec Claude
-        if: steps.create-pr.outputs.pr-url != ''
+      - name: Ajuster les patterns regex avec Claude
+        if: steps.create-pr.outputs.branch != ''
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
-            Analyse les modeles dans data/registry.json.
-            Pour chaque modele, verifie si les patterns regex dans src/patterns.py
-            peuvent le detecter en executant :
+            Le registre data/registry.json vient d'etre mis a jour avec de nouveaux
+            modeles deprecies. Verifie si les patterns regex couvrent tous les modeles.
 
-              PYTHONPATH=. python -m src.validate_patterns --output-json
+            1. Execute : PYTHONPATH=. python -m src.validate_patterns --output-json
+            2. Si des modeles ne sont pas couverts :
+               a. Ajoute les patterns manquants dans src/patterns.py (respecte le style existant)
+               b. Ajoute les cas de test BDD dans tests/features/patterns.feature
+               c. Execute les tests : PYTHONPATH=. python -m pytest tests/ -v --rootdir=.
+               d. Execute le linter : ruff check src/ --fix && ruff format src/
+               e. Commit les changements sur cette branche avec le message :
+                  "feat: add regex patterns for new registry models"
+            3. Si tous les modeles sont deja couverts, ne fais rien.
 
-            Si des lacunes sont trouvees :
-            1. Liste les modeles non couverts
-            2. Suggere des patterns regex a ajouter dans src/patterns.py
-            3. Suggere des cas de test BDD a ajouter dans tests/features/patterns.feature
-
-            Poste un commentaire sur la PR avec les resultats.
           claude_args: |
-            --allowedTools "Bash(python:*),Bash(gh pr comment:*),Read,Glob,Grep"
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(python:*),Bash(ruff:*),Bash(git:*),Bash(gh pr comment:*)"
+
+      - name: Auto-merge la PR
+        if: steps.create-pr.outputs.branch != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge "${{ steps.create-pr.outputs.branch }}" --squash --auto --delete-branch

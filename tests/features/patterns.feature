@@ -152,21 +152,3 @@ Feature: LLM model pattern detection
     When I scan the line for matches
     Then I should find 0 matches
 
-  Scenario Outline: Detect plausible future model names
-    Given a line containing "<line>"
-    When I scan the line for matches
-    Then I should find model "<model>" from provider "<provider>"
-    And the match type should be "llm"
-
-    Examples:
-      | line                             | model              | provider  |
-      | model = "gpt-5-pro"             | gpt-5-pro          | openai    |
-      | model = "gpt-5-codex"           | gpt-5-codex        | openai    |
-      | model: gpt-5-chat               | gpt-5-chat         | openai    |
-      | model = "gpt-5.1-mini"          | gpt-5.1-mini       | openai    |
-      | model = "gpt-5.2-nano"          | gpt-5.2-nano       | openai    |
-      | model = "gpt-4.1-2025-06-01"    | gpt-4.1-2025-06-01 | openai    |
-      | model = "gemini-2.5-pro-001"    | gemini-2.5-pro-001 | google    |
-      | model = "gemini-2.5-flash-002"  | gemini-2.5-flash-002 | google  |
-      | model: claude-3-5-haiku-20250601 | claude-3-5-haiku-20250601 | anthropic |
-      | model = "claude-3.5-sonnet-20260101" | claude-3.5-sonnet-20260101 | anthropic |

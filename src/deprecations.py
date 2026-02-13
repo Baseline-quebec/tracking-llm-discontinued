@@ -1,10 +1,6 @@
 """Registry of deprecated/retiring LLM models with lifecycle data.
 
-Sources:
-    OpenAI: https://platform.openai.com/docs/deprecations
-    Anthropic: https://platform.claude.com/docs/en/about-claude/model-deprecations
-    Google: https://ai.google.dev/gemini-api/docs/deprecations
-    deprecations.info: https://deprecations.info/
+Source: https://deprecations.info/
 """
 
 from __future__ import annotations
