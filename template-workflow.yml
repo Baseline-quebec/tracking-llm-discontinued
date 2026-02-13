@@ -38,7 +38,7 @@ jobs:
       - name: Run LLM scanner
         id: scan
         # Pin to a release tag for stability, e.g. @v1.0.0
-        uses: Baseline-quebec/Baseline-Automation/tracking-llm-discontinued@main
+        uses: Baseline-quebec/tracking-llm-discontinued@main
         with:
           repo-name: ${{ github.repository }}
           assignees: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
