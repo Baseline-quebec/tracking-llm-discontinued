@@ -8,6 +8,34 @@ Action composite GitHub qui scanne les dépôts pour détecter les références 
 2. **Vérifie** contre un registre de dépréciation JSON (`data/registry.json`) les modèles dépréciés/en retrait/arrêtés
 3. **Crée des issues GitHub** pour chaque modèle déprécié trouvé, avec les fichiers affectés, les suggestions de remplacement et les dates d'arrêt
 
+### Workflow de scan (repos consommateurs)
+
+```mermaid
+flowchart LR
+    A[Push sur main<br>ou cron bimensuel] --> B[Checkout du repo]
+    B --> C[Action composite<br>tracking-llm-discontinued]
+    C --> D[Scan des fichiers<br>patterns.py + scanner.py]
+    D --> E{Modèles<br>dépréciés?}
+    E -->|Oui| F[Créer issues GitHub<br>avec remplacement suggéré]
+    E -->|Non| G[Aucune action]
+```
+
+### Workflow de mise à jour du registre (ce repo)
+
+```mermaid
+flowchart TD
+    A[Cron lundi 06h UTC<br>semaines paires] --> B[Fetch deprecations.info]
+    B --> C{Flux<br>accessible?}
+    C -->|Non| D[Créer issue<br>d'échec]
+    C -->|Oui| E[Fusionner avec<br>registry.json]
+    E --> F[Mettre à jour<br>le README]
+    F --> G{Changements<br>détectés?}
+    G -->|Non| H[Fin]
+    G -->|Oui| I[Créer PR]
+    I --> J[Claude Code valide<br>et ajuste les regex]
+    J --> K[Auto-merge PR]
+```
+
 ## Modèles supportés
 
 | Fournisseur | Modèles détectés |
@@ -150,14 +178,6 @@ PYTHONPATH=. python -m src.main --repo-name "my-repo" --scan-path /path/to/repo 
 pip install pytest pytest-bdd
 python -m pytest tests/ -v --rootdir=.
 ```
-
-Tests BDD couvrant :
-- Détection de patterns (modèles LLM, embeddings, suffixes de date, faux positifs)
-- Scanner (parcours de répertoires, déduplication, exclusions)
-- Registre de dépréciation (modèles dépréciés vs actifs, gestion des suffixes de date, cohérence)
-- Mise à jour du registre (ajout, écrasement, flux vide)
-- Rapporteur d'issues (formatage, regroupement, dry-run, validation des assignés)
-- Orchestration CLI (pipelines bout-en-bout)
 
 ### Architecture
 
