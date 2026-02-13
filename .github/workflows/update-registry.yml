@@ -9,6 +9,7 @@ permissions:
   contents: write
   issues: write
   pull-requests: write
+  id-token: write
 
 jobs:
   update:
@@ -36,6 +37,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
 
       - name: Creer une PR si le registre a change
+        id: create-pr
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -55,4 +57,28 @@ jobs:
             --head "$BRANCH" \
             --base main
 
+          PR_URL=$(gh pr view "$BRANCH" --json url -q .url)
+          echo "pr-url=$PR_URL" >> "$GITHUB_OUTPUT"
+
           gh pr merge "$BRANCH" --squash --auto --delete-branch
+
+      - name: Valider la couverture regex avec Claude
+        if: steps.create-pr.outputs.pr-url != ''
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Analyse les modeles dans data/registry.json.
+            Pour chaque modele, verifie si les patterns regex dans src/patterns.py
+            peuvent le detecter en executant :
+
+              PYTHONPATH=. python -m src.validate_patterns --output-json
+
+            Si des lacunes sont trouvees :
+            1. Liste les modeles non couverts
+            2. Suggere des patterns regex a ajouter dans src/patterns.py
+            3. Suggere des cas de test BDD a ajouter dans tests/features/patterns.feature
+
+            Poste un commentaire sur la PR avec les resultats.
+          claude_args: |
+            --allowedTools "Bash(python:*),Bash(gh pr comment:*),Read,Glob,Grep"
