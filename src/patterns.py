@@ -1,0 +1,161 @@
+"""Regex patterns for detecting LLM models, embeddings, and frameworks."""
+
+from __future__ import annotations
+
+import re
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from src.models import MatchType
+
+
+@dataclass(frozen=True)
+class ModelPattern:
+    """A pattern definition for detecting a model reference."""
+
+    provider: str
+    match_type: MatchType
+    pattern: re.Pattern[str]
+    context_required: bool = False
+
+
+# Context keywords required for short model names (e.g. "o1", "o3")
+CONTEXT_KEYWORDS: re.Pattern[str] = re.compile(
+    r"model|llm|openai|api|chat|completion|gpt|anthropic|claude|gemini|"
+    r"embedding|embed|vector|provider|ai[\._\-]|engine",
+    re.IGNORECASE,
+)
+
+
+def _build_patterns() -> list[ModelPattern]:
+    """Build all model detection patterns."""
+    patterns: list[ModelPattern] = []
+
+    def _add(
+        provider: str,
+        match_type: MatchType,
+        regex: str,
+        *,
+        context_required: bool = False,
+    ) -> None:
+        patterns.append(
+            ModelPattern(
+                provider=provider,
+                match_type=match_type,
+                pattern=re.compile(regex, re.IGNORECASE),
+                context_required=context_required,
+            )
+        )
+
+    # --- OpenAI LLM ---
+    # Order matters: specific patterns (gpt-5.1) must precede general ones (gpt-5)
+    # to avoid double-matching. General patterns use negative lookaheads to exclude
+    # the specific variants.
+    _add(
+        "openai",
+        "llm",
+        r"\bgpt-5\.?[12]?(?:-(?:mini|nano|pro|codex|chat))?(?:-\d{4}-\d{2}-\d{2})?\b",
+    )
+    # gpt-5 base: (?!\.[12]) prevents matching "gpt-5" inside "gpt-5.1" or "gpt-5.2"
+    _add(
+        "openai",
+        "llm",
+        r"\bgpt-5(?!\.[12])(?:-(?:mini|nano|pro|codex|chat))?(?:-\d{4}-\d{2}-\d{2})?\b",
+    )
+    _add("openai", "llm", r"\bgpt-4\.1(?:-(?:mini|nano))?(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4o(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4-turbo(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    # gpt-4 base: (?!\.1|o|-turbo) prevents matching inside gpt-4.1, gpt-4o, gpt-4-turbo
+    _add("openai", "llm", r"\bgpt-4(?!\.1|o|-turbo)(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-3\.5-turbo(?:-\d{4})?\b")
+    _add("openai", "llm", r"\bo1(?:-preview|-mini|-pro)?\b", context_required=True)
+    _add("openai", "llm", r"\bo3(?:-mini|-pro|-deep-research)?\b", context_required=True)
+    _add("openai", "llm", r"\bo4-mini\b")
+    _add("openai", "llm", r"\bcodex-mini\b")
+
+    # --- Anthropic ---
+    _add("anthropic", "llm", r"\bclaude-opus-4\b")
+    _add("anthropic", "llm", r"\bclaude-sonnet-4\b")
+    _add("anthropic", "llm", r"\bclaude-3[\.-]5-sonnet(?:-\d{8})?\b")
+    _add("anthropic", "llm", r"\bclaude-3[\.-]5-haiku(?:-\d{8})?\b")
+    _add("anthropic", "llm", r"\bclaude-3-opus(?:-\d{8})?\b")
+    _add("anthropic", "llm", r"\bclaude-3-sonnet(?:-\d{8})?\b")
+    _add("anthropic", "llm", r"\bclaude-3-haiku(?:-\d{8})?\b")
+
+    # --- Google ---
+    _add("google", "llm", r"\bgemini-2[\.-]5-(?:pro|flash)(?:-\d{3})?\b")
+    _add("google", "llm", r"\bgemini-2[\.-]0-flash(?:-lite)?\b")
+    _add("google", "llm", r"\bgemini-1[\.-]5-pro(?:-\d{3})?\b")
+    _add("google", "llm", r"\bgemini-1[\.-]5-flash(?:-\d{3})?\b")
+    _add("google", "llm", r"\bgemini-pro\b")
+
+    # --- DeepSeek ---
+    _add("deepseek", "llm", r"\bdeepseek-(?:v3|r1|coder)\b")
+
+    # --- xAI ---
+    _add("xai", "llm", r"\bgrok-[23]\b")
+
+    # --- Meta ---
+    _add("meta", "llm", r"\bllama-?3(?:\.?[123])?\b")
+    _add("meta", "llm", r"\bllama-?2\b")
+    _add("meta", "llm", r"\bcodellama\b")
+
+    # --- Mistral ---
+    _add("mistral", "llm", r"\bmistral-large(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("mistral", "llm", r"\bmistral-medium(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("mistral", "llm", r"\bmistral-small(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("mistral", "llm", r"\bmixtral\b")
+    _add("mistral", "llm", r"\bcodestral\b")
+
+    # --- Cohere ---
+    _add("cohere", "llm", r"\bcommand-r-plus\b")
+    _add("cohere", "llm", r"\bcommand-r\b")
+
+    # --- OpenAI Embeddings ---
+    _add("openai", "embedding", r"\btext-embedding-3-(?:small|large)\b")
+    _add("openai", "embedding", r"\btext-embedding-ada-002\b")
+
+    # --- Cohere Embeddings ---
+    _add("cohere", "embedding", r"\bembed-(?:english|multilingual)-v[23]\.0\b")
+
+    # --- Voyage Embeddings ---
+    _add("voyage", "embedding", r"\bvoyage-(?:large|code|lite)-\d+\b")
+
+    # --- Frameworks ---
+    _add("langchain", "framework", r"\blangchain\b")
+    _add("llamaindex", "framework", r"\bllamaindex\b")
+    _add("haystack", "framework", r"\bhaystack\b")
+    _add("autogen", "framework", r"\bautogen\b")
+    _add("crewai", "framework", r"\bcrewai\b")
+    _add("dspy", "framework", r"\bdspy\b")
+    _add("litellm", "framework", r"\blitellm\b")
+
+    return patterns
+
+
+MODEL_PATTERNS: list[ModelPattern] = _build_patterns()
+
+
+def find_matches_in_line(
+    line: str,
+) -> list[tuple[str, str, MatchType]]:
+    """Find all model/framework matches in a single line of text.
+
+    Returns a list of (provider, model_name, match_type) tuples.
+    """
+    results: list[tuple[str, str, MatchType]] = []
+
+    for model_pattern in MODEL_PATTERNS:
+        match: re.Match[str] | None = model_pattern.pattern.search(line)
+        if match is None:
+            continue
+
+        if model_pattern.context_required and not CONTEXT_KEYWORDS.search(line):
+            continue
+
+        model_name = match.group(0).lower()
+        results.append((model_pattern.provider, model_name, model_pattern.match_type))
+
+    return results

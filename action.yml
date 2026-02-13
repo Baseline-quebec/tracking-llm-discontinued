@@ -1,0 +1,60 @@
+name: "LLM Configuration Scanner"
+description: "Scans a repository for deprecated LLM models and creates GitHub issues"
+
+inputs:
+  repo-name:
+    description: "Name of the repository being scanned"
+    required: true
+  assignees:
+    description: "Comma-separated GitHub usernames to assign deprecation issues"
+    required: false
+    default: ""
+  dry-run:
+    description: "If true, scan only without creating issues"
+    required: false
+    default: "false"
+
+outputs:
+  match-count:
+    description: "Number of LLM model references found"
+    value: ${{ steps.scan.outputs.match-count }}
+  deprecated-count:
+    description: "Number of deprecated model references found"
+    value: ${{ steps.scan.outputs.deprecated-count }}
+  issues-created:
+    description: "Number of new GitHub issues created"
+    value: ${{ steps.scan.outputs.issues-created }}
+  deprecated-summary:
+    description: "JSON summary of deprecated models found"
+    value: ${{ steps.scan.outputs.deprecated-summary }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Run LLM scanner
+      id: scan
+      shell: bash
+      env:
+        SCAN_REPO_NAME: ${{ inputs.repo-name }}
+        SCAN_PATH: ${{ github.workspace }}
+        SCAN_ASSIGNEES: ${{ inputs.assignees }}
+        SCAN_DRY_RUN: ${{ inputs.dry-run }}
+        PYTHONPATH: ${{ github.action_path }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        ARGS=(--repo-name "$SCAN_REPO_NAME" --scan-path "$SCAN_PATH")
+
+        if [ -n "$SCAN_ASSIGNEES" ]; then
+          ARGS+=(--assignees "$SCAN_ASSIGNEES")
+        fi
+
+        if [ "$SCAN_DRY_RUN" = "true" ]; then
+          ARGS+=(--dry-run)
+        fi
+
+        python -m src.main "${ARGS[@]}"
