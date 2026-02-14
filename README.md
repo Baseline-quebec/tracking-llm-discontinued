@@ -110,7 +110,6 @@ flowchart TD
     F -->|Oui| H[Mettre à jour<br>le README]
     H --> I[Claude Code valide<br>et ajuste les regex]
     I --> J[Créer PR]
-    J --> K[Merge PR]
 ```
 
 Le workflow :
@@ -119,7 +118,7 @@ Le workflow :
 2. Fusionne avec le registre existant
 3. Si des changements sont détectés : met à jour le README et pousse sur une branche
 4. Claude Code valide et ajuste les patterns regex si nécessaire
-5. Crée une PR et la merge automatiquement
+5. Crée une PR pour révision
 
 Si le flux est inaccessible, une issue GitHub est créée et assignée aux mainteneurs.
 
