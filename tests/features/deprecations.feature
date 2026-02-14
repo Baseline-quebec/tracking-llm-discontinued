@@ -34,7 +34,7 @@ Feature: Model deprecation detection
       | model                  |
       | gpt-4.1                |
       | claude-opus-4          |
-      | gemini-2.5-pro         |
+      | claude-haiku-4         |
       | text-embedding-3-small |
 
   Scenario: Scan config with deprecated models flags them

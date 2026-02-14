@@ -55,32 +55,50 @@ def _build_patterns() -> list[ModelPattern]:
         "llm",
         r"\bgpt-5(?:\.[12])?(?:-(?:mini|nano|pro|codex|chat))?(?:-\d{4}-\d{2}-\d{2})?\b",
     )
+    _add("openai", "llm", r"\bgpt-4\.5-preview\b")
     _add("openai", "llm", r"\bgpt-4\.1(?:-(?:mini|nano))?(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4o-audio-preview(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4o-realtime-preview(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4o(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4-turbo(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?\b")
-    # gpt-4 base: (?!\.1|o|-turbo) prevents matching inside gpt-4.1, gpt-4o, gpt-4-turbo
-    _add("openai", "llm", r"\bgpt-4(?!\.1|o|-turbo)(?:-\d{4}-\d{2}-\d{2})?\b")
+    # gpt-4 base: negative lookahead prevents matching gpt-4.1, gpt-4.5, gpt-4o, gpt-4-turbo
+    _add("openai", "llm", r"\bgpt-4(?!\.\d|o|-turbo)(?:-32k)?(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-3\.5-turbo(?:-\d{4})?\b")
+    _add("openai", "llm", r"\bchatgpt-4o-latest\b")
     _add("openai", "llm", r"\bo1(?:-preview|-mini|-pro)?\b", context_required=True)
     _add("openai", "llm", r"\bo3(?:-mini|-pro|-deep-research)?\b", context_required=True)
     _add("openai", "llm", r"\bo4-mini\b")
-    _add("openai", "llm", r"\bcodex-mini\b")
+    _add("openai", "llm", r"\bcodex-mini(?:-latest)?\b")
+    _add("openai", "llm", r"\btext-moderation\b")
 
     # --- Anthropic ---
     _add("anthropic", "llm", r"\bclaude-opus-4\b")
     _add("anthropic", "llm", r"\bclaude-sonnet-4\b")
+    _add("anthropic", "llm", r"\bclaude-3[\.-]7-sonnet(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3[\.-]5-sonnet(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3[\.-]5-haiku(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3-opus(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3-sonnet(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3-haiku(?:-\d{8})?\b")
+    _add("anthropic", "llm", r"\bclaude-2\.\d\b")
+    _add("anthropic", "llm", r"\bclaude-instant-1\.\d\b")
+    _add("anthropic", "llm", r"\bclaude-1\.\d\b")
 
-    # --- Google ---
-    _add("google", "llm", r"\bgemini-2[\.-]5-(?:pro|flash)(?:-\d{3})?\b")
-    _add("google", "llm", r"\bgemini-2[\.-]0-flash(?:-lite)?\b")
-    _add("google", "llm", r"\bgemini-1[\.-]5-pro(?:-\d{3})?\b")
-    _add("google", "llm", r"\bgemini-1[\.-]5-flash(?:-\d{3})?\b")
+    # --- Google LLM ---
+    _add("google", "llm", r"\bgemini-2[\.-]5-flash(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bgemini-2[\.-]5-pro(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bgemini-2[\.-]0-flash(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bgemini-2[\.-]0-pro(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bgemini-1[\.-]5-pro(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bgemini-1[\.-]5-flash(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bgemini-1[\.-]0-pro(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-pro\b")
+    _add("google", "llm", r"\bgemini-live(?:-[a-z0-9.]+)+\b")
+    _add("google", "llm", r"\bimagen-\d+\.\d+(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bveo-\d+\.\d+(?:-[a-z0-9]+)*\b")
+
+    # --- Google Embeddings ---
+    _add("google", "embedding", r"\bgemini-embedding(?:-[a-z0-9]+)*\b")
 
     # --- OpenAI Embeddings ---
     _add("openai", "embedding", r"\btext-embedding-3-(?:small|large)\b")

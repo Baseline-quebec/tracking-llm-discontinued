@@ -82,20 +82,33 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
             Le registre data/registry.json vient d'etre mis a jour avec de nouveaux
-            modeles deprecies. Verifie si les patterns regex couvrent tous les modeles.
+            modeles deprecies. Verifie que les patterns regex et les tests sont a jour.
 
-            1. Execute : PYTHONPATH=. python -m src.validate_patterns --output-json
+            Notes importantes :
+            - Les entrees du registre contenant des espaces sont des noms de categories
+              (ex: "Chat model updates"), pas des model IDs. Elles sont ignorees par
+              validate_patterns et le test de coherence. Ne cree PAS de patterns pour elles.
+            - Les cles du registre sont en minuscules. Les patterns sont case-insensitive.
+
+            1. Execute la validation des patterns :
+               PYTHONPATH=. python -m src.validate_patterns --output-json
             2. Si des modeles ne sont pas couverts :
                a. Ajoute les patterns manquants dans src/patterns.py (respecte le style existant)
                b. Ajoute les cas de test BDD dans tests/features/patterns.feature
-               c. Execute les tests : PYTHONPATH=. python -m pytest tests/ -v --rootdir=.
-               d. Execute le linter : ruff check src/ --fix && ruff format src/
-               e. Commit les changements sur cette branche avec le message :
-                  "feat: add regex patterns for new registry models"
-            3. Si tous les modeles sont deja couverts, ne fais rien.
+            3. Execute les tests :
+               PYTHONPATH=. python -m pytest tests/ -v --rootdir=.
+            4. Si des tests echouent :
+               a. Corrige tests/features/deprecations.feature si des modeles ont change de
+                  statut (ex: un modele "actif" est maintenant deprecie dans le registre)
+               b. Corrige les autres tests BDD si necessaire
+               c. Re-execute les tests jusqu'a ce qu'ils passent
+            5. Execute le linter : ruff check src/ tests/ --fix && ruff format src/ tests/
+            6. Si des changements ont ete faits, commit avec le message :
+               "feat: update patterns and tests for new registry models"
+            7. Si tout passe sans changement, ne fais rien.
 
           claude_args: |
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(python:*),Bash(ruff:*),Bash(git:*),Bash(gh pr comment:*)"
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(python:*),Bash(pip:*),Bash(ruff:*),Bash(git:*),Bash(gh pr comment:*)"
 
       - name: Creer la PR
         id: create-pr

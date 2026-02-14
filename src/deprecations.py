@@ -73,7 +73,7 @@ def load_registry(path: Path | None = None) -> dict[str, DeprecatedModel]:
     registry: dict[str, DeprecatedModel] = {}
     for entry in data.get("models", []):
         dm = _entry_to_deprecated(entry)
-        registry[dm.model] = dm
+        registry[dm.model.lower()] = dm
     return registry
 
 
@@ -102,10 +102,11 @@ def merge_registries(
     """Merge static registry with live feed data.
 
     Feed entries take priority over static entries for the same model.
+    Keys are stored in lowercase for case-insensitive lookup.
     """
     merged = dict(static)
     for entry in feed:
-        merged[entry.model] = entry
+        merged[entry.model.lower()] = entry
     return merged
 
 
@@ -120,13 +121,14 @@ def check_deprecation(model: str) -> DeprecatedModel | None:
 
     Returns DeprecatedModel if the model is deprecated/retiring, None otherwise.
     """
-    result = DEPRECATION_REGISTRY.get(model)
+    model_lower = model.lower()
+    result = DEPRECATION_REGISTRY.get(model_lower)
     if result is not None:
         return result
 
     # Try stripping date suffix (e.g. "claude-3.5-sonnet-20241022" -> "claude-3.5-sonnet")
-    base = _DATE_SUFFIX_RE.sub("", model)
-    if base != model:
+    base = _DATE_SUFFIX_RE.sub("", model_lower)
+    if base != model_lower:
         return DEPRECATION_REGISTRY.get(base)
 
     return None
