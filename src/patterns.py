@@ -93,7 +93,7 @@ def _build_patterns() -> list[ModelPattern]:
     _add("google", "llm", r"\bgemini-1[\.-]5-flash(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-1[\.-]0-pro(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-pro\b")
-    _add("google", "llm", r"\bgemini-live(?:-[a-z0-9.]+)+\b")
+    _add("google", "llm", r"\bgemini-live(?:-[a-z0-9.]+)*\b")
     _add("google", "llm", r"\bimagen-\d+\.\d+(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bveo-\d+\.\d+(?:-[a-z0-9]+)*\b")
 

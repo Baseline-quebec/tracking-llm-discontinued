@@ -135,6 +135,7 @@ Feature: LLM model pattern detection
       | model: gemini-1.0-pro                                   | gemini-1.0-pro                                  |
       | model = "gemini-1.0-pro-vision"                         | gemini-1.0-pro-vision                           |
       | model: gemini-live-2.5-flash-preview                    | gemini-live-2.5-flash-preview                   |
+      | model = "gemini-live"                                    | gemini-live                                     |
       | model = "imagen-3.0-generate-002"                       | imagen-3.0-generate-002                         |
       | model: veo-3.0-fast-generate-preview                    | veo-3.0-fast-generate-preview                   |
 

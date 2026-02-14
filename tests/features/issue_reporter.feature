@@ -54,3 +54,8 @@ Feature: GitHub Issue creation for deprecated models
     Given a list of deprecation alerts for models "gpt-4o"
     When I create issues with gh CLI failing
     Then 0 issues should be reported as created
+
+  Scenario: gh CLI timeout is handled gracefully
+    Given a list of deprecation alerts for models "gpt-4o"
+    When I create issues with gh CLI timing out
+    Then 0 issues should be reported as created
