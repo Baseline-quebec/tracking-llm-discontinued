@@ -45,6 +45,10 @@ Feature: LLM model pattern detection
       | model = "text-embedding-ada-002"           | text-embedding-ada-002    | openai   |
       | model = "voyage-large-2"                  | voyage-large-2            | voyage   |
       | model: voyage-code-3                       | voyage-code-3             | voyage   |
+      | model = "voyage-lite-3"                    | voyage-lite-3             | voyage   |
+      | model = "voyage-finance-2"                 | voyage-finance-2          | voyage   |
+      | model: voyage-3                            | voyage-3                  | voyage   |
+      | model = "voyage-3-lite"                    | voyage-3-lite             | voyage   |
       | model = "gemini-embedding-001"             | gemini-embedding-001      | google   |
       | model: gemini-embedding-exp                 | gemini-embedding-exp      | google   |
 

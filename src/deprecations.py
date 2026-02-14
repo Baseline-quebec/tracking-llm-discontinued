@@ -44,6 +44,10 @@ def _validate_entry(entry: dict[str, Any]) -> bool:
     if not isinstance(model, str) or not model:
         return False
 
+    # Reject category headers from deprecations.info (e.g. "Chat model updates")
+    if " " in model:
+        return False
+
     provider = entry.get("provider")
     if provider not in _VALID_PROVIDERS:
         return False
@@ -142,6 +146,12 @@ def merge_registries(
 
 
 DEPRECATION_REGISTRY: dict[str, DeprecatedModel] = load_registry()
+
+
+def reload_deprecation_registry(path: Path | None = None) -> None:
+    """Reload the global deprecation registry from disk."""
+    global DEPRECATION_REGISTRY
+    DEPRECATION_REGISTRY = load_registry(path)
 
 
 def check_deprecation(model: str) -> DeprecatedModel | None:

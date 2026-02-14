@@ -105,7 +105,7 @@ def _build_patterns() -> list[ModelPattern]:
     _add("openai", "embedding", r"\btext-embedding-ada-002\b")
 
     # --- Voyage Embeddings ---
-    _add("voyage", "embedding", r"\bvoyage-(?:large|code|lite)-\d+\b")
+    _add("voyage", "embedding", r"\bvoyage-(?:[a-z]+-)*\d+(?:-[a-z0-9]+)*\b")
 
     return patterns
 
