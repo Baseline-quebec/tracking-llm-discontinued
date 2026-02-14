@@ -76,6 +76,7 @@ jobs:
 
       - name: Ajuster les patterns regex avec Claude
         if: steps.push-branch.outputs.branch != ''
+        continue-on-error: true
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
