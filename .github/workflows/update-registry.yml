@@ -54,8 +54,8 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
 
-      - name: Creer une PR
-        id: create-pr
+      - name: Pousser les changements sur une branche
+        id: push-branch
         if: steps.detect-changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
@@ -63,21 +63,19 @@ jobs:
           BRANCH="chore/update-registry-$(date +%Y-%m-%d)"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Supprimer la branche distante si elle existe deja (re-execution le meme jour)
+          git push origin --delete "$BRANCH" 2>/dev/null || true
+
           git checkout -b "$BRANCH"
           git add data/registry.json README.md
           git commit -m "chore: mise a jour du registre depuis deprecations.info"
           git push -u origin "$BRANCH"
 
-          gh pr create \
-            --title "chore: mise a jour du registre de deprecation" \
-            --body "Mise a jour automatique du registre et du README depuis [deprecations.info](https://deprecations.info/)." \
-            --head "$BRANCH" \
-            --base main
-
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
       - name: Ajuster les patterns regex avec Claude
-        if: steps.create-pr.outputs.branch != ''
+        if: steps.push-branch.outputs.branch != ''
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -98,9 +96,21 @@ jobs:
           claude_args: |
             --allowedTools "Read,Write,Edit,Glob,Grep,Bash(python:*),Bash(ruff:*),Bash(git:*),Bash(gh pr comment:*)"
 
-      - name: Auto-merge la PR
-        if: steps.create-pr.outputs.branch != ''
+      - name: Creer la PR
+        id: create-pr
+        if: steps.push-branch.outputs.branch != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh pr merge "${{ steps.create-pr.outputs.branch }}" --squash --auto --delete-branch
+          gh pr create \
+            --title "chore: mise a jour du registre de deprecation" \
+            --body "Mise a jour automatique du registre et du README depuis [deprecations.info](https://deprecations.info/)." \
+            --head "${{ steps.push-branch.outputs.branch }}" \
+            --base main
+
+      - name: Auto-merge la PR
+        if: steps.push-branch.outputs.branch != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr merge "${{ steps.push-branch.outputs.branch }}" --squash --auto --delete-branch
