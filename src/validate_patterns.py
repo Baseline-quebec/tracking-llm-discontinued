@@ -52,6 +52,9 @@ def validate_coverage(registry_path: Path) -> dict[str, list[str]]:
     unmatched: list[str] = []
 
     for model_name in registry:
+        # Skip group/category names (entries with spaces are not scannable model IDs)
+        if " " in model_name:
+            continue
         line = f'model = "{model_name}"'
         matches = find_matches_in_line(line)
         matched_models = [m[1] for m in matches]
