@@ -20,22 +20,6 @@ flowchart LR
     E -->|Non| G[Aucune action]
 ```
 
-### Workflow de mise à jour du registre (ce repo)
-
-```mermaid
-flowchart TD
-    A[Cron lundi 06h UTC<br>semaines paires] --> B[Fetch deprecations.info]
-    B --> C{Flux<br>accessible?}
-    C -->|Non| D[Créer issue<br>d'échec]
-    C -->|Oui| E[Fusionner avec<br>registry.json]
-    E --> F{Changements<br>détectés?}
-    F -->|Non| G[Fin]
-    F -->|Oui| H[Mettre à jour<br>le README]
-    H --> I[Claude Code valide<br>et ajuste les regex]
-    I --> J[Créer PR]
-    J --> K[Auto-merge PR]
-```
-
 ## Modèles dépréciés suivis
 
 <!-- REGISTRY_START -->
@@ -113,7 +97,23 @@ Le pipeline de scan lit uniquement le fichier JSON local — aucun appel réseau
 
 ### Mise à jour du registre
 
-Le registre est mis à jour automatiquement aux deux semaines (lundi à 06:00 UTC) par `.github/workflows/update-registry.yml`. Le workflow :
+Le registre est mis à jour automatiquement aux deux semaines (lundi à 06:00 UTC) par `.github/workflows/update-registry.yml`.
+
+```mermaid
+flowchart TD
+    A[Cron lundi 06h UTC<br>semaines paires] --> B[Fetch deprecations.info]
+    B --> C{Flux<br>accessible?}
+    C -->|Non| D[Créer issue<br>d'échec]
+    C -->|Oui| E[Fusionner avec<br>registry.json]
+    E --> F{Changements<br>détectés?}
+    F -->|Non| G[Fin]
+    F -->|Oui| H[Mettre à jour<br>le README]
+    H --> I[Claude Code valide<br>et ajuste les regex]
+    I --> J[Créer PR]
+    J --> K[Auto-merge PR]
+```
+
+Le workflow :
 
 1. Récupère le flux depuis [deprecations.info](https://deprecations.info/)
 2. Fusionne avec le registre existant
