@@ -12,7 +12,7 @@ Action composite GitHub qui scanne les dépôts pour détecter les références 
 
 ```mermaid
 flowchart LR
-    A[Push d'un tag<br>ou cron bimensuel] --> B[Checkout du repo]
+    A[Création d'un tag<br>ou cron bimensuel] --> B[Checkout du repo]
     B --> C[Action composite<br>tracking-llm-discontinued]
     C --> D[Scan des fichiers<br>patterns.py + scanner.py]
     D --> E{Modèles<br>dépréciés?}
@@ -126,7 +126,7 @@ name: LLM Configuration Scan
 on:
   push:
     tags:
-      - "v*"
+      - "*"
   schedule:
     - cron: "0 8 1,15 * *"  # 1er et 15 de chaque mois
   workflow_dispatch:
