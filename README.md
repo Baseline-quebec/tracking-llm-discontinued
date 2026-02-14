@@ -116,7 +116,7 @@ flowchart LR
 
 ## Utiliser l'action dans votre dépôt
 
-### 1. Ajouter le workflow
+### Ajouter le workflow
 
 Copiez `template-workflow.yml` dans `.github/workflows/llm-scan.yml` de votre dépôt :
 
