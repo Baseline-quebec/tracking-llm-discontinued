@@ -9,7 +9,7 @@ name: LLM Configuration Scan
 on:
   push:
     tags:
-      - "v*"
+      - "*"
   schedule:
     - cron: "0 8 1,15 * *"  # Bi-weekly: 1st and 15th of each month at 8:00 UTC
   workflow_dispatch:
