@@ -12,38 +12,13 @@ Action composite GitHub qui scanne les dépôts pour détecter les références 
 
 ```mermaid
 flowchart LR
-    A[Push sur main<br>ou cron bimensuel] --> B[Checkout du repo]
+    A[Push d'un tag<br>ou cron bimensuel] --> B[Checkout du repo]
     B --> C[Action composite<br>tracking-llm-discontinued]
     C --> D[Scan des fichiers<br>patterns.py + scanner.py]
     D --> E{Modèles<br>dépréciés?}
     E -->|Oui| F[Créer issues GitHub<br>avec date d'arrêt]
     E -->|Non| G[Aucune action]
 ```
-
-### Workflow de mise à jour du registre (ce repo)
-
-```mermaid
-flowchart TD
-    A[Cron lundi 06h UTC<br>semaines paires] --> B[Fetch deprecations.info]
-    B --> C{Flux<br>accessible?}
-    C -->|Non| D[Créer issue<br>d'échec]
-    C -->|Oui| E[Fusionner avec<br>registry.json]
-    E --> F{Changements<br>détectés?}
-    F -->|Non| G[Fin]
-    F -->|Oui| H[Mettre à jour<br>le README]
-    H --> I[Créer PR]
-    I --> J[Claude Code valide<br>et ajuste les regex]
-    J --> K[Auto-merge PR]
-```
-
-## Modèles supportés
-
-| Fournisseur | Modèles détectés |
-|---|---|
-| OpenAI | gpt-4.1, gpt-5, gpt-5.1, gpt-4o, gpt-4-turbo, gpt-3.5-turbo, o1/o3/o4-mini, codex-mini |
-| Anthropic | claude-opus-4, claude-sonnet-4, claude-3.5-sonnet/haiku, claude-3-opus/sonnet/haiku |
-| Google | gemini-2.5-pro/flash, gemini-2.0-flash, gemini-1.5-pro/flash, gemini-pro |
-| Embeddings | text-embedding-3-small/large, text-embedding-ada-002, voyage-* |
 
 ## Modèles dépréciés suivis
 
@@ -83,7 +58,8 @@ name: LLM Configuration Scan
 
 on:
   push:
-    branches: [main]
+    tags:
+      - "v*"
   schedule:
     - cron: "0 8 1,15 * *"  # 1er et 15 de chaque mois
   workflow_dispatch:
@@ -102,30 +78,7 @@ jobs:
           assignees: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
 ```
 
-### 2. Configurer les variables
-
-| Nom | Type | Description |
-|---|---|---|
-| `LLM_SCAN_ASSIGNEES` | Variable (org ou repo) | Noms d'utilisateur GitHub séparés par des virgules |
-
-Aucun secret n'est requis pour les repos consommateurs. L'action utilise le `GITHUB_TOKEN` automatique pour créer les issues.
-
-### 3. Entrées de l'action
-
-| Entrée | Requis | Défaut | Description |
-|---|---|---|---|
-| `repo-name` | Oui | | Nom du dépôt |
-| `assignees` | Non | `""` | Assignés séparés par des virgules |
-| `dry-run` | Non | `false` | Scanner seulement, ne pas créer d'issues |
-
-### 4. Sorties de l'action
-
-| Sortie | Description |
-|---|---|
-| `match-count` | Nombre total de références trouvées |
-| `deprecated-count` | Nombre de références à des modèles dépréciés |
-| `issues-created` | Nombre d'issues GitHub créées |
-| `deprecated-summary` | Résumé JSON des modèles dépréciés |
+Aucun secret ni variable n'est requis pour les repos consommateurs. L'action utilise le `GITHUB_TOKEN` automatique pour créer les issues. La variable `LLM_SCAN_ASSIGNEES` est configurée au niveau de l'organisation.
 
 ---
 
@@ -144,13 +97,29 @@ Le pipeline de scan lit uniquement le fichier JSON local — aucun appel réseau
 
 ### Mise à jour du registre
 
-Le registre est mis à jour automatiquement aux deux semaines (lundi à 06:00 UTC) par `.github/workflows/update-registry.yml`. Le workflow :
+Le registre est mis à jour automatiquement aux deux semaines (lundi à 06:00 UTC) par `.github/workflows/update-registry.yml`.
+
+```mermaid
+flowchart TD
+    A[Cron lundi 06h UTC<br>semaines paires] --> B[Fetch deprecations.info]
+    B --> C{Flux<br>accessible?}
+    C -->|Non| D[Créer issue<br>d'échec]
+    C -->|Oui| E[Fusionner avec<br>registry.json]
+    E --> F{Changements<br>détectés?}
+    F -->|Non| G[Fin]
+    F -->|Oui| H[Mettre à jour<br>le README]
+    H --> I[Claude Code valide<br>et ajuste les regex]
+    I --> J[Créer PR]
+    J --> K[Auto-merge PR]
+```
+
+Le workflow :
 
 1. Récupère le flux depuis [deprecations.info](https://deprecations.info/)
 2. Fusionne avec le registre existant
-3. Si des changements sont détectés : met à jour le README et crée une PR
+3. Si des changements sont détectés : met à jour le README et pousse sur une branche
 4. Claude Code valide et ajuste les patterns regex si nécessaire
-5. La PR est auto-mergée
+5. Crée une PR puis auto-merge
 
 Si le flux est inaccessible, une issue GitHub est créée et assignée aux mainteneurs.
 
