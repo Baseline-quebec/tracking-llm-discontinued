@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import subprocess
 from datetime import date
 from unittest.mock import patch
 
@@ -130,6 +131,17 @@ def create_issues_dry_run(alerts: list[DeprecationAlert]) -> dict[str, int | boo
     with patch("src.issue_reporter.subprocess.run") as mock_run:
         count = create_issues(alerts, dry_run=True)
         return {"count": count, "subprocess_called": mock_run.called}
+
+
+@when(
+    "I create issues with gh CLI failing",
+    target_fixture="create_result",
+)
+def create_issues_gh_failure(alerts: list[DeprecationAlert]) -> dict[str, int | bool]:
+    mock_result = subprocess.CompletedProcess(args=[], returncode=1, stdout="", stderr="error")
+    with patch("src.issue_reporter.subprocess.run", return_value=mock_result):
+        count = create_issues(alerts, dry_run=False)
+        return {"count": count, "subprocess_called": True}
 
 
 @when(

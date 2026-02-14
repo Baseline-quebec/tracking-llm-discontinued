@@ -49,3 +49,8 @@ Feature: GitHub Issue creation for deprecated models
     Given assignees "dominique,invalid user!,bob"
     When I validate the assignees
     Then valid assignees should be "dominique,bob"
+
+  Scenario: gh CLI failure is handled gracefully
+    Given a list of deprecation alerts for models "gpt-4o"
+    When I create issues with gh CLI failing
+    Then 0 issues should be reported as created
