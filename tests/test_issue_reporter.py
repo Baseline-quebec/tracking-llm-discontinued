@@ -145,6 +145,19 @@ def create_issues_gh_failure(alerts: list[DeprecationAlert]) -> dict[str, int | 
 
 
 @when(
+    "I create issues with gh CLI timing out",
+    target_fixture="create_result",
+)
+def create_issues_gh_timeout(alerts: list[DeprecationAlert]) -> dict[str, int | bool]:
+    def raise_timeout(*args: object, **kwargs: object) -> None:
+        raise subprocess.TimeoutExpired(cmd=["gh"], timeout=30)
+
+    with patch("src.issue_reporter.subprocess.run", side_effect=raise_timeout):
+        count = create_issues(alerts, dry_run=False)
+        return {"count": count, "subprocess_called": True}
+
+
+@when(
     "I validate the assignees",
     target_fixture="validated_assignees",
 )

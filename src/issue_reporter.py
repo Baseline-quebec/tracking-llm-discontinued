@@ -93,23 +93,27 @@ def _validate_assignees(assignees: list[str]) -> list[str] | None:
 
 def _ensure_label() -> None:
     """Create the deprecated-model label if it doesn't exist."""
-    result = subprocess.run(
-        [
-            "gh",
-            "label",
-            "create",
-            ISSUE_LABEL,
-            "--description",
-            "Model deprecation alert",
-            "--color",
-            "D93F0B",
-            "--force",
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=GH_TIMEOUT_SECONDS,
-    )
+    try:
+        result = subprocess.run(
+            [
+                "gh",
+                "label",
+                "create",
+                ISSUE_LABEL,
+                "--description",
+                "Model deprecation alert",
+                "--color",
+                "D93F0B",
+                "--force",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=GH_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        logger.warning("Timeout creating label '%s'", ISSUE_LABEL)
+        return
     if result.returncode != 0 and "already exists" not in result.stderr:
         logger.warning("Could not create label '%s': %s", ISSUE_LABEL, result.stderr)
 
@@ -120,25 +124,29 @@ def _issue_exists(model: str) -> bool:
         logger.warning("Suspicious model name, skipping search: %s", model)
         return False
 
-    result = subprocess.run(
-        [
-            "gh",
-            "issue",
-            "list",
-            "--label",
-            ISSUE_LABEL,
-            "--search",
-            f'"{model}" in:title',
-            "--state",
-            "open",
-            "--json",
-            "number",
-        ],
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=GH_TIMEOUT_SECONDS,
-    )
+    try:
+        result = subprocess.run(
+            [
+                "gh",
+                "issue",
+                "list",
+                "--label",
+                ISSUE_LABEL,
+                "--search",
+                f'"{model}" in:title',
+                "--state",
+                "open",
+                "--json",
+                "number",
+            ],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=GH_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        logger.warning("Timeout searching issues for '%s'", model)
+        return False
     if result.returncode != 0:
         logger.warning("Failed to search issues: %s", result.stderr)
         return False
@@ -172,13 +180,17 @@ def _create_issue(
     if assignees:
         cmd.extend(["--assignee", ",".join(assignees)])
 
-    result = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        check=False,
-        timeout=GH_TIMEOUT_SECONDS,
-    )
+    try:
+        result = subprocess.run(
+            cmd,
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=GH_TIMEOUT_SECONDS,
+        )
+    except subprocess.TimeoutExpired:
+        logger.warning("Timeout creating issue '%s'", title)
+        return False
     if result.returncode == 0:
         logger.info("Created issue: %s → %s", title, result.stdout.strip())
         return True

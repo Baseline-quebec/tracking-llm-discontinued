@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import time
 import urllib.request
 from datetime import UTC, date, datetime
 from typing import TYPE_CHECKING, Any
@@ -19,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 FEED_URL = "https://deprecations.info/v1/deprecations.json"
 FEED_TIMEOUT = 10
+MAX_RETRIES = 3
+RETRY_DELAY = 2  # seconds
 
 # Providers we track (feed name -> internal name)
 PROVIDER_MAP: dict[str, str] = {
@@ -31,18 +34,21 @@ PROVIDER_MAP: dict[str, str] = {
 def fetch_deprecations() -> list[DeprecatedModel]:
     """Fetch deprecation data from deprecations.info.
 
+    Retries up to MAX_RETRIES times with RETRY_DELAY seconds between attempts.
     Returns a list of DeprecatedModel objects for tracked providers.
     Returns an empty list on any network or parsing error (silent fallback).
     """
-    try:
-        req = urllib.request.Request(FEED_URL, headers={"User-Agent": "llm-scanner/1.0"})  # noqa: S310
-        with urllib.request.urlopen(req, timeout=FEED_TIMEOUT) as resp:  # noqa: S310
-            data: list[dict[str, Any]] = json.loads(resp.read().decode())
-    except (OSError, json.JSONDecodeError, ValueError) as exc:
-        logger.warning("Could not fetch deprecation feed: %s", exc)
-        return []
-
-    return _parse_feed(data)
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            req = urllib.request.Request(FEED_URL, headers={"User-Agent": "llm-scanner/1.0"})  # noqa: S310
+            with urllib.request.urlopen(req, timeout=FEED_TIMEOUT) as resp:  # noqa: S310
+                data: list[dict[str, Any]] = json.loads(resp.read().decode())
+            return _parse_feed(data)
+        except (OSError, json.JSONDecodeError, ValueError) as exc:
+            logger.warning("Attempt %d/%d failed: %s", attempt, MAX_RETRIES, exc)
+            if attempt < MAX_RETRIES:
+                time.sleep(RETRY_DELAY)
+    return []
 
 
 def _parse_feed(data: list[dict[str, Any]]) -> list[DeprecatedModel]:
@@ -60,7 +66,13 @@ def _parse_feed(data: list[dict[str, Any]]) -> list[DeprecatedModel]:
         if not model_id:
             continue
 
-        shutdown_date = _parse_date(entry.get("shutdown_date"))
+        raw_date = entry.get("shutdown_date")
+        shutdown_date = _parse_date(raw_date)
+        if raw_date and shutdown_date is None:
+            logger.warning(
+                "Invalid shutdown_date '%s' for model '%s', skipping", raw_date, model_id
+            )
+            continue
 
         # Determine status from dates
         status: DeprecationStatus

@@ -34,6 +34,34 @@ class DeprecatedModel:
     shutdown_date: date | None = None
 
 
+_VALID_PROVIDERS = {"openai", "anthropic", "google"}
+_VALID_STATUSES = {"retiring", "deprecated", "shutdown"}
+
+
+def _validate_entry(entry: dict[str, Any]) -> bool:
+    """Validate that a registry entry has the required fields and valid values."""
+    model = entry.get("model")
+    if not isinstance(model, str) or not model:
+        return False
+
+    provider = entry.get("provider")
+    if provider not in _VALID_PROVIDERS:
+        return False
+
+    status = entry.get("status")
+    if status not in _VALID_STATUSES:
+        return False
+
+    shutdown_str = entry.get("shutdown_date")
+    if shutdown_str is not None:
+        try:
+            date.fromisoformat(shutdown_str)
+        except (ValueError, TypeError):
+            return False
+
+    return True
+
+
 def _entry_to_deprecated(entry: dict[str, Any]) -> DeprecatedModel:
     """Convert a JSON entry to a DeprecatedModel object."""
     shutdown_str = entry.get("shutdown_date")
@@ -72,6 +100,9 @@ def load_registry(path: Path | None = None) -> dict[str, DeprecatedModel]:
         return {}
     registry: dict[str, DeprecatedModel] = {}
     for entry in data.get("models", []):
+        if not _validate_entry(entry):
+            logger.warning("Skipping invalid registry entry: %s", entry)
+            continue
         dm = _entry_to_deprecated(entry)
         registry[dm.model.lower()] = dm
     return registry
