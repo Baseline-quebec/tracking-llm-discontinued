@@ -41,4 +41,12 @@ Feature: Repository file scanner
     When I scan the directory for repo "test-repo"
     Then I should find 0 scan matches
 
+  Scenario: Scanner skips files larger than 1MB
+    Given a temporary directory with a large file "big.py" containing "gpt-4o"
+    When I scan the directory for repo "test-repo"
+    Then I should find 0 scan matches
 
+  Scenario: Scanner handles non-existent directory
+    Given a non-existent scan path
+    When I scan the directory for repo "test-repo"
+    Then I should find 0 scan matches

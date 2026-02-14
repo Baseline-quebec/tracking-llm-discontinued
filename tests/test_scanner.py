@@ -4,13 +4,34 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from pytest_bdd import parsers, scenarios, then, when
+from pytest_bdd import given, parsers, scenarios, then, when
 
 from src.models import ScanResult
-from src.scanner import scan_directory
+from src.scanner import MAX_FILE_SIZE, scan_directory
 
 
 scenarios("features/scanner.feature")
+
+
+@given(
+    parsers.cfparse('a temporary directory with a large file "{filename}" containing "{content}"'),
+    target_fixture="scan_dir",
+)
+def given_large_file(tmp_path: Path, filename: str, content: str) -> Path:
+    """Create a file larger than MAX_FILE_SIZE in a temporary directory."""
+    file_path = tmp_path / filename
+    # Write content padded to exceed MAX_FILE_SIZE
+    padding = "x" * (MAX_FILE_SIZE + 1 - len(content))
+    file_path.write_text(f'model = "{content}"\n{padding}', encoding="utf-8")
+    return tmp_path
+
+
+@given(
+    "a non-existent scan path",
+    target_fixture="scan_dir",
+)
+def given_nonexistent_path(tmp_path: Path) -> Path:
+    return tmp_path / "does_not_exist"
 
 
 @when(
