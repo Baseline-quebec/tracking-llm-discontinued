@@ -129,7 +129,7 @@ def build_body(alert: DeprecationAlert) -> str:
 )
 def create_issues_dry_run(alerts: list[DeprecationAlert]) -> dict[str, int | bool]:
     with patch("src.issue_reporter.subprocess.run") as mock_run:
-        count = create_issues(alerts, dry_run=True)
+        count, _failed = create_issues(alerts, dry_run=True)
         return {"count": count, "subprocess_called": mock_run.called}
 
 
@@ -140,7 +140,7 @@ def create_issues_dry_run(alerts: list[DeprecationAlert]) -> dict[str, int | boo
 def create_issues_gh_failure(alerts: list[DeprecationAlert]) -> dict[str, int | bool]:
     mock_result = subprocess.CompletedProcess(args=[], returncode=1, stdout="", stderr="error")
     with patch("src.issue_reporter.subprocess.run", return_value=mock_result):
-        count = create_issues(alerts, dry_run=False)
+        count, _failed = create_issues(alerts, dry_run=False)
         return {"count": count, "subprocess_called": True}
 
 
@@ -153,7 +153,7 @@ def create_issues_gh_timeout(alerts: list[DeprecationAlert]) -> dict[str, int | 
         raise subprocess.TimeoutExpired(cmd=["gh"], timeout=30)
 
     with patch("src.issue_reporter.subprocess.run", side_effect=raise_timeout):
-        count = create_issues(alerts, dry_run=False)
+        count, _failed = create_issues(alerts, dry_run=False)
         return {"count": count, "subprocess_called": True}
 
 

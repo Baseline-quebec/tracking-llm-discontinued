@@ -40,16 +40,16 @@ def create_issues(
     assignees: list[str] | None = None,
     *,
     dry_run: bool = False,
-) -> int:
+) -> tuple[int, int]:
     """Create GitHub issues for deprecated models.
 
     Groups alerts by model so each model gets at most one issue.
     Skips creation if an open issue already exists for the model.
 
-    Returns the number of new issues created.
+    Returns (issues_created, issues_failed).
     """
     if not alerts:
-        return 0
+        return 0, 0
 
     # Validate assignees
     valid_assignees = _validate_assignees(assignees) if assignees else None
@@ -62,6 +62,7 @@ def create_issues(
         by_model.setdefault(alert.lifecycle.model, []).append(alert)
 
     created = 0
+    failed = 0
     for model, model_alerts in by_model.items():
         if not dry_run and _issue_exists(model):
             logger.info("Open issue already exists for %s, skipping", model)
@@ -78,8 +79,10 @@ def create_issues(
 
         if _create_issue(title, body, valid_assignees):
             created += 1
+        else:
+            failed += 1
 
-    return created
+    return created, failed
 
 
 def _validate_assignees(assignees: list[str]) -> list[str] | None:
@@ -119,7 +122,11 @@ def _ensure_label() -> None:
 
 
 def _issue_exists(model: str) -> bool:
-    """Check if an open issue already exists for this model."""
+    """Check if an open issue already exists for this model.
+
+    Uses GitHub search to find candidates, then verifies the model name
+    appears in the title to avoid false positives from fuzzy search.
+    """
     if not _SAFE_MODEL_NAME.match(model):
         logger.warning("Suspicious model name, skipping search: %s", model)
         return False
@@ -137,7 +144,7 @@ def _issue_exists(model: str) -> bool:
                 "--state",
                 "open",
                 "--json",
-                "number",
+                "number,title",
             ],
             capture_output=True,
             text=True,
@@ -152,12 +159,13 @@ def _issue_exists(model: str) -> bool:
         return False
 
     try:
-        issues: list[dict[str, int]] = json.loads(result.stdout)
+        issues: list[dict[str, str | int]] = json.loads(result.stdout)
     except json.JSONDecodeError:
         logger.warning("Failed to parse issue list response: %s", result.stdout[:200])
         return False
 
-    return len(issues) > 0
+    # Verify model name is actually in the title (GitHub search can be fuzzy)
+    return any(model in str(issue.get("title", "")) for issue in issues)
 
 
 def _create_issue(
