@@ -115,4 +115,5 @@ jobs:
             --title "chore: mise a jour du registre de deprecation" \
             --body "Mise a jour automatique du registre et du README depuis [deprecations.info](https://deprecations.info/)." \
             --head "${{ steps.push-branch.outputs.branch }}" \
-            --base main
+            --base main \
+            --reviewer davebulaval
