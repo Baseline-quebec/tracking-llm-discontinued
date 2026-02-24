@@ -75,6 +75,15 @@ def main(argv: list[str] | None = None) -> None:
     )
     issues_created = create_issues(alerts, assignees=assignees, dry_run=args.dry_run)
 
+    # Fail if deprecated models were found but no issues could be created
+    if alerts and not args.dry_run and issues_created == 0:
+        logger.error(
+            "Found %d deprecated models but failed to create any issues. "
+            "Check that issues are enabled on this repository.",
+            len(alerts),
+        )
+        sys.exit(1)
+
     # Step 4: Output summary
     _print_summary(result.matches, alerts)
 
