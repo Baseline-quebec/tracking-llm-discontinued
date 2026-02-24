@@ -88,16 +88,8 @@ flowchart LR
 | imagen-4.0-ultra-generate-preview-06-06 | google | deprecated |  |
 | veo-3.0-fast-generate-preview | google | shutdown | 2025-11-12 |
 | veo-3.0-generate-preview | google | shutdown | 2025-11-12 |
-| Chat model updates | openai | shutdown | 2023-11-06 |
-| Codex models | openai | shutdown | 2023-03-20 |
-| DALL·E model snapshots | openai | retiring | 2026-05-12 |
 | GPT-4-32K | openai | shutdown | 2024-06-06 |
 | GPT-4.5-preview | openai | shutdown | 2025-04-14 |
-| Legacy GPT model snapshots | openai | shutdown | 2025-09-26 |
-| Updated chat models | openai | shutdown | 2023-06-13 |
-| Vision Preview models | openai | shutdown | 2024-06-06 |
-| chatgpt-4o-latest snapshot | openai | retiring | 2026-02-17 |
-| codex-mini-latest model snapshot | openai | shutdown | 2026-02-12 |
 | gpt-3.5-turbo | openai | deprecated | 2025-09-14 |
 | gpt-4 | openai | retiring | 2026-06-06 |
 | gpt-4-turbo | openai | retiring | 2026-06-06 |
@@ -105,7 +97,6 @@ flowchart LR
 | gpt-4o | openai | retiring | 2026-10-01 |
 | gpt-4o-audio-preview-2024-10-01 | openai | shutdown | 2025-06-10 |
 | gpt-4o-mini | openai | retiring | 2026-10-01 |
-| gpt-4o-realtime-preview models | openai | shutdown | 2025-09-15 |
 | gpt-4o-realtime-preview-2024-10-01 | openai | shutdown | 2025-06-10 |
 | o1 | openai | retiring | 2026-07-15 |
 | o1-mini | openai | shutdown | 2025-04-28 |
