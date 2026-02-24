@@ -13,7 +13,7 @@ L'action composite exécutée dans vos repos ne fait aucun appel à une API AI/L
 ### Workflow de scan (repos consommateurs)
 
 ```mermaid
-flowchart LR
+flowchart TD
     A[Création d'un tag<br>ou cron bimensuel] --> B[Checkout du repo]
     B --> C[Action composite<br>tracking-llm-discontinued]
     C --> D[Scan des fichiers<br>patterns.py + scanner.py]

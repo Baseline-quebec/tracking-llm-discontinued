@@ -1,7 +1,6 @@
 # Template: copy to .github/workflows/llm-scan.yml in each target repository
 #
 # Prerequisites:
-#   - Organization secret: LLM_SCAN_SLACK_WEBHOOK (Slack incoming webhook URL)
 #   - Organization variable: LLM_SCAN_ASSIGNEES (comma-separated GitHub usernames, e.g. "dominique")
 
 name: LLM Configuration Scan
@@ -35,37 +34,3 @@ jobs:
         with:
           repo-name: ${{ github.repository }}
           assignees: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
-
-      - name: Notify Slack
-        if: steps.scan.outputs.deprecated-count != '0'
-        uses: slackapi/slack-github-action@b0fa283ad8fea605de13dc3f449259339835fc52 # v2.1.0
-        with:
-          webhook: ${{ secrets.LLM_SCAN_SLACK_WEBHOOK }}
-          webhook-type: incoming-webhook
-          payload: |
-            {
-              "text": "⚠️ Deprecated LLM models found in ${{ github.repository }}",
-              "blocks": [
-                {
-                  "type": "header",
-                  "text": {
-                    "type": "plain_text",
-                    "text": "⚠️ Deprecated LLM Models Detected"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*Repository:* ${{ github.repository }}\n*Total references:* ${{ steps.scan.outputs.match-count }}\n*Deprecated models:* ${{ steps.scan.outputs.deprecated-count }}\n*Issues created:* ${{ steps.scan.outputs.issues-created }}"
-                  }
-                },
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "<${{ github.server_url }}/${{ github.repository }}/issues?q=label%3Adeprecated-model+is%3Aopen|View open deprecation issues>"
-                  }
-                }
-              ]
-            }
