@@ -4,9 +4,11 @@ Action composite GitHub qui scanne les dépôts pour détecter les références 
 
 ## Ce que ça fait
 
-1. **Scanne** le code source et les fichiers de configuration pour trouver les références aux modèles LLM (OpenAI, Anthropic, Google)
+1. **Scanne** le code source et les fichiers de configuration pour trouver les références aux modèles LLM (OpenAI, Anthropic, Google) via **pattern matching regex**
 2. **Vérifie** contre un registre de dépréciation JSON (`data/registry.json`) les modèles dépréciés/en retrait/arrêtés
 3. **Crée des issues GitHub** pour chaque modèle déprécié trouvé, avec les fichiers affectés et les dates d'arrêt
+
+L'action composite exécutée dans vos repos ne fait aucun appel à une API AI/LLM — c'est purement de l'analyse statique (regex + registre JSON). Claude est utilisé uniquement pour la maintenance de ce repo (développement des regex, mise à jour du registre de dépréciation).
 
 ### Workflow de scan (repos consommateurs)
 
@@ -207,6 +209,8 @@ python -m pytest tests/ -v --rootdir=.
 ```
 
 ### Architecture
+
+Aucune dépendance externe — utilise uniquement la bibliothèque standard Python et le CLI `gh`.
 
 ```
 data/
