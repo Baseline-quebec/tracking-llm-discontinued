@@ -1,5 +1,5 @@
 name: "LLM Configuration Scanner"
-description: "Scans a repository for deprecated LLM models and creates GitHub issues"
+description: "Scans a repository for deprecated LLM model references using regex pattern matching and creates GitHub issues. No AI/LLM API calls — purely static analysis."
 
 inputs:
   repo-name:
