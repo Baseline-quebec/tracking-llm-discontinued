@@ -7,19 +7,19 @@ Feature: GitHub Issue creation for deprecated models
     Given a model lifecycle for "gpt-4o" with status "retiring"
     When I build the issue title
     Then the title should contain "gpt-4o"
-    And the title should start with "⚠️"
+    And the title should start with "Modèle déprécié"
 
   Scenario: Build title for deprecated model
     Given a model lifecycle for "gpt-3.5-turbo" with status "deprecated"
     When I build the issue title
     Then the title should contain "gpt-3.5-turbo"
-    And the title should start with "🚫"
+    And the title should start with "Modèle déprécié"
 
   Scenario: Build title for shutdown model
     Given a model lifecycle for "o1-preview" with status "shutdown"
     When I build the issue title
     Then the title should contain "o1-preview"
-    And the title should start with "🔴"
+    And the title should start with "Modèle déprécié"
 
   Scenario: Build body contains required sections
     Given a deprecation alert for "gpt-4o" in file "config.py" at line 5

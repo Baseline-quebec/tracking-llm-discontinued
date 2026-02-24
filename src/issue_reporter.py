@@ -208,9 +208,7 @@ def _create_issue(
 
 def _build_title(lifecycle: DeprecatedModel) -> str:
     """Build the issue title."""
-    status_emoji = {"retiring": "⚠️", "deprecated": "🚫", "shutdown": "🔴"}
-    emoji = status_emoji.get(lifecycle.status, "⚠️")
-    return f"{emoji} Modèle déprécié : {lifecycle.model}"
+    return f"Modèle déprécié : {lifecycle.model}"
 
 
 def _build_body(
