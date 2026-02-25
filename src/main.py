@@ -47,6 +47,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         action="store_true",
         help="Scan only, do not create issues",
     )
+    parser.add_argument(
+        "--webhook-url",
+        default="",
+        help="Optional webhook URL to POST issue details for CRM integration",
+    )
     return parser.parse_args(argv)
 
 
@@ -74,7 +79,11 @@ def main(argv: list[str] | None = None) -> None:
         [a.strip() for a in args.assignees.split(",") if a.strip()] if args.assignees else None
     )
     issues_created, issues_failed = create_issues(
-        alerts, assignees=assignees, dry_run=args.dry_run
+        alerts,
+        assignees=assignees,
+        dry_run=args.dry_run,
+        webhook_url=args.webhook_url or None,
+        repo_name=args.repo_name,
     )
 
     # Fail if any issues could not be created (e.g. issues disabled on repo)

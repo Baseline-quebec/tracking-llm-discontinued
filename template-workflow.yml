@@ -2,6 +2,7 @@
 #
 # Prerequisites:
 #   - Organization variable: LLM_SCAN_ASSIGNEES (comma-separated GitHub usernames, e.g. "dominique")
+#   - Organization secret (optional): LLM_SCAN_WEBHOOK_URL (webhook URL for CRM notifications)
 
 name: LLM Configuration Scan
 
@@ -34,3 +35,4 @@ jobs:
         with:
           repo-name: ${{ github.repository }}
           assignees: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
+          webhook-url: ${{ secrets.LLM_SCAN_WEBHOOK_URL }}
