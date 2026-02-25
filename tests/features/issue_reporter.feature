@@ -59,3 +59,14 @@ Feature: GitHub Issue creation for deprecated models
     Given a list of deprecation alerts for models "gpt-4o"
     When I create issues with gh CLI timing out
     Then 0 issues should be reported as created
+
+  Scenario: Webhook is called after issue creation
+    Given a list of deprecation alerts for models "gpt-4o"
+    When I create issues with webhook enabled
+    Then 1 issues should be reported as created
+    And webhook should have been called 1 time
+
+  Scenario: Webhook failure does not block issue creation
+    Given a list of deprecation alerts for models "gpt-4o"
+    When I create issues with webhook failing
+    Then 1 issues should be reported as created

@@ -13,6 +13,10 @@ inputs:
     description: "If true, scan only without creating issues"
     required: false
     default: "false"
+  webhook-url:
+    description: "Optional webhook URL to POST issue details for CRM integration"
+    required: false
+    default: ""
 
 outputs:
   match-count:
@@ -44,6 +48,7 @@ runs:
         SCAN_PATH: ${{ github.workspace }}
         SCAN_ASSIGNEES: ${{ inputs.assignees }}
         SCAN_DRY_RUN: ${{ inputs.dry-run }}
+        SCAN_WEBHOOK_URL: ${{ inputs.webhook-url }}
         PYTHONPATH: ${{ github.action_path }}
         GH_TOKEN: ${{ github.token }}
       run: |
@@ -55,6 +60,10 @@ runs:
 
         if [ "$SCAN_DRY_RUN" = "true" ]; then
           ARGS+=(--dry-run)
+        fi
+
+        if [ -n "$SCAN_WEBHOOK_URL" ]; then
+          ARGS+=(--webhook-url "$SCAN_WEBHOOK_URL")
         fi
 
         python -m src.main "${ARGS[@]}"

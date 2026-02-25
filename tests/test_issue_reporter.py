@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import subprocess
 from datetime import date
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from pytest_bdd import given, parsers, scenarios, then, when
 
@@ -214,4 +214,69 @@ def check_valid_assignees(validated_assignees: list[str] | None, expected: str) 
     expected_list = [a.strip() for a in expected.split(",")]
     assert validated_assignees == expected_list, (
         f"Expected {expected_list}, got {validated_assignees}"
+    )
+
+
+# --- Webhook integration steps ---
+
+
+def _gh_success(*args: object, **kwargs: object) -> subprocess.CompletedProcess[str]:
+    """Simulate gh CLI returning an issue URL."""
+    cmd = args[0] if args else kwargs.get("args", [])
+    if isinstance(cmd, list) and "create" in cmd:
+        return subprocess.CompletedProcess(
+            args=cmd,
+            returncode=0,
+            stdout="https://github.com/org/repo/issues/42\n",
+            stderr="",
+        )
+    # label create / issue list: succeed with empty result
+    return subprocess.CompletedProcess(args=cmd, returncode=0, stdout="[]", stderr="")
+
+
+@when(
+    "I create issues with webhook enabled",
+    target_fixture="create_result",
+)
+def create_issues_with_webhook(alerts: list[DeprecationAlert]) -> dict[str, object]:
+    webhook_mock = MagicMock(return_value=True)
+    with (
+        patch("src.issue_reporter.subprocess.run", side_effect=_gh_success),
+        patch("src.issue_reporter.send_webhook", webhook_mock),
+    ):
+        count, _failed = create_issues(
+            alerts,
+            dry_run=False,
+            webhook_url="https://example.com/webhook",
+            repo_name="org/repo",
+        )
+    return {"count": count, "subprocess_called": True, "webhook_mock": webhook_mock}
+
+
+@when(
+    "I create issues with webhook failing",
+    target_fixture="create_result",
+)
+def create_issues_with_webhook_failing(alerts: list[DeprecationAlert]) -> dict[str, object]:
+    webhook_mock = MagicMock(return_value=False)
+    with (
+        patch("src.issue_reporter.subprocess.run", side_effect=_gh_success),
+        patch("src.issue_reporter.send_webhook", webhook_mock),
+    ):
+        count, _failed = create_issues(
+            alerts,
+            dry_run=False,
+            webhook_url="https://example.com/webhook",
+            repo_name="org/repo",
+        )
+    return {"count": count, "subprocess_called": True, "webhook_mock": webhook_mock}
+
+
+@then(
+    parsers.cfparse("webhook should have been called {count:d} time"),
+)
+def check_webhook_called(create_result: dict[str, object], count: int) -> None:
+    webhook_mock: MagicMock = create_result["webhook_mock"]  # type: ignore[assignment]
+    assert webhook_mock.call_count == count, (
+        f"Expected webhook called {count} time(s), got {webhook_mock.call_count}"
     )

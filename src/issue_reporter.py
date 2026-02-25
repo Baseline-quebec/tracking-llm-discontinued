@@ -9,6 +9,8 @@ import subprocess
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from src.webhook import send_webhook
+
 
 if TYPE_CHECKING:
     from src.deprecations import DeprecatedModel
@@ -40,6 +42,8 @@ def create_issues(
     assignees: list[str] | None = None,
     *,
     dry_run: bool = False,
+    webhook_url: str | None = None,
+    repo_name: str = "",
 ) -> tuple[int, int]:
     """Create GitHub issues for deprecated models.
 
@@ -74,11 +78,35 @@ def create_issues(
 
         if dry_run:
             logger.info("[DRY RUN] Would create issue: %s", title)
+            if webhook_url:
+                send_webhook(
+                    url=webhook_url,
+                    repo_name=repo_name,
+                    lifecycle=lifecycle,
+                    alerts=model_alerts,
+                    issue_url="",
+                    title=title,
+                    body=body,
+                    assignees=valid_assignees,
+                    dry_run=True,
+                )
             created += 1
             continue
 
-        if _create_issue(title, body, valid_assignees):
+        issue_url = _create_issue(title, body, valid_assignees)
+        if issue_url:
             created += 1
+            if webhook_url:
+                send_webhook(
+                    url=webhook_url,
+                    repo_name=repo_name,
+                    lifecycle=lifecycle,
+                    alerts=model_alerts,
+                    issue_url=issue_url,
+                    title=title,
+                    body=body,
+                    assignees=valid_assignees,
+                )
         else:
             failed += 1
 
@@ -172,8 +200,8 @@ def _create_issue(
     title: str,
     body: str,
     assignees: list[str] | None = None,
-) -> bool:
-    """Create a single GitHub issue. Returns True on success."""
+) -> str | None:
+    """Create a single GitHub issue. Returns the issue URL on success, None on failure."""
     cmd = [
         "gh",
         "issue",
@@ -198,12 +226,13 @@ def _create_issue(
         )
     except subprocess.TimeoutExpired:
         logger.warning("Timeout creating issue '%s'", title)
-        return False
+        return None
     if result.returncode == 0:
-        logger.info("Created issue: %s → %s", title, result.stdout.strip())
-        return True
+        issue_url = result.stdout.strip()
+        logger.info("Created issue: %s → %s", title, issue_url)
+        return issue_url
     logger.error("Failed to create issue '%s': %s", title, result.stderr)
-    return False
+    return None
 
 
 def _build_title(lifecycle: DeprecatedModel) -> str:
