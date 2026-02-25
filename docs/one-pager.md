@@ -18,6 +18,7 @@ Les projets de Baseline utilisent des modeles LLM (OpenAI, Anthropic, Google) qu
 | F8 | Mettre a jour le registre automatiquement toutes les 2 semaines via PR | Implemente |
 | F9 | Creer une issue GitHub automatiquement si le flux est inaccessible | Implemente |
 | F10 | Valider la couverture regex des nouveaux modeles via Claude lors des mises a jour du registre | Implemente |
+| F11 | Envoyer les details des issues par webhook HTTP POST vers un CRM (optionnel, fire-and-forget) | Implemente |
 
 ## Exigences techniques
 
@@ -48,6 +49,7 @@ src/
   update_registry.py     # Script : fetch -> merge -> save (+ issue en cas d'echec)
   validate_patterns.py   # Validation de couverture regex pour les modeles du registre
   issue_reporter.py      # Creation d'issues GitHub via gh CLI
+  webhook.py             # Notifications webhook HTTP POST pour integration CRM
   main.py                # Point d'entree CLI et orchestration du scan
 .github/workflows/
   ci.yml                 # CI : lint, tests, type checking
@@ -59,5 +61,6 @@ src/
 1. **Scan** : `scanner.py` parcourt un depot cible, `patterns.py` detecte les modeles
 2. **Verification** : chaque modele trouve est compare au registre JSON local
 3. **Alerte** : `issue_reporter.py` cree des issues GitHub pour les modeles deprecies
-4. **Mise a jour** : `update_registry.py` recupere le flux deprecations.info et met a jour `registry.json`
-5. **Validation** : Claude verifie que les patterns regex couvrent les nouveaux modeles du registre
+4. **Webhook** : `webhook.py` envoie les details de chaque issue par HTTP POST vers un CRM (optionnel)
+5. **Mise a jour** : `update_registry.py` recupere le flux deprecations.info et met a jour `registry.json`
+6. **Validation** : Claude verifie que les patterns regex couvrent les nouveaux modeles du registre

@@ -19,6 +19,9 @@ flowchart TD
     C --> D[Scan des fichiers<br>patterns.py + scanner.py]
     D --> E{Modèles<br>dépréciés?}
     E -->|Oui| F[Créer issues GitHub<br>avec date d'arrêt]
+    F --> H{Webhook<br>configuré?}
+    H -->|Oui| I[POST vers CRM]
+    H -->|Non| J[Fin]
     E -->|Non| G[Aucune action]
 ```
 
@@ -136,9 +139,10 @@ jobs:
         with:
           repo-name: ${{ github.repository }}
           assignees: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
+          webhook-url: ${{ secrets.LLM_SCAN_WEBHOOK_URL }}
 ```
 
-Aucun secret ni variable n'est requis pour les repos consommateurs. L'action utilise le `GITHUB_TOKEN` automatique pour créer les issues. La variable `LLM_SCAN_ASSIGNEES` est configurée au niveau de l'organisation.
+Aucun secret ni variable n'est requis pour les repos consommateurs. L'action utilise le `GITHUB_TOKEN` automatique pour créer les issues. La variable `LLM_SCAN_ASSIGNEES` et le secret `LLM_SCAN_WEBHOOK_URL` sont configurés au niveau de l'organisation.
 
 ### Prérequis pour les forks
 
@@ -198,11 +202,18 @@ PYTHONPATH=. python -m src.update_registry
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Repository secret | Clé API Anthropic pour la validation Claude dans le workflow de mise à jour |
 | `LLM_SCAN_ASSIGNEES` | Organization variable | Noms d'utilisateur GitHub assignés aux issues (partagée avec les repos consommateurs) |
+| `LLM_SCAN_WEBHOOK_URL` | Organization secret (optionnel) | URL webhook pour envoyer les détails des issues vers un CRM |
 
 ### Utilisation locale
 
 ```bash
 PYTHONPATH=. python -m src.main --repo-name "my-repo" --scan-path /path/to/repo --dry-run
+```
+
+Avec webhook :
+
+```bash
+PYTHONPATH=. python -m src.main --repo-name "my-repo" --scan-path /path/to/repo --webhook-url "https://example.com/webhook"
 ```
 
 ### Tests
@@ -228,6 +239,7 @@ src/
   update_registry.py     # Script : fetch -> merge -> save (+ issue en cas d'echec)
   validate_patterns.py   # Validation de couverture regex pour les modeles du registre
   issue_reporter.py      # Creation d'issues GitHub via gh CLI
+  webhook.py             # Notifications webhook HTTP POST pour integration CRM
   main.py                # Point d'entree CLI et orchestration du scan
 .github/workflows/
   ci.yml                 # CI : lint, tests, type checking
