@@ -36,10 +36,11 @@ flowchart TD
 | claude-1.3 | anthropic | shutdown | 2024-11-06 |
 | claude-2.0 | anthropic | shutdown | 2025-07-21 |
 | claude-2.1 | anthropic | shutdown | 2025-07-21 |
-| claude-3-5-haiku-20241022 | anthropic | retiring | 2026-02-19 |
+| claude-3-5-haiku-20241022 | anthropic | shutdown | 2026-02-19 |
 | claude-3-5-sonnet-20240620 | anthropic | shutdown | 2025-10-28 |
 | claude-3-5-sonnet-20241022 | anthropic | shutdown | 2025-10-28 |
-| claude-3-7-sonnet-20250219 | anthropic | retiring | 2026-02-19 |
+| claude-3-7-sonnet-20250219 | anthropic | shutdown | 2026-02-19 |
+| claude-3-haiku-20240307 | anthropic | retiring | 2026-04-20 |
 | claude-3-opus | anthropic | shutdown | 2026-01-05 |
 | claude-3-opus-20240229 | anthropic | shutdown | 2026-01-05 |
 | claude-3-sonnet | anthropic | shutdown | 2025-07-21 |
@@ -81,6 +82,7 @@ flowchart TD
 | gemini-2.5-pro-preview-03-25 | google | shutdown | 2025-12-02 |
 | gemini-2.5-pro-preview-05-06 | google | shutdown | 2025-12-02 |
 | gemini-2.5-pro-preview-06-05 | google | shutdown | 2025-12-02 |
+| gemini-3-pro-preview | google | deprecated |  |
 | gemini-embedding-001 | google | deprecated |  |
 | gemini-embedding-exp | google | deprecated |  |
 | gemini-embedding-exp-03-07 | google | deprecated |  |
