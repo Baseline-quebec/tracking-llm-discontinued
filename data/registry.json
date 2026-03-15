@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-03-01T06:17:28.754719+00:00",
+  "updated_at": "2026-03-15T06:23:59.460476+00:00",
   "models": [
     {
       "model": "claude-1.0",
@@ -260,6 +260,12 @@
       "shutdown_date": null
     },
     {
+      "model": "gemini-2.5-flash-lite-preview-09-2025",
+      "provider": "google",
+      "status": "deprecated",
+      "shutdown_date": null
+    },
+    {
       "model": "gemini-2.5-flash-native-audio-preview-09-2025",
       "provider": "google",
       "status": "deprecated",
@@ -321,6 +327,12 @@
     },
     {
       "model": "gemini-embedding-001",
+      "provider": "google",
+      "status": "deprecated",
+      "shutdown_date": null
+    },
+    {
+      "model": "gemini-embedding-2-preview",
       "provider": "google",
       "status": "deprecated",
       "shutdown_date": null
