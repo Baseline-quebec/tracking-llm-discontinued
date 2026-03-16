@@ -73,6 +73,7 @@ flowchart TD
 | gemini-2.5-flash-exp-native-audio-thinking-dialog | google | deprecated |  |
 | gemini-2.5-flash-image-preview | google | deprecated |  |
 | gemini-2.5-flash-lite-preview-06-17 | google | deprecated |  |
+| gemini-2.5-flash-lite-preview-09-2025 | google | deprecated |  |
 | gemini-2.5-flash-native-audio-preview-09-2025 | google | deprecated |  |
 | gemini-2.5-flash-preview-04-17 | google | deprecated |  |
 | gemini-2.5-flash-preview-05-20 | google | deprecated |  |
@@ -84,6 +85,7 @@ flowchart TD
 | gemini-2.5-pro-preview-06-05 | google | shutdown | 2025-12-02 |
 | gemini-3-pro-preview | google | deprecated |  |
 | gemini-embedding-001 | google | deprecated |  |
+| gemini-embedding-2-preview | google | deprecated |  |
 | gemini-embedding-exp | google | deprecated |  |
 | gemini-embedding-exp-03-07 | google | deprecated |  |
 | gemini-live-2.5-flash-preview | google | deprecated |  |
