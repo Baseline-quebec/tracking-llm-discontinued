@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-03-15T06:23:59.460476+00:00",
+  "updated_at": "2026-04-01T06:37:49.780476+00:00",
   "models": [
     {
       "model": "claude-1.0",
@@ -392,64 +392,118 @@
       "shutdown_date": "2025-11-12"
     },
     {
-      "model": "Chat model updates",
+      "model": "ada",
       "provider": "openai",
       "status": "shutdown",
-      "shutdown_date": "2023-11-06"
+      "shutdown_date": "2024-01-04"
     },
     {
-      "model": "Codex models",
+      "model": "babbage",
       "provider": "openai",
       "status": "shutdown",
-      "shutdown_date": "2023-03-20"
+      "shutdown_date": "2024-01-04"
     },
     {
-      "model": "DALL\u00b7E model snapshots",
+      "model": "babbage-002",
       "provider": "openai",
       "status": "retiring",
-      "shutdown_date": "2026-05-12"
+      "shutdown_date": "2026-09-28"
     },
     {
-      "model": "GPT-4-32K",
-      "provider": "openai",
-      "status": "shutdown",
-      "shutdown_date": "2024-06-06"
-    },
-    {
-      "model": "GPT-4.5-preview",
-      "provider": "openai",
-      "status": "shutdown",
-      "shutdown_date": "2025-04-14"
-    },
-    {
-      "model": "Legacy GPT model snapshots",
-      "provider": "openai",
-      "status": "shutdown",
-      "shutdown_date": "2025-09-26"
-    },
-    {
-      "model": "Updated chat models",
-      "provider": "openai",
-      "status": "shutdown",
-      "shutdown_date": "2023-06-13"
-    },
-    {
-      "model": "Vision Preview models",
-      "provider": "openai",
-      "status": "shutdown",
-      "shutdown_date": "2024-06-06"
-    },
-    {
-      "model": "chatgpt-4o-latest snapshot",
+      "model": "chatgpt-4o-latest",
       "provider": "openai",
       "status": "shutdown",
       "shutdown_date": "2026-02-17"
     },
     {
-      "model": "codex-mini-latest model snapshot",
+      "model": "code-cushman-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2023-03-23"
+    },
+    {
+      "model": "code-cushman-002",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2023-03-23"
+    },
+    {
+      "model": "code-davinci-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2023-03-23"
+    },
+    {
+      "model": "code-davinci-002",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "code-davinci-edit-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "code-search-ada-code-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "code-search-ada-text-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "code-search-babbage-code-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "code-search-babbage-text-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "codex-mini-latest",
       "provider": "openai",
       "status": "shutdown",
       "shutdown_date": "2026-02-12"
+    },
+    {
+      "model": "curie",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "dall-e-2",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-05-12"
+    },
+    {
+      "model": "dall-e-3",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-05-12"
+    },
+    {
+      "model": "davinci",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "davinci-002",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-09-28"
     },
     {
       "model": "gpt-3.5-turbo",
@@ -458,10 +512,82 @@
       "shutdown_date": "2025-09-14"
     },
     {
+      "model": "gpt-3.5-turbo-0301",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-09-13"
+    },
+    {
+      "model": "gpt-3.5-turbo-0613",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-09-13"
+    },
+    {
+      "model": "gpt-3.5-turbo-1106",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-09-28"
+    },
+    {
+      "model": "gpt-3.5-turbo-16k-0613",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-09-13"
+    },
+    {
+      "model": "gpt-3.5-turbo-instruct",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-09-28"
+    },
+    {
       "model": "gpt-4",
       "provider": "openai",
       "status": "retiring",
       "shutdown_date": "2026-06-06"
+    },
+    {
+      "model": "gpt-4-0125-preview",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2026-03-26"
+    },
+    {
+      "model": "gpt-4-0314",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2026-03-26"
+    },
+    {
+      "model": "gpt-4-1106-preview",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2026-03-26"
+    },
+    {
+      "model": "gpt-4-1106-vision-preview",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-12-06"
+    },
+    {
+      "model": "gpt-4-32k",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-06-06"
+    },
+    {
+      "model": "gpt-4-32k-0314",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-06-06"
+    },
+    {
+      "model": "gpt-4-32k-0613",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-06-06"
     },
     {
       "model": "gpt-4-turbo",
@@ -472,8 +598,26 @@
     {
       "model": "gpt-4-turbo-preview",
       "provider": "openai",
-      "status": "retiring",
-      "shutdown_date": "2026-06-06"
+      "status": "shutdown",
+      "shutdown_date": "2026-03-26"
+    },
+    {
+      "model": "gpt-4-turbo-preview-completions",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2026-03-26"
+    },
+    {
+      "model": "gpt-4-vision-preview",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-12-06"
+    },
+    {
+      "model": "gpt-4.5-preview",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-07-14"
     },
     {
       "model": "gpt-4o",
@@ -482,10 +626,16 @@
       "shutdown_date": "2026-10-01"
     },
     {
+      "model": "gpt-4o-audio-preview",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-05-07"
+    },
+    {
       "model": "gpt-4o-audio-preview-2024-10-01",
       "provider": "openai",
       "status": "shutdown",
-      "shutdown_date": "2025-06-10"
+      "shutdown_date": "2025-10-10"
     },
     {
       "model": "gpt-4o-mini",
@@ -494,16 +644,40 @@
       "shutdown_date": "2026-10-01"
     },
     {
-      "model": "gpt-4o-realtime-preview models",
+      "model": "gpt-4o-mini-audio-preview",
       "provider": "openai",
-      "status": "shutdown",
-      "shutdown_date": "2025-09-15"
+      "status": "retiring",
+      "shutdown_date": "2026-05-07"
+    },
+    {
+      "model": "gpt-4o-mini-realtime-preview",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-05-07"
+    },
+    {
+      "model": "gpt-4o-realtime-preview",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-05-07"
     },
     {
       "model": "gpt-4o-realtime-preview-2024-10-01",
       "provider": "openai",
       "status": "shutdown",
-      "shutdown_date": "2025-06-10"
+      "shutdown_date": "2025-10-10"
+    },
+    {
+      "model": "gpt-4o-realtime-preview-2024-12-17",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-05-07"
+    },
+    {
+      "model": "gpt-4o-realtime-preview-2025-06-03",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-05-07"
     },
     {
       "model": "o1",
@@ -515,13 +689,85 @@
       "model": "o1-mini",
       "provider": "openai",
       "status": "shutdown",
-      "shutdown_date": "2025-04-28"
+      "shutdown_date": "2025-10-27"
     },
     {
       "model": "o1-preview",
       "provider": "openai",
       "status": "shutdown",
-      "shutdown_date": "2025-04-28"
+      "shutdown_date": "2025-07-28"
+    },
+    {
+      "model": "sora-2",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-09-24"
+    },
+    {
+      "model": "sora-2-2025-10-06",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-09-24"
+    },
+    {
+      "model": "sora-2-2025-12-08",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-09-24"
+    },
+    {
+      "model": "sora-2-pro",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-09-24"
+    },
+    {
+      "model": "sora-2-pro-2025-10-06",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-09-24"
+    },
+    {
+      "model": "text-ada-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-babbage-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-curie-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-davinci-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-davinci-002",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-davinci-003",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-davinci-edit-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
     },
     {
       "model": "text-embedding-ada-002",
@@ -534,6 +780,96 @@
       "provider": "openai",
       "status": "shutdown",
       "shutdown_date": "2025-04-28"
+    },
+    {
+      "model": "text-moderation-007",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-10-27"
+    },
+    {
+      "model": "text-moderation-latest",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-10-27"
+    },
+    {
+      "model": "text-moderation-stable",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-10-27"
+    },
+    {
+      "model": "text-search-ada-doc-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-search-ada-query-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-search-babbage-doc-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-search-babbage-query-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-search-curie-doc-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-search-curie-query-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-search-davinci-doc-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-search-davinci-query-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-similarity-ada-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-similarity-babbage-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-similarity-curie-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
+    },
+    {
+      "model": "text-similarity-davinci-001",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2024-01-04"
     }
   ]
 }
