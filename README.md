@@ -50,6 +50,8 @@ flowchart TD
 | claude-instant-1.0 | anthropic | shutdown | 2024-11-06 |
 | claude-instant-1.1 | anthropic | shutdown | 2024-11-06 |
 | claude-instant-1.2 | anthropic | shutdown | 2024-11-06 |
+| claude-opus-4-20250514 | anthropic | retiring | 2026-06-15 |
+| claude-sonnet-4-20250514 | anthropic | retiring | 2026-06-15 |
 | gemini-1.0-pro | google | deprecated |  |
 | gemini-1.0-pro-vision | google | deprecated |  |
 | gemini-1.5-flash | google | deprecated |  |
@@ -90,6 +92,8 @@ flowchart TD
 | gemini-embedding-exp-03-07 | google | deprecated |  |
 | gemini-live-2.5-flash-preview | google | deprecated |  |
 | gemini-pro | google | shutdown | 2025-02-15 |
+| gemini-robotics-er-1.5-preview | google | deprecated |  |
+| gemini-robotics-er-1.6-preview | google | deprecated |  |
 | imagen-3.0-generate-002 | google | deprecated |  |
 | imagen-4.0-generate-preview-06-06 | google | deprecated |  |
 | imagen-4.0-ultra-generate-preview-06-06 | google | deprecated |  |
