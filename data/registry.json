@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-04-01T06:37:49.780476+00:00",
+  "updated_at": "2026-04-15T06:40:37.816492+00:00",
   "models": [
     {
       "model": "claude-1.0",
@@ -120,6 +120,18 @@
       "provider": "anthropic",
       "status": "shutdown",
       "shutdown_date": "2024-11-06"
+    },
+    {
+      "model": "claude-opus-4-20250514",
+      "provider": "anthropic",
+      "status": "retiring",
+      "shutdown_date": "2026-06-15"
+    },
+    {
+      "model": "claude-sonnet-4-20250514",
+      "provider": "anthropic",
+      "status": "retiring",
+      "shutdown_date": "2026-06-15"
     },
     {
       "model": "gemini-1.0-pro",
@@ -360,6 +372,18 @@
       "provider": "google",
       "status": "shutdown",
       "shutdown_date": "2025-02-15"
+    },
+    {
+      "model": "gemini-robotics-er-1.5-preview",
+      "provider": "google",
+      "status": "deprecated",
+      "shutdown_date": null
+    },
+    {
+      "model": "gemini-robotics-er-1.6-preview",
+      "provider": "google",
+      "status": "deprecated",
+      "shutdown_date": null
     },
     {
       "model": "imagen-3.0-generate-002",
