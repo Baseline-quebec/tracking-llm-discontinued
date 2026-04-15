@@ -236,4 +236,3 @@ Feature: LLM model pattern detection
     Given a line containing "Hello world, this is a normal line of code"
     When I scan the line for matches
     Then I should find 0 matches
-
