@@ -59,21 +59,49 @@ def _build_patterns() -> list[ModelPattern]:
     _add("openai", "llm", r"\bgpt-4\.1(?:-(?:mini|nano))?(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4o-audio-preview(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4o-realtime-preview(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4o-mini-(?:audio|realtime)-preview\b")
     _add("openai", "llm", r"\bgpt-4o(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4-turbo-preview-completions\b")
     _add("openai", "llm", r"\bgpt-4-turbo(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4-vision-preview\b")
+    _add("openai", "llm", r"\bgpt-4-\d{4}-vision-preview\b")
+    _add("openai", "llm", r"\bgpt-4-\d{4}-preview\b")
+    # gpt-4-MMDD: negative lookahead prevents matching YYYY-MM-DD date suffixes
+    _add("openai", "llm", r"\bgpt-4-\d{4}(?!-\d{2}-\d{2})\b")
+    _add("openai", "llm", r"\bgpt-4-32k-\d{4}\b")
     # gpt-4 base: negative lookahead prevents matching gpt-4.1, gpt-4.5, gpt-4o, gpt-4-turbo
     _add("openai", "llm", r"\bgpt-4(?!\.\d|o|-turbo)(?:-32k)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-3\.5-turbo-instruct\b")
+    _add("openai", "llm", r"\bgpt-3\.5-turbo-16k(?:-\d{4})?\b")
     _add("openai", "llm", r"\bgpt-3\.5-turbo(?:-\d{4})?\b")
     _add("openai", "llm", r"\bchatgpt-4o-latest\b")
     _add("openai", "llm", r"\bo1(?:-preview|-mini|-pro)?\b", context_required=True)
     _add("openai", "llm", r"\bo3(?:-mini|-pro|-deep-research)?\b", context_required=True)
     _add("openai", "llm", r"\bo4-mini\b")
     _add("openai", "llm", r"\bcodex-mini(?:-latest)?\b")
-    _add("openai", "llm", r"\btext-moderation\b")
+    _add("openai", "llm", r"\bdall-e-[23]\b")
+    _add("openai", "llm", r"\bsora-\d+(?:-pro)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    # Legacy text generation models
+    _add("openai", "llm", r"\btext-(?:ada|babbage|curie|davinci)-\d{3}\b")
+    _add("openai", "llm", r"\btext-davinci-edit-\d{3}\b")
+    _add("openai", "llm", r"\btext-moderation(?:-(?:\d{3}|latest|stable))?\b")
+    # Legacy code models
+    _add("openai", "llm", r"\bcode-(?:cushman|davinci)-\d{3}\b")
+    _add("openai", "llm", r"\bcode-davinci-edit-\d{3}\b")
+    _add("openai", "llm", r"\bcode-search-(?:ada|babbage)-(?:code|text)-\d{3}\b")
+    # Legacy search and similarity
+    _add("openai", "llm", r"\btext-search-(?:ada|babbage|curie|davinci)-(?:doc|query)-\d{3}\b")
+    _add("openai", "llm", r"\btext-similarity-(?:ada|babbage|curie|davinci)-\d{3}\b")
+    # Generic legacy base models (require context; lookbehind prevents matching within compound
+    # names like text-embedding-ada-002 where ada appears after a dash separator)
+    _add("openai", "llm", r"(?<![a-z0-9-])ada\b", context_required=True)
+    _add("openai", "llm", r"(?<![a-z0-9-])babbage(?:-\d{3})?\b", context_required=True)
+    _add("openai", "llm", r"(?<![a-z0-9-])curie\b", context_required=True)
+    _add("openai", "llm", r"(?<![a-z0-9-])davinci(?:-\d{3})?\b", context_required=True)
 
     # --- Anthropic ---
-    _add("anthropic", "llm", r"\bclaude-opus-4\b")
-    _add("anthropic", "llm", r"\bclaude-sonnet-4\b")
+    _add("anthropic", "llm", r"\bclaude-opus-4(?:-\d{8})?\b")
+    _add("anthropic", "llm", r"\bclaude-sonnet-4(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3[\.-]7-sonnet(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3[\.-]5-sonnet(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3[\.-]5-haiku(?:-\d{8})?\b")
@@ -85,6 +113,8 @@ def _build_patterns() -> list[ModelPattern]:
     _add("anthropic", "llm", r"\bclaude-1\.\d\b")
 
     # --- Google LLM ---
+    _add("google", "llm", r"\bgemini-3(?:[\.-]\d+)?-(?:pro|flash)(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bgemini-robotics-er-\d+[\.-]\d+(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-2[\.-]5-flash(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-2[\.-]5-pro(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-2[\.-]0-flash(?:-[a-z0-9]+)*\b")

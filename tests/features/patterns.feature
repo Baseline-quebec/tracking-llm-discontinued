@@ -16,8 +16,10 @@ Feature: LLM model pattern detection
       | model: gpt-4-turbo-preview       | gpt-4-turbo-preview | openai   | llm        |
       | model = "gpt-4"                  | gpt-4              | openai    | llm        |
       | model: gpt-3.5-turbo             | gpt-3.5-turbo      | openai    | llm        |
-      | model_name = "claude-opus-4"     | claude-opus-4      | anthropic | llm        |
-      | model_name = "claude-sonnet-4"   | claude-sonnet-4    | anthropic | llm        |
+      | model_name = "claude-opus-4"              | claude-opus-4              | anthropic | llm        |
+      | model_name = "claude-opus-4-20250514"     | claude-opus-4-20250514     | anthropic | llm        |
+      | model_name = "claude-sonnet-4"            | claude-sonnet-4            | anthropic | llm        |
+      | model_name = "claude-sonnet-4-20250514"   | claude-sonnet-4-20250514   | anthropic | llm        |
       | model: claude-3.5-sonnet         | claude-3.5-sonnet  | anthropic | llm        |
       | model: claude-3.5-haiku          | claude-3.5-haiku   | anthropic | llm        |
       | model: claude-3-opus             | claude-3-opus      | anthropic | llm        |
@@ -76,23 +78,73 @@ Feature: LLM model pattern detection
     And the match type should be "llm"
 
     Examples:
-      | line                                         | model                             |
-      | model = "gpt-4.1"                           | gpt-4.1                           |
-      | model = "gpt-4.1-mini"                      | gpt-4.1-mini                      |
-      | model = "gpt-4.1-nano"                      | gpt-4.1-nano                      |
-      | model: gpt-5                                 | gpt-5                             |
-      | model = "gpt-5.1"                           | gpt-5.1                           |
-      | model = "gpt-5.2"                           | gpt-5.2                           |
-      | model: gpt-5-mini                            | gpt-5-mini                        |
-      | model = "o4-mini"                            | o4-mini                           |
-      | model = "codex-mini"                         | codex-mini                        |
-      | model = "codex-mini-latest"                  | codex-mini-latest                 |
-      | model = "gpt-4.5-preview"                   | gpt-4.5-preview                   |
-      | model: gpt-4-32k                             | gpt-4-32k                         |
-      | model = "gpt-4o-audio-preview-2024-10-01"   | gpt-4o-audio-preview-2024-10-01   |
-      | model: gpt-4o-realtime-preview-2024-10-01    | gpt-4o-realtime-preview-2024-10-01 |
-      | model = "chatgpt-4o-latest"                  | chatgpt-4o-latest                 |
-      | model: text-moderation                        | text-moderation                   |
+      | line                                              | model                              |
+      | model = "gpt-4.1"                                | gpt-4.1                            |
+      | model = "gpt-4.1-mini"                           | gpt-4.1-mini                       |
+      | model = "gpt-4.1-nano"                           | gpt-4.1-nano                       |
+      | model: gpt-5                                      | gpt-5                              |
+      | model = "gpt-5.1"                                | gpt-5.1                            |
+      | model = "gpt-5.2"                                | gpt-5.2                            |
+      | model: gpt-5-mini                                 | gpt-5-mini                         |
+      | model = "o4-mini"                                 | o4-mini                            |
+      | model = "codex-mini"                              | codex-mini                         |
+      | model = "codex-mini-latest"                       | codex-mini-latest                  |
+      | model = "gpt-4.5-preview"                        | gpt-4.5-preview                    |
+      | model: gpt-4-32k                                  | gpt-4-32k                          |
+      | model = "gpt-4o-audio-preview-2024-10-01"        | gpt-4o-audio-preview-2024-10-01    |
+      | model: gpt-4o-realtime-preview-2024-10-01         | gpt-4o-realtime-preview-2024-10-01 |
+      | model = "chatgpt-4o-latest"                       | chatgpt-4o-latest                  |
+      | model: text-moderation                            | text-moderation                    |
+      | model = "gpt-3.5-turbo-instruct"                 | gpt-3.5-turbo-instruct             |
+      | model = "gpt-3.5-turbo-16k-0613"                 | gpt-3.5-turbo-16k-0613             |
+      | model = "gpt-3.5-turbo-16k"                      | gpt-3.5-turbo-16k                  |
+      | model = "gpt-4-0314"                             | gpt-4-0314                         |
+      | model = "gpt-4-1106-preview"                     | gpt-4-1106-preview                 |
+      | model = "gpt-4-0125-preview"                     | gpt-4-0125-preview                 |
+      | model = "gpt-4-1106-vision-preview"              | gpt-4-1106-vision-preview          |
+      | model = "gpt-4-32k-0314"                         | gpt-4-32k-0314                     |
+      | model = "gpt-4-32k-0613"                         | gpt-4-32k-0613                     |
+      | model = "gpt-4-vision-preview"                   | gpt-4-vision-preview               |
+      | model = "gpt-4-turbo-preview-completions"        | gpt-4-turbo-preview-completions    |
+      | model = "gpt-4o-mini-audio-preview"              | gpt-4o-mini-audio-preview          |
+      | model = "gpt-4o-mini-realtime-preview"           | gpt-4o-mini-realtime-preview       |
+      | model = "dall-e-2"                               | dall-e-2                           |
+      | model = "dall-e-3"                               | dall-e-3                           |
+      | model = "sora-2"                                  | sora-2                             |
+      | model = "sora-2-pro"                             | sora-2-pro                         |
+      | model = "sora-2-2025-10-06"                      | sora-2-2025-10-06                  |
+      | model = "sora-2-pro-2025-10-06"                  | sora-2-pro-2025-10-06              |
+      | model = "text-davinci-003"                       | text-davinci-003                   |
+      | model = "text-ada-001"                           | text-ada-001                       |
+      | model = "text-curie-001"                         | text-curie-001                     |
+      | model = "text-davinci-edit-001"                  | text-davinci-edit-001              |
+      | model = "text-moderation-007"                    | text-moderation-007                |
+      | model = "text-moderation-latest"                 | text-moderation-latest             |
+      | model = "text-moderation-stable"                 | text-moderation-stable             |
+      | model = "code-davinci-002"                       | code-davinci-002                   |
+      | model = "code-cushman-001"                       | code-cushman-001                   |
+      | model = "code-davinci-edit-001"                  | code-davinci-edit-001              |
+      | model = "code-search-ada-code-001"               | code-search-ada-code-001           |
+      | model = "code-search-babbage-text-001"           | code-search-babbage-text-001       |
+      | model = "text-search-ada-doc-001"                | text-search-ada-doc-001            |
+      | model = "text-search-davinci-query-001"          | text-search-davinci-query-001      |
+      | model = "text-similarity-babbage-001"            | text-similarity-babbage-001        |
+      | model = "text-similarity-davinci-001"            | text-similarity-davinci-001        |
+
+  Scenario Outline: Detect legacy OpenAI base models (require context)
+    Given a line containing "<line>"
+    When I scan the line for matches
+    Then I should find model "<model>" from provider "openai"
+    And the match type should be "llm"
+
+    Examples:
+      | line                    | model        |
+      | model = "ada"           | ada          |
+      | model = "babbage"       | babbage      |
+      | model = "babbage-002"   | babbage-002  |
+      | model = "curie"         | curie        |
+      | model = "davinci"       | davinci      |
+      | model = "davinci-002"   | davinci-002  |
 
   Scenario Outline: Detect models with date suffixes
     Given a line containing "<line>"
@@ -142,6 +194,9 @@ Feature: LLM model pattern detection
       | model = "gemini-live"                                    | gemini-live                                     |
       | model = "imagen-3.0-generate-002"                       | imagen-3.0-generate-002                         |
       | model: veo-3.0-fast-generate-preview                    | veo-3.0-fast-generate-preview                   |
+      | model = "gemini-3-pro-preview"                          | gemini-3-pro-preview                            |
+      | model: gemini-robotics-er-1.5-preview                   | gemini-robotics-er-1.5-preview                  |
+      | model = "gemini-robotics-er-1.6-preview"                | gemini-robotics-er-1.6-preview                  |
 
   Scenario Outline: No false positives on overlapping patterns
     Given a line containing "<line>"
