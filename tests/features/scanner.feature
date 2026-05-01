@@ -50,3 +50,15 @@ Feature: Repository file scanner
     Given a non-existent scan path
     When I scan the directory for repo "test-repo"
     Then I should find 0 scan matches
+
+  Scenario: Scanner picks up files matched by name (Dockerfile, Makefile, .env)
+    Given a temporary directory with the following files:
+      | path        | content              |
+      | Dockerfile  | ENV MODEL=gpt-4o     |
+      | Makefile    | model: claude-3-opus |
+      | .env        | MODEL=gpt-4-turbo    |
+    When I scan the directory for repo "test-repo"
+    Then I should find 3 scan matches
+    And the results should contain model "gpt-4o"
+    And the results should contain model "claude-3-opus"
+    And the results should contain model "gpt-4-turbo"

@@ -13,6 +13,7 @@ from src.issue_reporter import (
     DeprecationAlert,
     _build_body,
     _build_title,
+    _issue_exists,
     _validate_assignees,
     create_issues,
 )
@@ -280,3 +281,72 @@ def check_webhook_called(create_result: dict[str, object], count: int) -> None:
     assert webhook_mock.call_count == count, (
         f"Expected webhook called {count} time(s), got {webhook_mock.call_count}"
     )
+
+
+# --- Unit tests for _issue_exists (regression for substring false-positive bug) ---
+
+
+def _gh_list_issues(titles: list[str]) -> subprocess.CompletedProcess[str]:
+    """Build a gh CLI 'issue list --json' response with the given titles."""
+    payload = [{"number": i + 1, "title": t} for i, t in enumerate(titles)]
+    import json as _json
+
+    return subprocess.CompletedProcess(
+        args=[], returncode=0, stdout=_json.dumps(payload), stderr=""
+    )
+
+
+def test_issue_exists_returns_true_on_exact_title_match() -> None:
+    """When an open issue exactly matches the model title, _issue_exists is True."""
+    fake = _gh_list_issues(["Modèle déprécié : gpt-4"])
+    with patch("src.issue_reporter.subprocess.run", return_value=fake):
+        assert _issue_exists("gpt-4") is True
+
+
+def test_issue_exists_returns_false_when_only_superstring_match() -> None:
+    """A title for 'gpt-4o' must NOT count as an existing issue for 'gpt-4'.
+
+    Regression: previously the check used substring matching, which falsely
+    blocked creating issues for 'gpt-4' when an open 'gpt-4o' issue existed.
+    """
+    fake = _gh_list_issues(["Modèle déprécié : gpt-4o"])
+    with patch("src.issue_reporter.subprocess.run", return_value=fake):
+        assert _issue_exists("gpt-4") is False
+
+
+def test_issue_exists_returns_false_when_title_is_substring() -> None:
+    """A 'gpt-4o-mini' lookup must NOT match a 'gpt-4o' open issue."""
+    fake = _gh_list_issues(["Modèle déprécié : gpt-4o"])
+    with patch("src.issue_reporter.subprocess.run", return_value=fake):
+        assert _issue_exists("gpt-4o-mini") is False
+
+
+def test_issue_exists_returns_false_for_unsafe_model_name() -> None:
+    """Model names with unsafe chars are rejected without calling gh."""
+    with patch("src.issue_reporter.subprocess.run") as mock_run:
+        assert _issue_exists("gpt-4; rm -rf /") is False
+        mock_run.assert_not_called()
+
+
+def test_issue_exists_returns_false_on_gh_failure() -> None:
+    """When gh CLI returns non-zero, treat as 'no existing issue' (proceed)."""
+    fail = subprocess.CompletedProcess(args=[], returncode=1, stdout="", stderr="auth failed")
+    with patch("src.issue_reporter.subprocess.run", return_value=fail):
+        assert _issue_exists("gpt-4") is False
+
+
+def test_issue_exists_returns_false_on_invalid_json() -> None:
+    """Malformed gh CLI output is handled without raising."""
+    bad = subprocess.CompletedProcess(args=[], returncode=0, stdout="not-json", stderr="")
+    with patch("src.issue_reporter.subprocess.run", return_value=bad):
+        assert _issue_exists("gpt-4") is False
+
+
+def test_issue_exists_returns_false_on_timeout() -> None:
+    """Gh CLI timeout is handled and returns False (proceed with creation)."""
+
+    def raise_timeout(*args: object, **kwargs: object) -> None:
+        raise subprocess.TimeoutExpired(cmd=["gh"], timeout=30)
+
+    with patch("src.issue_reporter.subprocess.run", side_effect=raise_timeout):
+        assert _issue_exists("gpt-4") is False

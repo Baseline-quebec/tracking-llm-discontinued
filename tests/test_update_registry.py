@@ -108,6 +108,12 @@ def given_readme_without_markers(readme_path: Path) -> Path:
     return readme_path
 
 
+@given("a README path that does not exist")
+def given_readme_missing(readme_path: Path) -> None:
+    """No-op: readme_path fixture returns a path with no file at it."""
+    assert not readme_path.exists()
+
+
 @given(
     parsers.cfparse('a feed with duplicate model "{model}"'),
     target_fixture="mock_feed",

@@ -12,7 +12,7 @@ Les projets de Baseline utilisent des modeles LLM (OpenAI, Anthropic, Google) qu
 | F2 | Detecter les modeles de 3 fournisseurs (OpenAI, Anthropic, Google) et les embeddings (OpenAI, Voyage) | Implemente |
 | F3 | Comparer les modeles detectes au registre de depreciation JSON (`data/registry.json`) | Implemente |
 | F4 | Gerer les suffixes de date (ex: `gpt-4o-2024-08-06` -> `gpt-4o`) | Implemente |
-| F5 | Creer automatiquement des issues GitHub avec fichiers affectes et remplacement suggere | Implemente |
+| F5 | Creer automatiquement des issues GitHub avec fichiers affectes et remplacement suggere | Partiel (issues + fichiers OK ; remplacement suggere : a faire, mapping deprecated -> remplacement non implemente dans `issue_reporter._build_body`) |
 | F6 | Eviter les doublons d'issues (verification avant creation) | Implemente |
 | F7 | Alimenter le registre depuis le flux live deprecations.info | Implemente |
 | F8 | Mettre a jour le registre automatiquement toutes les 2 semaines via PR | Implemente |
