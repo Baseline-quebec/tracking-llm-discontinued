@@ -265,17 +265,17 @@ Cette section concerne les mainteneurs du repo `tracking-llm-discontinued`.
 | Source | Description |
 |---|---|
 | `data/registry.json` | Registre JSON des modèles dépréciés, commité dans le dépôt |
-| [deprecations.info](https://deprecations.info/) | Flux en direct fusionné dans le registre aux deux semaines via GitHub Actions |
+| [deprecations.info](https://deprecations.info/) | Flux en direct fusionné dans le registre deux fois par mois (le 1er et le 15) via GitHub Actions |
 
 Le pipeline de scan lit uniquement le fichier JSON local — aucun appel réseau lors du scan.
 
 ### Mise à jour du registre
 
-Le registre est mis à jour automatiquement aux deux semaines (lundi à 06:00 UTC) par `.github/workflows/update-registry.yml`.
+Le registre est mis à jour automatiquement deux fois par mois (le 1er et le 15 à 06:00 UTC) par `.github/workflows/update-registry.yml`.
 
 ```mermaid
 flowchart TD
-    A[Cron lundi 06h UTC<br>semaines paires] --> B[Fetch deprecations.info]
+    A[Cron le 1er et 15<br>du mois 06h UTC] --> B[Fetch deprecations.info]
     B --> C{Flux<br>accessible?}
     C -->|Non| D[Créer issue<br>d'échec]
     C -->|Oui| E[Fusionner avec<br>registry.json]

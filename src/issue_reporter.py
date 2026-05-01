@@ -192,8 +192,10 @@ def _issue_exists(model: str) -> bool:
         logger.warning("Failed to parse issue list response: %s", result.stdout[:200])
         return False
 
-    # Verify model name is actually in the title (GitHub search can be fuzzy)
-    return any(model in str(issue.get("title", "")) for issue in issues)
+    # Verify the title matches exactly: a substring check would falsely match
+    # e.g. "gpt-4" against an open issue titled "Modèle déprécié : gpt-4o".
+    expected_title = _build_title_for_model(model)
+    return any(str(issue.get("title", "")) == expected_title for issue in issues)
 
 
 def _create_issue(
@@ -235,9 +237,14 @@ def _create_issue(
     return None
 
 
+def _build_title_for_model(model: str) -> str:
+    """Build the issue title from a model name."""
+    return f"Modèle déprécié : {model}"
+
+
 def _build_title(lifecycle: DeprecatedModel) -> str:
     """Build the issue title."""
-    return f"Modèle déprécié : {lifecycle.model}"
+    return _build_title_for_model(lifecycle.model)
 
 
 def _build_body(

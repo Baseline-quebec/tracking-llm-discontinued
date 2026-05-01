@@ -45,3 +45,9 @@ Feature: Mise a jour du registre depuis le flux deprecations.info
     And a feed with duplicate model "gpt-4o"
     When I run the registry update
     Then the registry should contain "gpt-4o" with status "shutdown"
+
+  Scenario: update_readme retourne False si le fichier est introuvable
+    Given a README path that does not exist
+    And a registry with 2 models
+    When I call update_readme
+    Then update_readme should return False
