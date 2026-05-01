@@ -53,13 +53,20 @@ def _build_patterns() -> list[ModelPattern]:
     _add(
         "openai",
         "llm",
-        r"\bgpt-5(?:\.[12])?(?:-(?:mini|nano|pro|codex|chat))?(?:-\d{4}-\d{2}-\d{2})?\b",
+        r"\bgpt-5(?:\.[12])?(?:-(?:mini|nano|pro|codex|chat))?"
+        r"(?:-(?:latest|mini|max)|-\d{4}-\d{2}-\d{2})?\b",
     )
     _add("openai", "llm", r"\bgpt-4\.5-preview\b")
     _add("openai", "llm", r"\bgpt-4\.1(?:-(?:mini|nano))?(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4o-audio-preview(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4o-realtime-preview(?:-\d{4}-\d{2}-\d{2})?\b")
-    _add("openai", "llm", r"\bgpt-4o-mini-(?:audio|realtime)-preview\b")
+    _add("openai", "llm", r"\bgpt-4o-search-preview(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add(
+        "openai",
+        "llm",
+        r"\bgpt-4o-mini-(?:audio|realtime|search)-preview(?:-\d{4}-\d{2}-\d{2})?\b",
+    )
+    _add("openai", "llm", r"\bgpt-4o-mini-tts(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4o(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4-turbo-preview-completions\b")
     _add("openai", "llm", r"\bgpt-4-turbo(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?\b")
@@ -74,13 +81,38 @@ def _build_patterns() -> list[ModelPattern]:
     _add("openai", "llm", r"\bgpt-3\.5-turbo-instruct\b")
     _add("openai", "llm", r"\bgpt-3\.5-turbo-16k(?:-\d{4})?\b")
     _add("openai", "llm", r"\bgpt-3\.5-turbo(?:-\d{4})?\b")
+    _add("openai", "llm", r"\bgpt-(?:audio|realtime)-mini(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-image-\d+\b")
     _add("openai", "llm", r"\bchatgpt-4o-latest\b")
-    _add("openai", "llm", r"\bo1(?:-preview|-mini|-pro)?\b", context_required=True)
-    _add("openai", "llm", r"\bo3(?:-mini|-pro|-deep-research)?\b", context_required=True)
-    _add("openai", "llm", r"\bo4-mini\b")
+    _add(
+        "openai",
+        "llm",
+        r"\bo1(?:-preview|-mini|-pro)?(?:-\d{4}-\d{2}-\d{2})?\b",
+        context_required=True,
+    )
+    _add(
+        "openai",
+        "llm",
+        r"\bo3(?:-mini|-pro|-deep-research)?(?:-\d{4}-\d{2}-\d{2})?\b",
+        context_required=True,
+    )
+    _add("openai", "llm", r"\bo4-mini(?:-deep-research)?(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bcodex-mini(?:-latest)?\b")
+    _add(
+        "openai",
+        "llm",
+        r"\bcomputer-use-preview(?:-\d{4}-\d{2}-\d{2})?\b",
+        context_required=True,
+    )
     _add("openai", "llm", r"\bdall-e-[23]\b")
     _add("openai", "llm", r"\bsora-\d+(?:-pro)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    # Fine-tuned model variants (ft- prefix)
+    _add(
+        "openai",
+        "llm",
+        r"\bft-(?:gpt-4\.1-(?:mini|nano)-\d{4}-\d{2}-\d{2}|gpt-3\.5-turbo|gpt-4|"
+        r"babbage-\d{3}|davinci-\d{3}|o4-mini-\d{4}-\d{2}-\d{2})\b",
+    )
     # Legacy text generation models
     _add("openai", "llm", r"\btext-(?:ada|babbage|curie|davinci)-\d{3}\b")
     _add("openai", "llm", r"\btext-davinci-edit-\d{3}\b")

@@ -67,9 +67,15 @@ Feature: LLM model pattern detection
       | model: o1-pro                         | 1     |
       | model = "o3-pro"                      | 1     |
       | api_model: o3-deep-research           | 1     |
+      | model = "o1-2024-12-17"               | 1     |
+      | model = "o1-pro-2025-03-19"           | 1     |
+      | model = "o3-mini-2025-01-31"          | 1     |
+      | model = "o3-deep-research-2025-06-26" | 1     |
+      | openai model: computer-use-preview-2025-03-11 | 1 |
       | The o1 visa is required               | 0     |
       | Section o3 of the document            | 0     |
       | o1 without any context                | 0     |
+      | computer-use-preview-2025-03-11 in some unrelated text | 0 |
 
   Scenario Outline: Detect new OpenAI models (GPT-4.1, GPT-4.5, GPT-5, o4-mini, codex-mini, etc.)
     Given a line containing "<line>"
@@ -87,6 +93,8 @@ Feature: LLM model pattern detection
       | model = "gpt-5.2"                                | gpt-5.2                            |
       | model: gpt-5-mini                                 | gpt-5-mini                         |
       | model = "o4-mini"                                 | o4-mini                            |
+      | model = "o4-mini-2025-04-16"                      | o4-mini-2025-04-16                 |
+      | model = "o4-mini-deep-research-2025-06-26"        | o4-mini-deep-research-2025-06-26   |
       | model = "codex-mini"                              | codex-mini                         |
       | model = "codex-mini-latest"                       | codex-mini-latest                  |
       | model = "gpt-4.5-preview"                        | gpt-4.5-preview                    |
@@ -108,6 +116,24 @@ Feature: LLM model pattern detection
       | model = "gpt-4-turbo-preview-completions"        | gpt-4-turbo-preview-completions    |
       | model = "gpt-4o-mini-audio-preview"              | gpt-4o-mini-audio-preview          |
       | model = "gpt-4o-mini-realtime-preview"           | gpt-4o-mini-realtime-preview       |
+      | model = "gpt-4o-mini-audio-preview-2024-12-17"   | gpt-4o-mini-audio-preview-2024-12-17    |
+      | model = "gpt-4o-mini-realtime-preview-2024-12-17" | gpt-4o-mini-realtime-preview-2024-12-17 |
+      | model = "gpt-4o-mini-search-preview-2025-03-11"  | gpt-4o-mini-search-preview-2025-03-11   |
+      | model = "gpt-4o-search-preview-2025-03-11"       | gpt-4o-search-preview-2025-03-11   |
+      | model = "gpt-4o-mini-tts-2025-03-20"             | gpt-4o-mini-tts-2025-03-20         |
+      | model = "gpt-image-1"                            | gpt-image-1                        |
+      | model = "gpt-audio-mini-2025-10-06"              | gpt-audio-mini-2025-10-06          |
+      | model = "gpt-realtime-mini-2025-10-06"           | gpt-realtime-mini-2025-10-06       |
+      | model = "gpt-5-chat-latest"                       | gpt-5-chat-latest                  |
+      | model = "gpt-5.1-chat-latest"                     | gpt-5.1-chat-latest                |
+      | model = "gpt-5.1-codex-mini"                      | gpt-5.1-codex-mini                 |
+      | model = "gpt-5.1-codex-max"                       | gpt-5.1-codex-max                  |
+      | model = "ft-gpt-3.5-turbo"                        | ft-gpt-3.5-turbo                   |
+      | model = "ft-gpt-4"                                | ft-gpt-4                           |
+      | model = "ft-gpt-4.1-nano-2025-04-14"              | ft-gpt-4.1-nano-2025-04-14         |
+      | model = "ft-o4-mini-2025-04-16"                   | ft-o4-mini-2025-04-16              |
+      | model = "ft-babbage-002"                          | ft-babbage-002                     |
+      | model = "ft-davinci-002"                          | ft-davinci-002                     |
       | model = "dall-e-2"                               | dall-e-2                           |
       | model = "dall-e-3"                               | dall-e-3                           |
       | model = "sora-2"                                  | sora-2                             |
