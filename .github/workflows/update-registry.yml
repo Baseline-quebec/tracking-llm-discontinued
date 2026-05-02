@@ -68,7 +68,7 @@ jobs:
         id: claude-validation
         if: steps.push-branch.outputs.branch != ''
         continue-on-error: true
-        uses: anthropics/claude-code-action@5fb899572b81d2bb648d4d187173a2f423a9677c # v1
+        uses: anthropics/claude-code-action@fefa07e9c665b7320f08c3b525980457f22f58aa # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
