@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-05-01T06:58:32.269532+00:00",
+  "updated_at": "2026-06-01T07:50:54.382678+00:00",
   "models": [
     {
       "model": "claude-1.0",
@@ -134,40 +134,58 @@
       "shutdown_date": "2026-06-15"
     },
     {
+      "model": "embedding-001",
+      "provider": "google",
+      "status": "shutdown",
+      "shutdown_date": "2025-10-30"
+    },
+    {
+      "model": "embedding-gecko-001",
+      "provider": "google",
+      "status": "shutdown",
+      "shutdown_date": "2025-10-30"
+    },
+    {
       "model": "gemini-1.0-pro",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-02-18"
     },
     {
       "model": "gemini-1.0-pro-vision",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2024-07-12"
     },
     {
       "model": "gemini-1.5-flash",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-09-29"
+    },
+    {
+      "model": "gemini-1.5-flash-8b",
+      "provider": "google",
+      "status": "shutdown",
+      "shutdown_date": "2025-09-29"
     },
     {
       "model": "gemini-1.5-pro",
       "provider": "google",
       "status": "shutdown",
-      "shutdown_date": "2025-09-23"
+      "shutdown_date": "2025-09-29"
     },
     {
       "model": "gemini-2.0-flash",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "retiring",
+      "shutdown_date": "2026-06-01"
     },
     {
       "model": "gemini-2.0-flash-001",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "retiring",
+      "shutdown_date": "2026-06-01"
     },
     {
       "model": "gemini-2.0-flash-exp",
@@ -178,20 +196,20 @@
     {
       "model": "gemini-2.0-flash-exp-image-generation",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-11-14"
     },
     {
       "model": "gemini-2.0-flash-lite",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "retiring",
+      "shutdown_date": "2026-06-01"
     },
     {
       "model": "gemini-2.0-flash-lite-001",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "retiring",
+      "shutdown_date": "2026-06-01"
     },
     {
       "model": "gemini-2.0-flash-lite-preview",
@@ -202,20 +220,20 @@
     {
       "model": "gemini-2.0-flash-lite-preview-02-05",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-12-09"
     },
     {
       "model": "gemini-2.0-flash-live-001",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-12-09"
     },
     {
       "model": "gemini-2.0-flash-preview-image-generation",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-11-14"
     },
     {
       "model": "gemini-2.0-flash-thinking-exp",
@@ -226,14 +244,14 @@
     {
       "model": "gemini-2.0-flash-thinking-exp-01-21",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-12-02"
     },
     {
       "model": "gemini-2.0-flash-thinking-exp-1219",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-12-02"
     },
     {
       "model": "gemini-2.0-pro-exp",
@@ -250,32 +268,44 @@
     {
       "model": "gemini-2.5-flash",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "retiring",
+      "shutdown_date": "2026-10-16"
     },
     {
       "model": "gemini-2.5-flash-exp-native-audio-thinking-dialog",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-10-20"
+    },
+    {
+      "model": "gemini-2.5-flash-image",
+      "provider": "google",
+      "status": "retiring",
+      "shutdown_date": "2026-10-02"
     },
     {
       "model": "gemini-2.5-flash-image-preview",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2026-01-15"
+    },
+    {
+      "model": "gemini-2.5-flash-lite",
+      "provider": "google",
+      "status": "retiring",
+      "shutdown_date": "2026-10-16"
     },
     {
       "model": "gemini-2.5-flash-lite-preview-06-17",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-11-18"
     },
     {
       "model": "gemini-2.5-flash-lite-preview-09-2025",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2026-03-31"
     },
     {
       "model": "gemini-2.5-flash-native-audio-preview-09-2025",
@@ -286,32 +316,38 @@
     {
       "model": "gemini-2.5-flash-preview-04-17",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-07-15"
     },
     {
       "model": "gemini-2.5-flash-preview-05-20",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-11-18"
     },
     {
       "model": "gemini-2.5-flash-preview-09-25",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2026-02-17"
     },
     {
       "model": "gemini-2.5-flash-preview-native-audio-dialog",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-10-20"
     },
     {
       "model": "gemini-2.5-pro",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "retiring",
+      "shutdown_date": "2026-10-16"
+    },
+    {
+      "model": "gemini-2.5-pro-exp-03-25",
+      "provider": "google",
+      "status": "shutdown",
+      "shutdown_date": "2025-06-26"
     },
     {
       "model": "gemini-2.5-pro-preview-03-25",
@@ -332,16 +368,40 @@
       "shutdown_date": "2025-12-02"
     },
     {
+      "model": "gemini-3-pro-image-preview",
+      "provider": "google",
+      "status": "retiring",
+      "shutdown_date": "2026-06-25"
+    },
+    {
       "model": "gemini-3-pro-preview",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2026-03-09"
+    },
+    {
+      "model": "gemini-3.1-flash-image-preview",
+      "provider": "google",
+      "status": "retiring",
+      "shutdown_date": "2026-06-25"
+    },
+    {
+      "model": "gemini-3.1-flash-lite",
+      "provider": "google",
+      "status": "retiring",
+      "shutdown_date": "2027-05-07"
+    },
+    {
+      "model": "gemini-3.1-flash-lite-preview",
+      "provider": "google",
+      "status": "shutdown",
+      "shutdown_date": "2026-05-25"
     },
     {
       "model": "gemini-embedding-001",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "retiring",
+      "shutdown_date": "2026-07-14"
     },
     {
       "model": "gemini-embedding-2-preview",
@@ -352,20 +412,20 @@
     {
       "model": "gemini-embedding-exp",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-10-30"
     },
     {
       "model": "gemini-embedding-exp-03-07",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-10-30"
     },
     {
       "model": "gemini-live-2.5-flash-preview",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-12-09"
     },
     {
       "model": "gemini-pro",
@@ -376,8 +436,8 @@
     {
       "model": "gemini-robotics-er-1.5-preview",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2026-04-30"
     },
     {
       "model": "gemini-robotics-er-1.6-preview",
@@ -388,20 +448,44 @@
     {
       "model": "imagen-3.0-generate-002",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2025-11-10"
+    },
+    {
+      "model": "imagen-4.0-fast-generate-001",
+      "provider": "google",
+      "status": "retiring",
+      "shutdown_date": "2026-06-24"
+    },
+    {
+      "model": "imagen-4.0-generate-001",
+      "provider": "google",
+      "status": "retiring",
+      "shutdown_date": "2026-06-24"
     },
     {
       "model": "imagen-4.0-generate-preview-06-06",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2026-02-17"
+    },
+    {
+      "model": "imagen-4.0-ultra-generate-001",
+      "provider": "google",
+      "status": "retiring",
+      "shutdown_date": "2026-06-24"
     },
     {
       "model": "imagen-4.0-ultra-generate-preview-06-06",
       "provider": "google",
-      "status": "deprecated",
-      "shutdown_date": null
+      "status": "shutdown",
+      "shutdown_date": "2026-02-17"
+    },
+    {
+      "model": "text-embedding-004",
+      "provider": "google",
+      "status": "shutdown",
+      "shutdown_date": "2026-01-14"
     },
     {
       "model": "veo-3.0-fast-generate-preview",
@@ -500,6 +584,12 @@
       "shutdown_date": "2026-02-12"
     },
     {
+      "model": "computer-use-preview",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-07-23"
+    },
+    {
       "model": "computer-use-preview-2025-03-11",
       "provider": "openai",
       "status": "retiring",
@@ -514,13 +604,13 @@
     {
       "model": "dall-e-2",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-05-12"
     },
     {
       "model": "dall-e-3",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-05-12"
     },
     {
@@ -574,8 +664,8 @@
     {
       "model": "gpt-3.5-turbo",
       "provider": "openai",
-      "status": "deprecated",
-      "shutdown_date": "2025-09-14"
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
     },
     {
       "model": "gpt-3.5-turbo-0125",
@@ -608,6 +698,12 @@
       "shutdown_date": "2024-09-13"
     },
     {
+      "model": "gpt-3.5-turbo-completions",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
       "model": "gpt-3.5-turbo-instruct",
       "provider": "openai",
       "status": "retiring",
@@ -617,7 +713,7 @@
       "model": "gpt-4",
       "provider": "openai",
       "status": "retiring",
-      "shutdown_date": "2026-06-06"
+      "shutdown_date": "2026-10-23"
     },
     {
       "model": "gpt-4-0125-preview",
@@ -633,6 +729,12 @@
     },
     {
       "model": "gpt-4-0613",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
+      "model": "gpt-4-0613-completions",
       "provider": "openai",
       "status": "retiring",
       "shutdown_date": "2026-10-23"
@@ -668,7 +770,25 @@
       "shutdown_date": "2025-06-06"
     },
     {
+      "model": "gpt-4-completions",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
       "model": "gpt-4-turbo",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
+      "model": "gpt-4-turbo-2024-04-09",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
+      "model": "gpt-4-turbo-completions",
       "provider": "openai",
       "status": "retiring",
       "shutdown_date": "2026-10-23"
@@ -698,6 +818,12 @@
       "shutdown_date": "2026-10-23"
     },
     {
+      "model": "gpt-4.1-nano-2025-04-14",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
       "model": "gpt-4.5-preview",
       "provider": "openai",
       "status": "shutdown",
@@ -718,7 +844,7 @@
     {
       "model": "gpt-4o-audio-preview",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-05-07"
     },
     {
@@ -742,7 +868,7 @@
     {
       "model": "gpt-4o-mini-audio-preview",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-05-07"
     },
     {
@@ -754,7 +880,7 @@
     {
       "model": "gpt-4o-mini-realtime-preview",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-05-07"
     },
     {
@@ -778,7 +904,7 @@
     {
       "model": "gpt-4o-realtime-preview",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-05-07"
     },
     {
@@ -790,13 +916,13 @@
     {
       "model": "gpt-4o-realtime-preview-2024-12-17",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-05-07"
     },
     {
       "model": "gpt-4o-realtime-preview-2025-06-03",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-05-07"
     },
     {
@@ -842,10 +968,22 @@
       "shutdown_date": "2026-07-23"
     },
     {
+      "model": "gpt-5.2-chat-latest",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-08-10"
+    },
+    {
       "model": "gpt-5.2-codex",
       "provider": "openai",
       "status": "retiring",
       "shutdown_date": "2026-07-23"
+    },
+    {
+      "model": "gpt-5.3-chat-latest",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-08-10"
     },
     {
       "model": "gpt-audio-mini-2025-10-06",
@@ -869,7 +1007,7 @@
       "model": "o1",
       "provider": "openai",
       "status": "retiring",
-      "shutdown_date": "2026-07-15"
+      "shutdown_date": "2026-10-23"
     },
     {
       "model": "o1-2024-12-17",
@@ -890,10 +1028,22 @@
       "shutdown_date": "2025-07-28"
     },
     {
+      "model": "o1-pro",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
       "model": "o1-pro-2025-03-19",
       "provider": "openai",
       "status": "retiring",
       "shutdown_date": "2026-10-23"
+    },
+    {
+      "model": "o3-deep-research",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-07-23"
     },
     {
       "model": "o3-deep-research-2025-06-26",
@@ -902,7 +1052,19 @@
       "shutdown_date": "2026-07-23"
     },
     {
+      "model": "o3-mini",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
       "model": "o3-mini-2025-01-31",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
+      "model": "o4-mini",
       "provider": "openai",
       "status": "retiring",
       "shutdown_date": "2026-10-23"
@@ -912,6 +1074,12 @@
       "provider": "openai",
       "status": "retiring",
       "shutdown_date": "2026-10-23"
+    },
+    {
+      "model": "o4-mini-deep-research",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-07-23"
     },
     {
       "model": "o4-mini-deep-research-2025-06-26",
