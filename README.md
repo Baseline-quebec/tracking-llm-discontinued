@@ -50,59 +50,75 @@ flowchart TD
 | claude-instant-1.0 | anthropic | shutdown | 2024-11-06 |
 | claude-instant-1.1 | anthropic | shutdown | 2024-11-06 |
 | claude-instant-1.2 | anthropic | shutdown | 2024-11-06 |
+| claude-opus-4-1-20250805 | anthropic | retiring | 2026-08-05 |
 | claude-opus-4-20250514 | anthropic | retiring | 2026-06-15 |
 | claude-sonnet-4-20250514 | anthropic | retiring | 2026-06-15 |
-| gemini-1.0-pro | google | deprecated |  |
-| gemini-1.0-pro-vision | google | deprecated |  |
-| gemini-1.5-flash | google | deprecated |  |
-| gemini-1.5-pro | google | shutdown | 2025-09-23 |
-| gemini-2.0-flash | google | deprecated |  |
-| gemini-2.0-flash-001 | google | deprecated |  |
+| embedding-001 | google | shutdown | 2025-10-30 |
+| embedding-gecko-001 | google | shutdown | 2025-10-30 |
+| gemini-1.0-pro | google | shutdown | 2025-02-18 |
+| gemini-1.0-pro-vision | google | shutdown | 2024-07-12 |
+| gemini-1.5-flash | google | shutdown | 2025-09-29 |
+| gemini-1.5-flash-8b | google | shutdown | 2025-09-29 |
+| gemini-1.5-pro | google | shutdown | 2025-09-29 |
+| gemini-2.0-flash | google | shutdown | 2026-06-01 |
+| gemini-2.0-flash-001 | google | shutdown | 2026-06-01 |
 | gemini-2.0-flash-exp | google | shutdown | 2025-12-09 |
-| gemini-2.0-flash-exp-image-generation | google | deprecated |  |
-| gemini-2.0-flash-lite | google | deprecated |  |
-| gemini-2.0-flash-lite-001 | google | deprecated |  |
+| gemini-2.0-flash-exp-image-generation | google | shutdown | 2025-11-14 |
+| gemini-2.0-flash-lite | google | shutdown | 2026-06-01 |
+| gemini-2.0-flash-lite-001 | google | shutdown | 2026-06-01 |
 | gemini-2.0-flash-lite-preview | google | shutdown | 2025-12-09 |
-| gemini-2.0-flash-lite-preview-02-05 | google | deprecated |  |
-| gemini-2.0-flash-live-001 | google | deprecated |  |
-| gemini-2.0-flash-preview-image-generation | google | deprecated |  |
+| gemini-2.0-flash-lite-preview-02-05 | google | shutdown | 2025-12-09 |
+| gemini-2.0-flash-live-001 | google | shutdown | 2025-12-09 |
+| gemini-2.0-flash-preview-image-generation | google | shutdown | 2025-11-14 |
 | gemini-2.0-flash-thinking-exp | google | shutdown | 2025-12-02 |
-| gemini-2.0-flash-thinking-exp-01-21 | google | deprecated |  |
-| gemini-2.0-flash-thinking-exp-1219 | google | deprecated |  |
+| gemini-2.0-flash-thinking-exp-01-21 | google | shutdown | 2025-12-02 |
+| gemini-2.0-flash-thinking-exp-1219 | google | shutdown | 2025-12-02 |
 | gemini-2.0-pro-exp | google | shutdown | 2025-12-09 |
 | gemini-2.0-pro-exp-02-05 | google | shutdown | 2025-12-09 |
-| gemini-2.5-flash | google | deprecated |  |
-| gemini-2.5-flash-exp-native-audio-thinking-dialog | google | deprecated |  |
-| gemini-2.5-flash-image-preview | google | deprecated |  |
-| gemini-2.5-flash-lite-preview-06-17 | google | deprecated |  |
-| gemini-2.5-flash-lite-preview-09-2025 | google | deprecated |  |
+| gemini-2.5-flash | google | retiring | 2026-10-16 |
+| gemini-2.5-flash-exp-native-audio-thinking-dialog | google | shutdown | 2025-10-20 |
+| gemini-2.5-flash-image | google | retiring | 2026-10-02 |
+| gemini-2.5-flash-image-preview | google | shutdown | 2026-01-15 |
+| gemini-2.5-flash-lite | google | retiring | 2026-10-16 |
+| gemini-2.5-flash-lite-preview-06-17 | google | shutdown | 2025-11-18 |
+| gemini-2.5-flash-lite-preview-09-2025 | google | shutdown | 2026-03-31 |
 | gemini-2.5-flash-native-audio-preview-09-2025 | google | deprecated |  |
-| gemini-2.5-flash-preview-04-17 | google | deprecated |  |
-| gemini-2.5-flash-preview-05-20 | google | deprecated |  |
-| gemini-2.5-flash-preview-09-25 | google | deprecated |  |
-| gemini-2.5-flash-preview-native-audio-dialog | google | deprecated |  |
-| gemini-2.5-pro | google | deprecated |  |
+| gemini-2.5-flash-preview-04-17 | google | shutdown | 2025-07-15 |
+| gemini-2.5-flash-preview-05-20 | google | shutdown | 2025-11-18 |
+| gemini-2.5-flash-preview-09-25 | google | shutdown | 2026-02-17 |
+| gemini-2.5-flash-preview-native-audio-dialog | google | shutdown | 2025-10-20 |
+| gemini-2.5-pro | google | retiring | 2026-10-16 |
+| gemini-2.5-pro-exp-03-25 | google | shutdown | 2025-06-26 |
 | gemini-2.5-pro-preview-03-25 | google | shutdown | 2025-12-02 |
 | gemini-2.5-pro-preview-05-06 | google | shutdown | 2025-12-02 |
 | gemini-2.5-pro-preview-06-05 | google | shutdown | 2025-12-02 |
-| gemini-3-pro-preview | google | deprecated |  |
-| gemini-embedding-001 | google | deprecated |  |
+| gemini-3-pro-image-preview | google | retiring | 2026-06-25 |
+| gemini-3-pro-preview | google | shutdown | 2026-03-09 |
+| gemini-3.1-flash-image-preview | google | retiring | 2026-06-25 |
+| gemini-3.1-flash-lite | google | retiring | 2027-05-07 |
+| gemini-3.1-flash-lite-preview | google | shutdown | 2026-05-25 |
+| gemini-embedding-001 | google | retiring | 2026-07-14 |
 | gemini-embedding-2-preview | google | deprecated |  |
-| gemini-embedding-exp | google | deprecated |  |
-| gemini-embedding-exp-03-07 | google | deprecated |  |
-| gemini-live-2.5-flash-preview | google | deprecated |  |
+| gemini-embedding-exp | google | shutdown | 2025-10-30 |
+| gemini-embedding-exp-03-07 | google | shutdown | 2025-10-30 |
+| gemini-live-2.5-flash-preview | google | shutdown | 2025-12-09 |
 | gemini-pro | google | shutdown | 2025-02-15 |
-| gemini-robotics-er-1.5-preview | google | deprecated |  |
+| gemini-robotics-er-1.5-preview | google | shutdown | 2026-04-30 |
 | gemini-robotics-er-1.6-preview | google | deprecated |  |
-| imagen-3.0-generate-002 | google | deprecated |  |
-| imagen-4.0-generate-preview-06-06 | google | deprecated |  |
-| imagen-4.0-ultra-generate-preview-06-06 | google | deprecated |  |
+| imagen-3.0-generate-002 | google | shutdown | 2025-11-10 |
+| imagen-4.0-fast-generate-001 | google | retiring | 2026-06-24 |
+| imagen-4.0-generate-001 | google | retiring | 2026-06-24 |
+| imagen-4.0-generate-preview-06-06 | google | shutdown | 2026-02-17 |
+| imagen-4.0-ultra-generate-001 | google | retiring | 2026-06-24 |
+| imagen-4.0-ultra-generate-preview-06-06 | google | shutdown | 2026-02-17 |
+| text-embedding-004 | google | shutdown | 2026-01-14 |
 | veo-3.0-fast-generate-preview | google | shutdown | 2025-11-12 |
 | veo-3.0-generate-preview | google | shutdown | 2025-11-12 |
 | ada | openai | shutdown | 2024-01-04 |
 | babbage | openai | shutdown | 2024-01-04 |
 | babbage-002 | openai | retiring | 2026-09-28 |
 | chatgpt-4o-latest | openai | shutdown | 2026-02-17 |
+| chatgpt-image-latest | openai | retiring | 2026-12-01 |
 | code-cushman-001 | openai | shutdown | 2023-03-23 |
 | code-cushman-002 | openai | shutdown | 2023-03-23 |
 | code-davinci-001 | openai | shutdown | 2023-03-23 |
@@ -113,10 +129,11 @@ flowchart TD
 | code-search-babbage-code-001 | openai | shutdown | 2024-01-04 |
 | code-search-babbage-text-001 | openai | shutdown | 2024-01-04 |
 | codex-mini-latest | openai | shutdown | 2026-02-12 |
+| computer-use-preview | openai | retiring | 2026-07-23 |
 | computer-use-preview-2025-03-11 | openai | retiring | 2026-07-23 |
 | curie | openai | shutdown | 2024-01-04 |
-| dall-e-2 | openai | retiring | 2026-05-12 |
-| dall-e-3 | openai | retiring | 2026-05-12 |
+| dall-e-2 | openai | shutdown | 2026-05-12 |
+| dall-e-3 | openai | shutdown | 2026-05-12 |
 | davinci | openai | shutdown | 2024-01-04 |
 | davinci-002 | openai | retiring | 2026-09-28 |
 | ft-babbage-002 | openai | retiring | 2026-10-23 |
@@ -125,44 +142,50 @@ flowchart TD
 | ft-gpt-4 | openai | retiring | 2026-10-23 |
 | ft-gpt-4.1-nano-2025-04-14 | openai | retiring | 2026-10-23 |
 | ft-o4-mini-2025-04-16 | openai | retiring | 2026-10-23 |
-| gpt-3.5-turbo | openai | deprecated | 2025-09-14 |
+| gpt-3.5-turbo | openai | retiring | 2026-10-23 |
 | gpt-3.5-turbo-0125 | openai | retiring | 2026-10-23 |
 | gpt-3.5-turbo-0301 | openai | shutdown | 2024-09-13 |
 | gpt-3.5-turbo-0613 | openai | shutdown | 2024-09-13 |
 | gpt-3.5-turbo-1106 | openai | retiring | 2026-09-28 |
 | gpt-3.5-turbo-16k-0613 | openai | shutdown | 2024-09-13 |
+| gpt-3.5-turbo-completions | openai | retiring | 2026-10-23 |
 | gpt-3.5-turbo-instruct | openai | retiring | 2026-09-28 |
-| gpt-4 | openai | retiring | 2026-06-06 |
+| gpt-4 | openai | retiring | 2026-10-23 |
 | gpt-4-0125-preview | openai | shutdown | 2026-03-26 |
 | gpt-4-0314 | openai | shutdown | 2026-03-26 |
 | gpt-4-0613 | openai | retiring | 2026-10-23 |
+| gpt-4-0613-completions | openai | retiring | 2026-10-23 |
 | gpt-4-1106-preview | openai | retiring | 2026-10-23 |
 | gpt-4-1106-vision-preview | openai | shutdown | 2024-12-06 |
 | gpt-4-32k | openai | shutdown | 2025-06-06 |
 | gpt-4-32k-0314 | openai | shutdown | 2025-06-06 |
 | gpt-4-32k-0613 | openai | shutdown | 2025-06-06 |
+| gpt-4-completions | openai | retiring | 2026-10-23 |
 | gpt-4-turbo | openai | retiring | 2026-10-23 |
+| gpt-4-turbo-2024-04-09 | openai | retiring | 2026-10-23 |
+| gpt-4-turbo-completions | openai | retiring | 2026-10-23 |
 | gpt-4-turbo-preview | openai | shutdown | 2026-03-26 |
 | gpt-4-turbo-preview-completions | openai | shutdown | 2026-03-26 |
 | gpt-4-vision-preview | openai | shutdown | 2024-12-06 |
 | gpt-4.1-nano | openai | retiring | 2026-10-23 |
+| gpt-4.1-nano-2025-04-14 | openai | retiring | 2026-10-23 |
 | gpt-4.5-preview | openai | shutdown | 2025-07-14 |
 | gpt-4o | openai | retiring | 2026-10-01 |
 | gpt-4o-2024-05-13 | openai | retiring | 2026-10-23 |
-| gpt-4o-audio-preview | openai | retiring | 2026-05-07 |
+| gpt-4o-audio-preview | openai | shutdown | 2026-05-07 |
 | gpt-4o-audio-preview-2024-10-01 | openai | shutdown | 2025-10-10 |
 | gpt-4o-audio-preview-2024-12-17 | openai | retiring | 2026-07-23 |
 | gpt-4o-mini | openai | retiring | 2026-10-01 |
-| gpt-4o-mini-audio-preview | openai | retiring | 2026-05-07 |
+| gpt-4o-mini-audio-preview | openai | shutdown | 2026-05-07 |
 | gpt-4o-mini-audio-preview-2024-12-17 | openai | retiring | 2026-07-23 |
-| gpt-4o-mini-realtime-preview | openai | retiring | 2026-05-07 |
+| gpt-4o-mini-realtime-preview | openai | shutdown | 2026-05-07 |
 | gpt-4o-mini-realtime-preview-2024-12-17 | openai | retiring | 2026-07-23 |
 | gpt-4o-mini-search-preview-2025-03-11 | openai | retiring | 2026-07-23 |
 | gpt-4o-mini-tts-2025-03-20 | openai | retiring | 2026-07-23 |
-| gpt-4o-realtime-preview | openai | retiring | 2026-05-07 |
+| gpt-4o-realtime-preview | openai | shutdown | 2026-05-07 |
 | gpt-4o-realtime-preview-2024-10-01 | openai | shutdown | 2025-10-10 |
-| gpt-4o-realtime-preview-2024-12-17 | openai | retiring | 2026-05-07 |
-| gpt-4o-realtime-preview-2025-06-03 | openai | retiring | 2026-05-07 |
+| gpt-4o-realtime-preview-2024-12-17 | openai | shutdown | 2026-05-07 |
+| gpt-4o-realtime-preview-2025-06-03 | openai | shutdown | 2026-05-07 |
 | gpt-4o-search-preview-2025-03-11 | openai | retiring | 2026-07-23 |
 | gpt-5-chat-latest | openai | retiring | 2026-07-23 |
 | gpt-5-codex | openai | retiring | 2026-07-23 |
@@ -170,18 +193,27 @@ flowchart TD
 | gpt-5.1-codex | openai | retiring | 2026-07-23 |
 | gpt-5.1-codex-max | openai | retiring | 2026-07-23 |
 | gpt-5.1-codex-mini | openai | retiring | 2026-07-23 |
+| gpt-5.2-chat-latest | openai | retiring | 2026-08-10 |
 | gpt-5.2-codex | openai | retiring | 2026-07-23 |
+| gpt-5.3-chat-latest | openai | retiring | 2026-08-10 |
 | gpt-audio-mini-2025-10-06 | openai | retiring | 2026-07-23 |
 | gpt-image-1 | openai | retiring | 2026-10-23 |
+| gpt-image-1-mini | openai | retiring | 2026-12-01 |
+| gpt-image-1.5 | openai | retiring | 2026-12-01 |
 | gpt-realtime-mini-2025-10-06 | openai | retiring | 2026-07-23 |
-| o1 | openai | retiring | 2026-07-15 |
+| o1 | openai | retiring | 2026-10-23 |
 | o1-2024-12-17 | openai | retiring | 2026-10-23 |
 | o1-mini | openai | shutdown | 2025-10-27 |
 | o1-preview | openai | shutdown | 2025-07-28 |
+| o1-pro | openai | retiring | 2026-10-23 |
 | o1-pro-2025-03-19 | openai | retiring | 2026-10-23 |
+| o3-deep-research | openai | retiring | 2026-07-23 |
 | o3-deep-research-2025-06-26 | openai | retiring | 2026-07-23 |
+| o3-mini | openai | retiring | 2026-10-23 |
 | o3-mini-2025-01-31 | openai | retiring | 2026-10-23 |
+| o4-mini | openai | retiring | 2026-10-23 |
 | o4-mini-2025-04-16 | openai | retiring | 2026-10-23 |
+| o4-mini-deep-research | openai | retiring | 2026-07-23 |
 | o4-mini-deep-research-2025-06-26 | openai | retiring | 2026-07-23 |
 | sora-2 | openai | retiring | 2026-09-24 |
 | sora-2-2025-10-06 | openai | retiring | 2026-09-24 |
