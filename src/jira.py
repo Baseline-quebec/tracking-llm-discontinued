@@ -78,7 +78,10 @@ def _request(
     )
     try:
         with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:  # noqa: S310
-            return json.loads(response.read().decode())
+            # json.loads est typé Any : on refuse explicitement une réponse qui
+            # ne serait pas un objet JSON plutôt que de la laisser passer.
+            body = json.loads(response.read().decode())
+            return body if isinstance(body, dict) else None
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode(errors="replace")[:300]
         logger.warning("Jira %s returned HTTP %s: %s", path, exc.code, detail)
