@@ -229,13 +229,13 @@ La distinction est la raison d'être du balayage. Quand un fournisseur dépréci
 
 ### Balayage mensuel de l'organisation
 
-`org-sweep.yml` tourne le 1er de chaque mois, une heure après la mise à jour du registre. Il liste les dépôts de l'organisation, les clone en surface dans un répertoire temporaire, les scanne contre le registre courant, ouvre une issue dans **le dépôt concerné**, et dépose un ticket Jira consolidé.
+`org-sweep.yml` tourne le 1er de chaque mois, une heure après la mise à jour du registre. Il liste les dépôts de l'organisation, les clone en surface dans un répertoire temporaire, les scanne contre le registre courant, ouvre une issue dans **le dépôt concerné**, et poste un rapport consolidé dans Slack.
 
-Un seul ticket Jira pour tout le balayage, pas un par dépôt : quarante tickets en priorité Highest le même matin sont indiscernables du bruit, et la première chose qu'on fait avec du bruit est de le couper.
+Un seul message Slack pour tout le balayage, pas un par dépôt : quarante notifications le même matin sont indiscernables du bruit, et la première chose qu'on fait avec du bruit est de le couper. Le message part même quand rien n'est trouvé, parce qu'un canal silencieux est ambigu : on ne sait pas si le balayage a tourné ou s'il est cassé.
 
 **Prérequis :** le secret `ORG_SWEEP_TOKEN`, un jeton avec lecture sur les dépôts de l'organisation et écriture sur les issues. Le `GITHUB_TOKEN` par défaut est limité à ce dépôt-ci et ne peut ni cloner les autres dépôts privés ni y créer d'issue. Sous SSO SAML, le jeton doit en plus être explicitement autorisé pour l'organisation, sinon la liste des dépôts revient **vide sans erreur** et le balayage se termine en vert sans rien avoir scanné. Le code refuse ce cas et fait échouer la run.
 
-**Jira, optionnel :** sans les variables `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_PROJECT_KEY` et le secret `JIRA_API_TOKEN`, le balayage tourne et ouvre quand même les issues GitHub ; seul le ticket est sauté.
+**Slack, optionnel :** le formatage du rapport vit dans `baseline-automation`, la où se trouvent déjà le jeton Slack et les conventions de rapport de l'équipe. Ce dépôt ne fait qu'envoyer le résultat structuré au script Windmill qui le poste. Sans la variable `WINDMILL_RAPPORT_CONFORMITE_URL` et le secret `WINDMILL_TOKEN`, le balayage tourne et ouvre quand même les issues GitHub ; seul le message est sauté.
 
 ```bash
 # Essai à blanc, sans créer d'issue ni de ticket

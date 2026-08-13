@@ -11,8 +11,10 @@
 # de GitHub Actions est limite a ce depot-ci et ne peut ni cloner les autres
 # depots prives ni y creer d'issue.
 #
-# Les variables Jira sont optionnelles : sans elles le balayage tourne et ouvre
-# quand meme les issues GitHub, seul le ticket consolide est saute.
+# Les variables Windmill sont optionnelles : sans elles le balayage tourne et
+# ouvre quand meme les issues GitHub, seul le rapport Slack est saute. Le
+# formatage du rapport vit dans baseline-automation, la ou se trouvent deja le
+# jeton Slack et les conventions de rapport de l'equipe.
 
 name: Balayage mensuel de l'organisation
 
@@ -49,10 +51,8 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
           GH_TOKEN: ${{ secrets.ORG_SWEEP_TOKEN }}
-          JIRA_BASE_URL: ${{ vars.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ vars.JIRA_EMAIL }}
-          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
-          JIRA_PROJECT_KEY: ${{ vars.JIRA_PROJECT_KEY }}
+          WINDMILL_WEBHOOK_URL: ${{ vars.WINDMILL_RAPPORT_CONFORMITE_URL }}
+          WINDMILL_TOKEN: ${{ secrets.WINDMILL_TOKEN }}
           ASSIGNEES: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
           DRY_RUN: ${{ inputs.dry-run && '--dry-run' || '' }}
         run: |

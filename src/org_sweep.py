@@ -23,8 +23,8 @@ from pathlib import Path
 
 from src.deprecations import check_deprecation
 from src.issue_reporter import DeprecationAlert, create_issues
-from src.jira import create_ticket
 from src.scanner import scan_directory
+from src.slack_report import send_report
 
 
 logger = logging.getLogger(__name__)
@@ -286,8 +286,13 @@ def main(argv: list[str] | None = None) -> int:
         args.summary_out.write_text(summary + "\n", encoding="utf-8")
 
     affected = [r for r in results if r.deprecated_models]
-    if affected and not args.dry_run:
-        create_ticket(summary, len(affected))
+    if not args.dry_run:
+        # Le rapport part meme quand rien n'est trouve : un canal silencieux
+        # est ambigu, on ne sait pas si le balayage a tourne ou s'il est casse.
+        send_report(
+            [{"depot": r.repository, "elements": r.deprecated_models} for r in affected],
+            sum(1 for r in results if r.scanned),
+        )
 
     # A failed clone is reported but never fails the run: one unreachable
     # repository must not hide the results of the eighty-one others.
