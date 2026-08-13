@@ -16,8 +16,12 @@ jobs:
         with:
           python-version: "3.12"
 
+      # Version identique a celle epinglee dans .pre-commit-config.yaml.
+      # Sans cet alignement, la CI et le hook local se contredisent des qu'une
+      # regle change entre versions : un fichier accepte en local est refuse
+      # en CI, et la correction de l'un casse l'autre.
       - name: Install ruff
-        run: pip install ruff
+        run: pip install ruff==0.15.10
 
       - name: Ruff check
         run: ruff check src/

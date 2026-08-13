@@ -40,7 +40,9 @@ def fetch_deprecations() -> list[DeprecatedModel]:
     """
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            req = urllib.request.Request(FEED_URL, headers={"User-Agent": "llm-scanner/1.0"})  # noqa: S310
+            req = urllib.request.Request(  # noqa: S310 - FEED_URL is a hardcoded https constant
+                FEED_URL, headers={"User-Agent": "llm-scanner/1.0"}
+            )
             with urllib.request.urlopen(req, timeout=FEED_TIMEOUT) as resp:  # noqa: S310
                 data: list[dict[str, Any]] = json.loads(resp.read().decode())
             return _parse_feed(data)

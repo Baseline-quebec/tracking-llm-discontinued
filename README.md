@@ -216,7 +216,37 @@ flowchart TD
 
 ---
 
+## Deux mécanismes complémentaires
+
+Le scan couvre deux risques différents, et un seul mécanisme ne peut pas couvrir les deux.
+
+| Risque | Mécanisme | Déclencheur |
+|---|---|---|
+| Un modèle déprécié est **introduit** dans le code | Ruleset organisationnel appelant `Baseline-quebec/.github` | Pull request, merge queue |
+| Un modèle **devient** déprécié alors que le code n'a pas bougé | `org-sweep.yml` de ce dépôt | Cron mensuel |
+
+La distinction est la raison d'être du balayage. Quand un fournisseur déprécie un modèle, le registre change mais votre code ne change pas : aucune pull request n'est ouverte, donc aucune règle de ruleset ne se déclenche. C'est pourtant le scénario le plus fréquent, et celui qui vous laisse en production sur un modèle qui va s'arrêter.
+
+### Balayage mensuel de l'organisation
+
+`org-sweep.yml` tourne le 1er de chaque mois, une heure après la mise à jour du registre. Il liste les dépôts de l'organisation, les clone en surface dans un répertoire temporaire, les scanne contre le registre courant, ouvre une issue dans **le dépôt concerné**, et dépose un ticket Jira consolidé.
+
+Un seul ticket Jira pour tout le balayage, pas un par dépôt : quarante tickets en priorité Highest le même matin sont indiscernables du bruit, et la première chose qu'on fait avec du bruit est de le couper.
+
+**Prérequis :** le secret `ORG_SWEEP_TOKEN`, un jeton avec lecture sur les dépôts de l'organisation et écriture sur les issues. Le `GITHUB_TOKEN` par défaut est limité à ce dépôt-ci et ne peut ni cloner les autres dépôts privés ni y créer d'issue. Sous SSO SAML, le jeton doit en plus être explicitement autorisé pour l'organisation, sinon la liste des dépôts revient **vide sans erreur** et le balayage se termine en vert sans rien avoir scanné. Le code refuse ce cas et fait échouer la run.
+
+**Jira, optionnel :** sans les variables `JIRA_BASE_URL`, `JIRA_EMAIL`, `JIRA_PROJECT_KEY` et le secret `JIRA_API_TOKEN`, le balayage tourne et ouvre quand même les issues GitHub ; seul le ticket est sauté.
+
+```bash
+# Essai à blanc, sans créer d'issue ni de ticket
+gh workflow run org-sweep.yml -f dry-run=true
+```
+
+---
+
 ## Utiliser l'action dans votre dépôt
+
+> **Note :** depuis la mise en place du ruleset organisationnel, il n'y a plus rien à copier dans les dépôts de `Baseline-quebec`. Le workflow central est imposé automatiquement. Cette section reste valable pour un dépôt hors organisation.
 
 ### Ajouter le workflow
 

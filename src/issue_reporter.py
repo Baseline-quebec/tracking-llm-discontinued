@@ -44,11 +44,17 @@ def create_issues(
     dry_run: bool = False,
     webhook_url: str | None = None,
     repo_name: str = "",
+    target_repo: str | None = None,
 ) -> tuple[int, int]:
     """Create GitHub issues for deprecated models.
 
     Groups alerts by model so each model gets at most one issue.
     Skips creation if an open issue already exists for the model.
+
+    `target_repo` routes every gh call to an explicit repository, which the
+    organisation-wide sweep needs since it scans clones rather than the
+    checkout it runs from. Left as None, gh infers the repository from the
+    working directory, which is the behaviour the per-repo action relies on.
 
     Returns (issues_created, issues_failed).
     """
@@ -59,7 +65,7 @@ def create_issues(
     valid_assignees = _validate_assignees(assignees) if assignees else None
 
     if not dry_run:
-        _ensure_label()
+        _ensure_label(target_repo)
 
     by_model: dict[str, list[DeprecationAlert]] = {}
     for alert in alerts:
@@ -68,7 +74,7 @@ def create_issues(
     created = 0
     failed = 0
     for model, model_alerts in by_model.items():
-        if not dry_run and _issue_exists(model):
+        if not dry_run and _issue_exists(model, target_repo):
             logger.info("Open issue already exists for %s, skipping", model)
             continue
 
@@ -93,7 +99,7 @@ def create_issues(
             created += 1
             continue
 
-        issue_url = _create_issue(title, body, valid_assignees)
+        issue_url = _create_issue(title, body, valid_assignees, target_repo)
         if issue_url:
             created += 1
             if webhook_url:
@@ -122,7 +128,12 @@ def _validate_assignees(assignees: list[str]) -> list[str] | None:
     return valid or None
 
 
-def _ensure_label() -> None:
+def _repo_flag(target_repo: str | None) -> list[str]:
+    """Build the gh --repo flag, or nothing when the current directory decides."""
+    return ["--repo", target_repo] if target_repo else []
+
+
+def _ensure_label(target_repo: str | None = None) -> None:
     """Create the deprecated-model label if it doesn't exist."""
     try:
         result = subprocess.run(
@@ -136,6 +147,7 @@ def _ensure_label() -> None:
                 "--color",
                 "D93F0B",
                 "--force",
+                *_repo_flag(target_repo),
             ],
             capture_output=True,
             text=True,
@@ -149,7 +161,7 @@ def _ensure_label() -> None:
         logger.warning("Could not create label '%s': %s", ISSUE_LABEL, result.stderr)
 
 
-def _issue_exists(model: str) -> bool:
+def _issue_exists(model: str, target_repo: str | None = None) -> bool:
     """Check if an open issue already exists for this model.
 
     Uses GitHub search to find candidates, then verifies the model name
@@ -173,6 +185,7 @@ def _issue_exists(model: str) -> bool:
                 "open",
                 "--json",
                 "number,title",
+                *_repo_flag(target_repo),
             ],
             capture_output=True,
             text=True,
@@ -202,6 +215,7 @@ def _create_issue(
     title: str,
     body: str,
     assignees: list[str] | None = None,
+    target_repo: str | None = None,
 ) -> str | None:
     """Create a single GitHub issue. Returns the issue URL on success, None on failure."""
     cmd = [
@@ -214,6 +228,7 @@ def _create_issue(
         body,
         "--label",
         ISSUE_LABEL,
+        *_repo_flag(target_repo),
     ]
     if assignees:
         cmd.extend(["--assignee", ",".join(assignees)])
