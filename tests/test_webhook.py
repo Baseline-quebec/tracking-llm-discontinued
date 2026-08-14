@@ -6,6 +6,7 @@ from datetime import date
 from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError, URLError
 
+import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
 from src.deprecations import DeprecatedModel
@@ -161,7 +162,8 @@ def send_webhook_normal(webhook_setup: dict[str, object]) -> dict[str, object]:
             body="## Le modèle `gpt-4o` est retiring",
             assignees=["davebulaval"],
         )
-    return {"result": result, "urlopen_called": mock.called}
+    request = mock.call_args.args[0] if mock.called else None
+    return {"result": result, "urlopen_called": mock.called, "request": request}
 
 
 @when(
@@ -219,3 +221,32 @@ def check_webhook_result(webhook_result: dict[str, object], expected: str) -> No
 )
 def check_no_http_request(webhook_result: dict[str, object]) -> None:
     assert not webhook_result["urlopen_called"], "urlopen should not have been called in dry-run"
+
+
+@given("a webhook token is configured")
+def _token_configured(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("LLM_SCAN_WEBHOOK_TOKEN", "jeton-crm")
+
+
+@given("no webhook token is configured")
+def _token_absent(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("LLM_SCAN_WEBHOOK_TOKEN", raising=False)
+
+
+@then("the request should carry the bearer token")
+def _carries_token(webhook_result: dict[str, object]) -> None:
+    """Without this header any protected destination answers 403.
+
+    That is exactly how the previous integration failed: the webhook fired on
+    every issue and was rejected, for months, with nobody able to diagnose it.
+    """
+    request = webhook_result["request"]
+    assert request is not None
+    assert request.get_header("Authorization") == "Bearer jeton-crm"
+
+
+@then("the request should carry no authorization header")
+def _carries_no_token(webhook_result: dict[str, object]) -> None:
+    request = webhook_result["request"]
+    assert request is not None
+    assert request.get_header("Authorization") is None

@@ -29,11 +29,11 @@ Feature: GitHub Issue creation for deprecated models
     And the body should contain "config.py"
     And the body should contain "### Action requise"
 
-  Scenario: Dry run does not call gh CLI
+  Scenario: Dry run reads but never writes
     Given a list of deprecation alerts for models "gpt-4o,gpt-3.5-turbo"
     When I create issues in dry-run mode
     Then 2 issues should be reported as created
-    And gh CLI should not have been called
+    And gh CLI should not have been called to write
 
   Scenario: Issues are grouped by model
     Given a list of deprecation alerts with "gpt-4o" in 3 different files

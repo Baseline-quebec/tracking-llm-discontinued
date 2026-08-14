@@ -74,7 +74,11 @@ def create_issues(
     created = 0
     failed = 0
     for model, model_alerts in by_model.items():
-        if not dry_run and _issue_exists(model, target_repo):
+        # The existence check runs in dry-run too. It is read-only, and skipping
+        # it made the rehearsal count every alert as new: the estimate came out
+        # far above what a real run would file, which is the opposite of what a
+        # rehearsal is for.
+        if _issue_exists(model, target_repo):
             logger.info("Open issue already exists for %s, skipping", model)
             continue
 

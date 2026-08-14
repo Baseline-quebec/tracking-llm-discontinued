@@ -14,13 +14,13 @@ L'action composite exécutée dans vos repos ne fait aucun appel à une API AI/L
 
 ```mermaid
 flowchart TD
-    A[Création d'un tag<br>ou cron bimensuel] --> B[Checkout du repo]
+    A[Pull request via ruleset<br>ou balayage mensuel] --> B[Checkout du repo]
     B --> C[Action composite<br>tracking-llm-discontinued]
     C --> D[Scan des fichiers<br>patterns.py + scanner.py]
     D --> E{Modèles<br>dépréciés?}
     E -->|Oui| F[Créer issues GitHub<br>avec date d'arrêt]
     F --> H{Webhook<br>configuré?}
-    H -->|Oui| I[POST vers CRM]
+    H -->|Oui| I[POST authentifié<br>vers le CRM]
     H -->|Non| J[Fin]
     E -->|Non| G[Aucune action]
 ```
@@ -285,10 +285,23 @@ jobs:
         with:
           repo-name: ${{ github.repository }}
           assignees: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
-          webhook-url: ${{ secrets.LLM_SCAN_WEBHOOK_URL }}
+          webhook-url: ${{ vars.LLM_SCAN_WEBHOOK_URL }}
+          webhook-token: ${{ secrets.LLM_SCAN_WEBHOOK_TOKEN }}
 ```
 
-Aucun secret ni variable n'est requis pour les repos consommateurs. L'action utilise le `GITHUB_TOKEN` automatique pour créer les issues. La variable `LLM_SCAN_ASSIGNEES` et le secret `LLM_SCAN_WEBHOOK_URL` sont configurés au niveau de l'organisation.
+Aucun secret ni variable n'est requis pour les repos consommateurs. L'action utilise le `GITHUB_TOKEN` automatique pour créer les issues. `LLM_SCAN_ASSIGNEES`, `LLM_SCAN_WEBHOOK_URL` et `LLM_SCAN_WEBHOOK_TOKEN` sont configurés au niveau de l'organisation.
+
+### L'URL du webhook est une variable, pas un secret
+
+Une destination n'est pas un identifiant. La mettre en secret la rend illisible
+pour tout le monde, y compris pour les propriétaires de l'organisation, et c'est
+exactement ce qui a permis à l'intégration CRM d'échouer en silence : le webhook
+partait à chaque issue et recevait un **403** que personne ne pouvait
+diagnostiquer, faute de pouvoir lire vers quoi il pointait.
+
+L'URL vit donc dans une variable d'organisation, lisible et auditable. Seul le
+jeton reste un secret. Si le récepteur répond 403 alors qu'aucun jeton n'est
+configuré, le journal le dit explicitement au lieu de laisser un code d'erreur nu.
 
 ### Prérequis pour les forks
 
@@ -348,7 +361,8 @@ PYTHONPATH=. python -m src.update_registry
 |---|---|---|
 | `ANTHROPIC_API_KEY` | Repository secret | Clé API Anthropic pour la validation Claude dans le workflow de mise à jour |
 | `LLM_SCAN_ASSIGNEES` | Organization variable | Noms d'utilisateur GitHub assignés aux issues (partagée avec les repos consommateurs) |
-| `LLM_SCAN_WEBHOOK_URL` | Organization secret (optionnel) | URL webhook pour envoyer les détails des issues vers un CRM |
+| `LLM_SCAN_WEBHOOK_URL` | Organization **variable** (optionnel) | URL du récepteur, appelée une fois par issue réellement créée |
+| `LLM_SCAN_WEBHOOK_TOKEN` | Organization secret (optionnel) | Jeton porteur envoyé en `Authorization: Bearer`. Sans lui, une destination protégée répond 403 |
 
 ### Utilisation locale
 
