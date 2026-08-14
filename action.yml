@@ -14,7 +14,15 @@ inputs:
     required: false
     default: "false"
   webhook-url:
-    description: "Optional webhook URL to POST issue details for CRM integration"
+    description: >
+      Optional webhook URL to POST issue details for CRM integration. Pass it
+      from a GitHub variable, not a secret: a destination URL is not a
+      credential, and hiding it is what let the previous integration fail
+      silently with a 403 nobody could diagnose.
+    required: false
+    default: ""
+  webhook-token:
+    description: "Bearer token for the webhook destination. This one is a secret."
     required: false
     default: ""
 
@@ -49,6 +57,7 @@ runs:
         SCAN_ASSIGNEES: ${{ inputs.assignees }}
         SCAN_DRY_RUN: ${{ inputs.dry-run }}
         SCAN_WEBHOOK_URL: ${{ inputs.webhook-url }}
+        LLM_SCAN_WEBHOOK_TOKEN: ${{ inputs.webhook-token }}
         PYTHONPATH: ${{ github.action_path }}
         GH_TOKEN: ${{ github.token }}
       run: |

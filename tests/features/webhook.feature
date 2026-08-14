@@ -42,3 +42,15 @@ Feature: Webhook notifications for CRM integration
     When I send the webhook in dry-run mode
     Then the webhook result should be True
     And no HTTP request should have been made
+
+  Scenario: An authenticated destination receives a bearer token
+    Given a webhook token is configured
+    And a webhook URL that returns HTTP 200
+    When I send the webhook
+    Then the request should carry the bearer token
+
+  Scenario: Without a token the request goes out unauthenticated
+    Given no webhook token is configured
+    And a webhook URL that returns HTTP 200
+    When I send the webhook
+    Then the request should carry no authorization header
