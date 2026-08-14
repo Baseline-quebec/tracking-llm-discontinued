@@ -262,3 +262,13 @@ Feature: LLM model pattern detection
     Given a line containing "Hello world, this is a normal line of code"
     When I scan the line for matches
     Then I should find 0 matches
+
+  Scenario: Un mot-cle lointain ne valide pas un nom de modele court
+    Given a line containing "Ada-inc has two imports from two different sources, and needs to post sales to an API"
+    When I scan the line for matches
+    Then I should find 0 matches
+
+  Scenario: Un mot-cle proche valide bien le nom de modele
+    Given a line containing "response = openai.Embedding.create(model='ada')"
+    When I scan the line for matches
+    Then I should find model "ada" from provider "openai"
