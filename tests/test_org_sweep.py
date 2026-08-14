@@ -25,9 +25,10 @@ scenarios("features/org_sweep.feature")
 
 
 def _gh_output(payload: list[dict[str, Any]], returncode: int = 0) -> MagicMock:
+    """Mimic `gh api --jq`, which emits one JSON object per line."""
     process = MagicMock(spec=subprocess.CompletedProcess)
     process.returncode = returncode
-    process.stdout = json.dumps(payload)
+    process.stdout = "\n".join(json.dumps(entry) for entry in payload)
     process.stderr = ""
     return process
 
@@ -39,17 +40,21 @@ def context() -> dict[str, Any]:
 
 @given("the organisation lists an active repository and an archived repository")
 def _active_and_archived(context: dict[str, Any]) -> None:
-    # gh --no-archived filters server-side, so the archived entry never comes
-    # back. The listing must not reintroduce it from a stale local assumption.
+    # The installation endpoint returns archived repositories too, unlike
+    # `gh repo list --no-archived`. Filtering is now ours to do, and forgetting
+    # it would file issues on repositories nobody can act on.
     context["listing"] = _gh_output(
-        [{"nameWithOwner": "org/active", "isArchived": False, "hasIssuesEnabled": True}]
+        [
+            {"full_name": "org/active", "archived": False, "has_issues": True},
+            {"full_name": "org/archive", "archived": True, "has_issues": True},
+        ]
     )
 
 
 @given("the organisation lists a repository with issues disabled")
 def _issues_disabled(context: dict[str, Any]) -> None:
     context["listing"] = _gh_output(
-        [{"nameWithOwner": "org/sans-issues", "isArchived": False, "hasIssuesEnabled": False}]
+        [{"full_name": "org/sans-issues", "archived": False, "has_issues": False}]
     )
 
 
@@ -57,8 +62,8 @@ def _issues_disabled(context: dict[str, Any]) -> None:
 def _two_repositories(context: dict[str, Any], first: str, second: str) -> None:
     context["listing"] = _gh_output(
         [
-            {"nameWithOwner": first, "isArchived": False, "hasIssuesEnabled": True},
-            {"nameWithOwner": second, "isArchived": False, "hasIssuesEnabled": True},
+            {"full_name": first, "archived": False, "has_issues": True},
+            {"full_name": second, "archived": False, "has_issues": True},
         ]
     )
 
