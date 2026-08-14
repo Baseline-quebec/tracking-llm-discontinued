@@ -6,10 +6,16 @@
 # modele qui DEVIENT deprecie alors que le code n'a pas bouge. Ce cas n'ouvre
 # aucune pull request, donc seul un balayage planifie le detecte.
 #
-# Prerequis : le secret ORG_SWEEP_TOKEN, un jeton avec les droits de lecture sur
-# les depots de l'organisation et d'ecriture sur les issues. Le jeton par defaut
-# de GitHub Actions est limite a ce depot-ci et ne peut ni cloner les autres
-# depots prives ni y creer d'issue.
+# Prerequis : une GitHub App installee sur l'organisation, dont l'identifiant
+# et la cle privee sont les secrets ORG_SWEEP_APP_ID et ORG_SWEEP_APP_KEY.
+# Permissions requises, cote depot uniquement : Contents en lecture pour cloner,
+# Issues en ecriture pour alerter. Le jeton par defaut de GitHub Actions est
+# limite a ce depot-ci et ne peut ni cloner les autres depots prives ni y creer
+# d'issue.
+#
+# Une App plutot qu'un jeton personnel : le balayage ne depend d'aucune personne,
+# ne casse pas quand quelqu'un quitte l'equipe, et n'a pas d'expiration a
+# renouveler tous les ans.
 #
 # Les variables Windmill sont optionnelles : sans elles le balayage tourne et
 # ouvre quand meme les issues GitHub, seul le rapport Slack est saute. Le
@@ -47,10 +53,18 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Obtenir un jeton d'installation
+        id: jeton
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.ORG_SWEEP_APP_ID }}
+          private-key: ${{ secrets.ORG_SWEEP_APP_KEY }}
+          owner: ${{ github.repository_owner }}
+
       - name: Balayer
         env:
           PYTHONPATH: ${{ github.workspace }}
-          GH_TOKEN: ${{ secrets.ORG_SWEEP_TOKEN }}
+          GH_TOKEN: ${{ steps.jeton.outputs.token }}
           WINDMILL_WEBHOOK_URL: ${{ vars.WINDMILL_RAPPORT_CONFORMITE_URL }}
           WINDMILL_TOKEN: ${{ secrets.WINDMILL_TOKEN }}
           ASSIGNEES: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
@@ -58,7 +72,7 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${GH_TOKEN:-}" ]; then
-            echo "::error title=Jeton manquant::Le secret ORG_SWEEP_TOKEN est requis pour lire les depots de l'organisation."
+            echo "::error title=Jeton manquant::Les secrets ORG_SWEEP_APP_ID et ORG_SWEEP_APP_KEY sont requis."
             exit 1
           fi
           python -m src.org_sweep \

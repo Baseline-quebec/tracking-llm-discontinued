@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 GH_TIMEOUT_SECONDS = 60
 CLONE_TIMEOUT_SECONDS = 300
-REPO_LIST_LIMIT = 500
+REPO_PAGE_SIZE = 100
 
 
 @dataclass(frozen=True)
@@ -58,24 +58,25 @@ class SweepResult:
 
 
 def list_repositories(org: str, excluded: set[str] | None = None) -> list[Repository]:
-    """List the organisation's non-archived, non-fork repositories.
+    """List the repositories the GitHub App installation can reach.
 
-    Archived repositories are excluded on purpose: they cannot receive issues,
-    and a deprecated model in code nobody runs is not actionable.
+    Deliberately not `gh repo list`: that command queries GraphQL as a user, and
+    a GitHub App installation token cannot enumerate an organisation that way.
+    The installation endpoint returns exactly what the App was granted, which is
+    also the honest definition of what this sweep is allowed to touch.
+
+    Archived repositories are dropped on purpose: they cannot receive issues, and
+    a deprecated model in code nobody runs is not actionable.
     """
     try:
         result = subprocess.run(
             [
                 "gh",
-                "repo",
-                "list",
-                org,
-                "--limit",
-                str(REPO_LIST_LIMIT),
-                "--no-archived",
-                "--source",
-                "--json",
-                "nameWithOwner,isArchived,hasIssuesEnabled",
+                "api",
+                "--paginate",
+                f"/installation/repositories?per_page={REPO_PAGE_SIZE}",
+                "--jq",
+                ".repositories[] | {full_name, archived, has_issues}",
             ],
             capture_output=True,
             text=True,
@@ -90,22 +91,26 @@ def list_repositories(org: str, excluded: set[str] | None = None) -> list[Reposi
         logger.error("Failed to list repositories: %s", result.stderr.strip())
         return []
 
-    try:
-        payload: list[dict[str, object]] = json.loads(result.stdout)
-    except json.JSONDecodeError:
-        logger.error("Could not parse repository list: %s", result.stdout[:200])
-        return []
-
     excluded = excluded or set()
     repositories: list[Repository] = []
-    for entry in payload:
-        name = str(entry.get("nameWithOwner", ""))
+    for ligne in result.stdout.splitlines():
+        if not ligne.strip():
+            continue
+        try:
+            entry: dict[str, object] = json.loads(ligne)
+        except json.JSONDecodeError:
+            logger.warning("Could not parse repository entry: %s", ligne[:120])
+            continue
+
+        name = str(entry.get("full_name", ""))
         if not name or name in excluded or name.split("/")[-1] in excluded:
+            continue
+        if entry.get("archived") is True:
             continue
         # A repository with issues disabled cannot be alerted; skipping it here
         # avoids a guaranteed failure later and keeps the run green for a
         # condition that is a repository setting, not a code problem.
-        if entry.get("hasIssuesEnabled") is False:
+        if entry.get("has_issues") is False:
             logger.warning("Issues disabled on %s, skipping", name)
             continue
         repositories.append(Repository(name_with_owner=name))

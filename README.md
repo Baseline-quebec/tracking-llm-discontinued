@@ -233,7 +233,17 @@ La distinction est la raison d'être du balayage. Quand un fournisseur dépréci
 
 Un seul message Slack pour tout le balayage, pas un par dépôt : quarante notifications le même matin sont indiscernables du bruit, et la première chose qu'on fait avec du bruit est de le couper. Le message part même quand rien n'est trouvé, parce qu'un canal silencieux est ambigu : on ne sait pas si le balayage a tourné ou s'il est cassé.
 
-**Prérequis :** le secret `ORG_SWEEP_TOKEN`, un jeton avec lecture sur les dépôts de l'organisation et écriture sur les issues. Le `GITHUB_TOKEN` par défaut est limité à ce dépôt-ci et ne peut ni cloner les autres dépôts privés ni y créer d'issue. Sous SSO SAML, le jeton doit en plus être explicitement autorisé pour l'organisation, sinon la liste des dépôts revient **vide sans erreur** et le balayage se termine en vert sans rien avoir scanné. Le code refuse ce cas et fait échouer la run.
+**Prérequis :** une GitHub App installée sur l'organisation, dont l'identifiant et la clé privée sont les secrets `ORG_SWEEP_APP_ID` et `ORG_SWEEP_APP_KEY`. Permissions requises, côté dépôt uniquement :
+
+| Permission | Niveau | Pourquoi |
+|---|---|---|
+| Contents | Lecture | Cloner chaque dépôt pour le scanner |
+| Issues | Lecture et écriture | Ouvrir l'alerte, et vérifier qu'elle n'existe pas déjà |
+| Metadata | Lecture | Accordée automatiquement, non désactivable |
+
+Une App plutôt qu'un jeton personnel : le balayage ne dépend d'aucune personne, ne casse pas quand quelqu'un quitte l'équipe, et n'a pas d'expiration à renouveler chaque année.
+
+La liste des dépôts vient de `/installation/repositories` et non de `gh repo list` : un jeton d'installation ne peut pas énumérer une organisation via GraphQL. L'endpoint retourne exactement ce que l'App a le droit de toucher, ce qui est aussi la définition honnête du périmètre du balayage. Si la liste revient vide, le code fait échouer la run plutôt que de se terminer en vert sans avoir rien scanné.
 
 **Slack, optionnel :** le formatage du rapport vit dans `baseline-automation`, la où se trouvent déjà le jeton Slack et les conventions de rapport de l'équipe. Ce dépôt ne fait qu'envoyer le résultat structuré au script Windmill qui le poste. Sans la variable `WINDMILL_RAPPORT_CONFORMITE_URL` et le secret `WINDMILL_TOKEN`, le balayage tourne et ouvre quand même les issues GitHub ; seul le message est sauté.
 
