@@ -22,6 +22,11 @@ class ModelPattern:
 
 
 # Context keywords required for short model names (e.g. "o1", "o3")
+# Fenetre autour d'une correspondance ou le mot-cle de contexte doit se trouver.
+# Large assez pour `openai_client.embeddings.create(model="ada")`, trop etroite
+# pour une phrase de prose qui mentionne une API quarante mots plus loin.
+CONTEXT_WINDOW = 40
+
 CONTEXT_KEYWORDS: re.Pattern[str] = re.compile(
     r"model|llm|openai|api|chat|completion|gpt|anthropic|claude|gemini|google|"
     r"embedding|embed|vector|provider|ai[\._\-]|engine",
@@ -175,6 +180,21 @@ def _build_patterns() -> list[ModelPattern]:
 MODEL_PATTERNS: list[ModelPattern] = _build_patterns()
 
 
+def _has_nearby_context(line: str, match: re.Match[str]) -> bool:
+    """Vrai si un mot-cle de contexte entoure la correspondance de pres.
+
+    Chercher le mot-cle n'importe ou dans la ligne suffisait a valider des noms
+    de modeles courts comme `ada` des qu'un mot banal apparaissait ailleurs.
+    Cas reel : « Ada-inc has two imports ... needs to post sales to an API »,
+    dans le README de Monolog, ou « API » se trouve a quatre-vingt-dix
+    caracteres de « Ada ». Une vraie declaration met le mot-cle a cote :
+    `model="ada"`, `"engine": "ada"`.
+    """
+    debut = max(0, match.start() - CONTEXT_WINDOW)
+    fin = min(len(line), match.end() + CONTEXT_WINDOW)
+    return CONTEXT_KEYWORDS.search(line[debut:fin]) is not None
+
+
 def find_matches_in_line(
     line: str,
 ) -> list[tuple[str, str, MatchType]]:
@@ -189,7 +209,7 @@ def find_matches_in_line(
         if match is None:
             continue
 
-        if model_pattern.context_required and not CONTEXT_KEYWORDS.search(line):
+        if model_pattern.context_required and not _has_nearby_context(line, match):
             continue
 
         model_name = match.group(0).lower()
