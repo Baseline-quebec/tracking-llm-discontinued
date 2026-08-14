@@ -27,6 +27,27 @@ def given_large_file(tmp_path: Path, filename: str, content: str) -> Path:
 
 
 @given(
+    parsers.cfparse(
+        'a temporary directory with a very long line mentioning "{model}" and the word model'
+    ),
+    target_fixture="scan_dir",
+)
+def given_generated_line(tmp_path: Path, model: str) -> Path:
+    """Reproduce the false positive that opened an issue on baseline.quebec.
+
+    ACE editor ships `ext-modelist.js` minified: one line of tens of thousands of
+    characters listing its language modes, Ada among them. Context detection
+    reasons per line, so the word "model" elsewhere in that single line validated
+    the context for `ada` and the scanner filed an issue on a repository that
+    contains no LLM at all.
+    """
+    fichier = tmp_path / "generated.js"
+    bruit = "".join(f'x{i}="mode-{i}";' for i in range(300))
+    fichier.write_text(f'var modelist={{}};{bruit}m.ada="ada";', encoding="utf-8")
+    return tmp_path
+
+
+@given(
     "a non-existent scan path",
     target_fixture="scan_dir",
 )

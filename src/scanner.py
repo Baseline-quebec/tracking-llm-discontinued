@@ -12,10 +12,17 @@ from src.patterns import find_matches_in_line
 logger = logging.getLogger(__name__)
 
 # Directories to skip during scanning
+# Au-dela, une ligne est du code genere, pas ecrit. Une declaration de modele
+# reelle tient tres largement en dessous : la plus longue rencontree dans les
+# depots Baseline fait environ 120 caracteres.
+MAX_LINE_LENGTH = 500
+
 EXCLUDED_DIRS: frozenset[str] = frozenset(
     {
         ".git",
         "node_modules",
+        "vendor",
+        "bower_components",
         "__pycache__",
         "venv",
         ".venv",
@@ -129,6 +136,16 @@ def _walk_files(root: Path) -> list[Path]:
     return files
 
 
+def _is_minified(file_path: Path) -> bool:
+    """Vrai si le nom du fichier annonce du contenu minifie ou groupe.
+
+    Complete le garde-fou sur la longueur de ligne : certains bundles gardent
+    des sauts de ligne tout en restant du code genere que personne ne modifie.
+    """
+    nom = file_path.name.lower()
+    return ".min." in nom or "-min." in nom or "-min-" in nom or nom.endswith(".bundle.js")
+
+
 def _scan_file(
     file_path: Path,
     relative_path: str,
@@ -136,6 +153,9 @@ def _scan_file(
     matches: list[ScanMatch],
 ) -> None:
     """Scan a single file for LLM model references."""
+    if _is_minified(file_path):
+        return
+
     try:
         content = file_path.read_text(encoding="utf-8", errors="ignore")
     except OSError as exc:
@@ -143,6 +163,16 @@ def _scan_file(
         return
 
     for line_num, line in enumerate(content.splitlines(), start=1):
+        # Une ligne aussi longue n'est pas du code ecrit par un humain : c'est du
+        # minifie ou un bundle. Le probleme n'est pas seulement le bruit, c'est
+        # que la detection de contexte raisonne PAR LIGNE. Un fichier minifie
+        # tient sur une seule ligne de plusieurs dizaines de milliers de
+        # caracteres, donc n'importe quel mot-cle present ailleurs dans le
+        # fichier valide le contexte d'un nom de modele court comme `ada`.
+        # Cas reel : ext-modelist.js de l'editeur ACE, qui liste ses modes de
+        # langage dont Ada, a ouvert une issue dans baseline.quebec.
+        if len(line) > MAX_LINE_LENGTH:
+            continue
         for provider, model_name, match_type in find_matches_in_line(line):
             dedup_key = (model_name, relative_path, match_type)
             if dedup_key in seen:
