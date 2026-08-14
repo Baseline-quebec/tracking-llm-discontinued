@@ -131,7 +131,12 @@ def build_body(alert: DeprecationAlert) -> str:
 def create_issues_dry_run(alerts: list[DeprecationAlert]) -> dict[str, int | bool]:
     with patch("src.issue_reporter.subprocess.run") as mock_run:
         count, _failed = create_issues(alerts, dry_run=True)
-        return {"count": count, "subprocess_called": mock_run.called}
+        commands = [" ".join(call.args[0]) for call in mock_run.call_args_list]
+        return {
+            "count": count,
+            "subprocess_called": mock_run.called,
+            "wrote": any("issue create" in c or "label create" in c for c in commands),
+        }
 
 
 @when(
@@ -200,12 +205,16 @@ def check_issues_created(create_result: dict[str, int | bool], count: int) -> No
 
 
 @then(
-    "gh CLI should not have been called",
+    "gh CLI should not have been called to write",
 )
-def check_no_subprocess(create_result: dict[str, int | bool]) -> None:
-    assert not create_result["subprocess_called"], (
-        "subprocess.run should not have been called in dry-run"
-    )
+def check_no_write(create_result: dict[str, int | bool]) -> None:
+    """Dry-run must not write, but it may read.
+
+    The deduplication check runs in dry-run on purpose: without it the
+    rehearsal counted every alert as new and overestimated what a real run
+    would file, which defeats the point of rehearsing.
+    """
+    assert not create_result["wrote"], "no issue or label should be created in dry-run"
 
 
 @then(
