@@ -28,6 +28,21 @@ Feature: Repository file scanner
     Then I should find 1 scan matches
     And the results should contain model "gpt-4o"
 
+  Scenario: Scanner skips minified files
+    Given a temporary directory with the following files:
+      | path                          | content            |
+      | src/main.py                   | model = "gpt-4o"   |
+      | assets/ace.min.js             | model = "gpt-4"    |
+      | assets/ext-min-modelist.js    | model = "gpt-4"    |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
+
+  Scenario: Scanner ignores a machine-generated line
+    Given a temporary directory with a very long line mentioning "ada" and the word model
+    When I scan the directory for repo "test-repo"
+    Then I should find 0 scan matches
+
   Scenario: Scanner skips files with unsupported extensions
     Given a temporary directory with the following files:
       | path           | content              |
