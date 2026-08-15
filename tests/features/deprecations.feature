@@ -9,7 +9,8 @@ Feature: Model deprecation detection
 
     Examples:
       | model                  | status     |
-      | gpt-3.5-turbo          | deprecated |
+      | claude-3.5-haiku       | deprecated |
+      | gpt-3.5-turbo          | retiring   |
       | gpt-4o                 | retiring   |
       | o1-preview             | shutdown   |
       | text-embedding-ada-002 | retiring   |
