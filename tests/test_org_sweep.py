@@ -79,13 +79,13 @@ def _listing_fails(context: dict[str, Any]) -> None:
 
 @when("I list the repositories to sweep")
 def _list_repositories(context: dict[str, Any]) -> None:
-    with patch("src.org_sweep.subprocess.run", return_value=context["listing"]):
+    with patch("src.gh.subprocess.run", return_value=context["listing"]):
         context["repositories"] = list_repositories("org")
 
 
 @when(parsers.parse('I list the repositories excluding "{excluded}"'))
 def _list_excluding(context: dict[str, Any], excluded: str) -> None:
-    with patch("src.org_sweep.subprocess.run", return_value=context["listing"]):
+    with patch("src.gh.subprocess.run", return_value=context["listing"]):
         context["repositories"] = list_repositories("org", {excluded})
 
 
@@ -138,7 +138,7 @@ def _sweep(context: dict[str, Any]) -> None:
     with (
         patch("src.org_sweep.clone", side_effect=context["clone"]),
         patch("src.org_sweep.create_issues", return_value=(1, 0)) as create_issues,
-        patch("src.org_sweep.check_deprecation") as check,
+        patch("src.issue_reporter.check_deprecation") as check,
     ):
         check.side_effect = lambda model: (
             MagicMock(model=model) if "claude-3-sonnet" in model else None

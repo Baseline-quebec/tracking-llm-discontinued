@@ -113,7 +113,7 @@ def given_assignees(assignees_str: str) -> list[str]:
     target_fixture="title",
 )
 def build_title(lifecycle: DeprecatedModel) -> str:
-    return _build_title(lifecycle)
+    return _build_title(lifecycle.model)
 
 
 @when(
@@ -129,7 +129,7 @@ def build_body(alert: DeprecationAlert) -> str:
     target_fixture="create_result",
 )
 def create_issues_dry_run(alerts: list[DeprecationAlert]) -> dict[str, int | bool]:
-    with patch("src.issue_reporter.subprocess.run") as mock_run:
+    with patch("src.gh.subprocess.run") as mock_run:
         count, _failed = create_issues(alerts, dry_run=True)
         commands = [" ".join(call.args[0]) for call in mock_run.call_args_list]
         return {
@@ -145,7 +145,7 @@ def create_issues_dry_run(alerts: list[DeprecationAlert]) -> dict[str, int | boo
 )
 def create_issues_gh_failure(alerts: list[DeprecationAlert]) -> dict[str, int | bool]:
     mock_result = subprocess.CompletedProcess(args=[], returncode=1, stdout="", stderr="error")
-    with patch("src.issue_reporter.subprocess.run", return_value=mock_result):
+    with patch("src.gh.subprocess.run", return_value=mock_result):
         count, _failed = create_issues(alerts, dry_run=False)
         return {"count": count, "subprocess_called": True}
 
@@ -158,7 +158,7 @@ def create_issues_gh_timeout(alerts: list[DeprecationAlert]) -> dict[str, int | 
     def raise_timeout(*args: object, **kwargs: object) -> None:
         raise subprocess.TimeoutExpired(cmd=["gh"], timeout=30)
 
-    with patch("src.issue_reporter.subprocess.run", side_effect=raise_timeout):
+    with patch("src.gh.subprocess.run", side_effect=raise_timeout):
         count, _failed = create_issues(alerts, dry_run=False)
         return {"count": count, "subprocess_called": True}
 
@@ -251,7 +251,7 @@ def _gh_success(*args: object, **kwargs: object) -> subprocess.CompletedProcess[
 def create_issues_with_webhook(alerts: list[DeprecationAlert]) -> dict[str, object]:
     webhook_mock = MagicMock(return_value=True)
     with (
-        patch("src.issue_reporter.subprocess.run", side_effect=_gh_success),
+        patch("src.gh.subprocess.run", side_effect=_gh_success),
         patch("src.issue_reporter.send_webhook", webhook_mock),
     ):
         count, _failed = create_issues(
@@ -270,7 +270,7 @@ def create_issues_with_webhook(alerts: list[DeprecationAlert]) -> dict[str, obje
 def create_issues_with_webhook_failing(alerts: list[DeprecationAlert]) -> dict[str, object]:
     webhook_mock = MagicMock(return_value=False)
     with (
-        patch("src.issue_reporter.subprocess.run", side_effect=_gh_success),
+        patch("src.gh.subprocess.run", side_effect=_gh_success),
         patch("src.issue_reporter.send_webhook", webhook_mock),
     ):
         count, _failed = create_issues(
@@ -308,7 +308,7 @@ def _gh_list_issues(titles: list[str]) -> subprocess.CompletedProcess[str]:
 def test_issue_exists_returns_true_on_exact_title_match() -> None:
     """When an open issue exactly matches the model title, _issue_exists is True."""
     fake = _gh_list_issues(["Modèle déprécié : gpt-4"])
-    with patch("src.issue_reporter.subprocess.run", return_value=fake):
+    with patch("src.gh.subprocess.run", return_value=fake):
         assert _issue_exists("gpt-4") is True
 
 
@@ -319,20 +319,20 @@ def test_issue_exists_returns_false_when_only_superstring_match() -> None:
     blocked creating issues for 'gpt-4' when an open 'gpt-4o' issue existed.
     """
     fake = _gh_list_issues(["Modèle déprécié : gpt-4o"])
-    with patch("src.issue_reporter.subprocess.run", return_value=fake):
+    with patch("src.gh.subprocess.run", return_value=fake):
         assert _issue_exists("gpt-4") is False
 
 
 def test_issue_exists_returns_false_when_title_is_substring() -> None:
     """A 'gpt-4o-mini' lookup must NOT match a 'gpt-4o' open issue."""
     fake = _gh_list_issues(["Modèle déprécié : gpt-4o"])
-    with patch("src.issue_reporter.subprocess.run", return_value=fake):
+    with patch("src.gh.subprocess.run", return_value=fake):
         assert _issue_exists("gpt-4o-mini") is False
 
 
 def test_issue_exists_returns_false_for_unsafe_model_name() -> None:
     """Model names with unsafe chars are rejected without calling gh."""
-    with patch("src.issue_reporter.subprocess.run") as mock_run:
+    with patch("src.gh.subprocess.run") as mock_run:
         assert _issue_exists("gpt-4; rm -rf /") is False
         mock_run.assert_not_called()
 
@@ -340,14 +340,14 @@ def test_issue_exists_returns_false_for_unsafe_model_name() -> None:
 def test_issue_exists_returns_false_on_gh_failure() -> None:
     """When gh CLI returns non-zero, treat as 'no existing issue' (proceed)."""
     fail = subprocess.CompletedProcess(args=[], returncode=1, stdout="", stderr="auth failed")
-    with patch("src.issue_reporter.subprocess.run", return_value=fail):
+    with patch("src.gh.subprocess.run", return_value=fail):
         assert _issue_exists("gpt-4") is False
 
 
 def test_issue_exists_returns_false_on_invalid_json() -> None:
     """Malformed gh CLI output is handled without raising."""
     bad = subprocess.CompletedProcess(args=[], returncode=0, stdout="not-json", stderr="")
-    with patch("src.issue_reporter.subprocess.run", return_value=bad):
+    with patch("src.gh.subprocess.run", return_value=bad):
         assert _issue_exists("gpt-4") is False
 
 
@@ -357,5 +357,5 @@ def test_issue_exists_returns_false_on_timeout() -> None:
     def raise_timeout(*args: object, **kwargs: object) -> None:
         raise subprocess.TimeoutExpired(cmd=["gh"], timeout=30)
 
-    with patch("src.issue_reporter.subprocess.run", side_effect=raise_timeout):
+    with patch("src.gh.subprocess.run", side_effect=raise_timeout):
         assert _issue_exists("gpt-4") is False

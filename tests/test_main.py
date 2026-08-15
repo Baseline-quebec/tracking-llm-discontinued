@@ -9,8 +9,8 @@ from unittest.mock import patch
 from pytest_bdd import given, parsers, scenarios, then, when
 
 from src.deprecations import DeprecatedModel
-from src.issue_reporter import DeprecationAlert
-from src.main import _build_deprecated_summary, _find_deprecated, _set_github_output, parse_args
+from src.issue_reporter import DeprecationAlert, alerts_from_matches
+from src.main import _build_deprecated_summary, _set_github_output, parse_args
 from src.models import ScanMatch
 from src.scanner import scan_directory
 
@@ -110,7 +110,7 @@ def parse_arguments(cli_args: list[str]) -> dict[str, str | bool]:
     target_fixture="deprecated_alerts",
 )
 def check_deprecated(scan_matches: list[ScanMatch]) -> list[DeprecationAlert]:
-    return _find_deprecated(scan_matches)
+    return alerts_from_matches(scan_matches)
 
 
 @when(
@@ -140,7 +140,7 @@ def set_output(github_output_path: Path, name: str, value: str) -> Path:
 def run_main_dry(scan_dir: Path, repo_name: str) -> dict[str, int]:
     from src.main import main
 
-    with patch("src.issue_reporter.subprocess.run"):
+    with patch("src.gh.subprocess.run"):
         try:
             main(["--repo-name", repo_name, "--scan-path", str(scan_dir), "--dry-run"])
             return {"exit_code": 0}
@@ -212,7 +212,7 @@ def scan_and_check_deprecations(
     scan_dir: Path, repo_name: str
 ) -> dict[str, list[DeprecationAlert] | list[ScanMatch]]:
     result = scan_directory(scan_dir, repo_name)
-    alerts = _find_deprecated(result.matches)
+    alerts = alerts_from_matches(result.matches)
     return {"alerts": alerts, "matches": result.matches}
 
 
