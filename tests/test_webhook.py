@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import date
 from unittest.mock import MagicMock, patch
 from urllib.error import HTTPError, URLError
@@ -104,6 +105,24 @@ def given_url_500() -> dict[str, object]:
 
 
 @given(
+    "a webhook URL that returns HTTP 403",
+    target_fixture="webhook_setup",
+)
+def given_url_403() -> dict[str, object]:
+    return {
+        "url": "https://example.com/webhook",
+        "error": HTTPError(
+            "https://example.com/webhook",
+            403,
+            "Forbidden",
+            {},
+            None,  # type: ignore[arg-type]
+        ),
+        "status": None,
+    }
+
+
+@given(
     "a webhook URL that causes a network error",
     target_fixture="webhook_setup",
 )
@@ -138,6 +157,7 @@ def _mock_urlopen(setup: dict[str, object]) -> MagicMock:
     else:
         response = MagicMock()
         response.status = setup["status"]
+        response.read = MagicMock(return_value=b"")
         response.__enter__ = MagicMock(return_value=response)
         response.__exit__ = MagicMock(return_value=False)
         mock.return_value = response
@@ -148,10 +168,13 @@ def _mock_urlopen(setup: dict[str, object]) -> MagicMock:
     "I send the webhook",
     target_fixture="webhook_result",
 )
-def send_webhook_normal(webhook_setup: dict[str, object]) -> dict[str, object]:
+def send_webhook_normal(
+    webhook_setup: dict[str, object],
+    caplog: pytest.LogCaptureFixture,
+) -> dict[str, object]:
     mock = _mock_urlopen(webhook_setup)
     alerts = _make_alerts()
-    with patch("src.webhook.urlopen", mock):
+    with caplog.at_level(logging.WARNING), patch("src.http.urlopen", mock):
         result = send_webhook(
             url=str(webhook_setup["url"]),
             repo_name="org/repo",
@@ -163,7 +186,12 @@ def send_webhook_normal(webhook_setup: dict[str, object]) -> dict[str, object]:
             assignees=["davebulaval"],
         )
     request = mock.call_args.args[0] if mock.called else None
-    return {"result": result, "urlopen_called": mock.called, "request": request}
+    return {
+        "result": result,
+        "urlopen_called": mock.called,
+        "request": request,
+        "warnings": caplog.text,
+    }
 
 
 @when(
@@ -173,7 +201,7 @@ def send_webhook_normal(webhook_setup: dict[str, object]) -> dict[str, object]:
 def send_webhook_dry_run(webhook_setup: dict[str, object]) -> dict[str, object]:
     mock = _mock_urlopen(webhook_setup)
     alerts = _make_alerts()
-    with patch("src.webhook.urlopen", mock):
+    with patch("src.http.urlopen", mock):
         result = send_webhook(
             url=str(webhook_setup["url"]),
             repo_name="org/repo",
@@ -250,3 +278,10 @@ def _carries_no_token(webhook_result: dict[str, object]) -> None:
     request = webhook_result["request"]
     assert request is not None
     assert request.get_header("Authorization") is None
+
+
+@then(parsers.cfparse('the warning should mention "{text}"'))
+def check_warning_mentions(webhook_result: dict[str, object], text: str) -> None:
+    assert text in str(webhook_result["warnings"]), (
+        f"Expected '{text}' in warnings: {webhook_result['warnings']}"
+    )

@@ -61,10 +61,11 @@ def _unreachable(context: dict[str, Any]) -> None:
 def _envoyer(context: dict[str, Any], affected: int, scanned: int) -> None:
     reponse = MagicMock()
     reponse.status = 200
+    reponse.read = MagicMock(return_value=b"")
     reponse.__enter__ = MagicMock(return_value=reponse)
     reponse.__exit__ = MagicMock(return_value=False)
 
-    with patch("src.slack_report.urllib.request.urlopen") as ouvrir:
+    with patch("src.http.urlopen") as ouvrir:
         if context.get("erreur") is not None:
             ouvrir.side_effect = context["erreur"]
         else:

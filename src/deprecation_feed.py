@@ -8,9 +8,10 @@ from __future__ import annotations
 import json
 import logging
 import time
-import urllib.request
 from datetime import date
 from typing import TYPE_CHECKING, Any
+
+from src.http import request_json
 
 
 if TYPE_CHECKING:
@@ -19,6 +20,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 FEED_URL = "https://deprecations.info/v1/deprecations.json"
+USER_AGENT = "llm-scanner/1.0"
 FEED_TIMEOUT = 10
 MAX_RETRIES = 3
 RETRY_DELAY = 2  # seconds
@@ -39,17 +41,23 @@ def fetch_deprecations() -> list[DeprecatedModel]:
     Returns an empty list on any network or parsing error (silent fallback).
     """
     for attempt in range(1, MAX_RETRIES + 1):
-        try:
-            req = urllib.request.Request(  # noqa: S310 - FEED_URL is a hardcoded https constant
-                FEED_URL, headers={"User-Agent": "llm-scanner/1.0"}
+        response = request_json(FEED_URL, timeout=FEED_TIMEOUT, user_agent=USER_AGENT)
+        if response.ok:
+            try:
+                data: list[dict[str, Any]] = json.loads(response.body)
+            except json.JSONDecodeError as exc:
+                logger.warning("Attempt %d/%d failed: %s", attempt, MAX_RETRIES, exc)
+            else:
+                return _parse_feed(data)
+        else:
+            logger.warning(
+                "Attempt %d/%d failed: %s",
+                attempt,
+                MAX_RETRIES,
+                response.erreur or response.status,
             )
-            with urllib.request.urlopen(req, timeout=FEED_TIMEOUT) as resp:  # noqa: S310
-                data: list[dict[str, Any]] = json.loads(resp.read().decode())
-            return _parse_feed(data)
-        except (OSError, json.JSONDecodeError, ValueError) as exc:
-            logger.warning("Attempt %d/%d failed: %s", attempt, MAX_RETRIES, exc)
-            if attempt < MAX_RETRIES:
-                time.sleep(RETRY_DELAY)
+        if attempt < MAX_RETRIES:
+            time.sleep(RETRY_DELAY)
     return []
 
 

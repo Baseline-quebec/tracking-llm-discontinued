@@ -17,8 +17,8 @@ import logging
 import os
 from datetime import UTC, datetime
 from typing import TYPE_CHECKING
-from urllib.error import URLError
-from urllib.request import Request, urlopen
+
+from src.http import request_json
 
 
 if TYPE_CHECKING:
@@ -101,31 +101,21 @@ def _post(url: str, payload: dict[str, object]) -> bool:
 
     Returns True on success (2xx), False on any error.
     """
-    data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    headers = {"Content-Type": "application/json"}
     token = os.environ.get("LLM_SCAN_WEBHOOK_TOKEN", "").strip()
-    if token:
-        headers["Authorization"] = f"Bearer {token}"
+    response = request_json(url, payload=payload, token=token, timeout=_WEBHOOK_TIMEOUT_SECONDS)
 
-    request = Request(url, data=data, headers=headers)  # noqa: S310
-
-    try:
-        with urlopen(request, timeout=_WEBHOOK_TIMEOUT_SECONDS) as response:  # noqa: S310
-            status = response.status
-    except (URLError, OSError, TimeoutError) as exc:
-        logger.warning("Webhook POST to %s failed: %s", url, exc)
-        return False
-
-    if 200 <= status < 300:
-        logger.info("Webhook POST to %s succeeded (HTTP %d)", url, status)
+    if response.ok:
+        logger.info("Webhook POST to %s succeeded (HTTP %s)", url, response.status)
         return True
 
-    if status == _HTTP_FORBIDDEN and not token:
+    if response.status is None:
+        logger.warning("Webhook POST to %s failed: %s", url, response.erreur)
+    elif response.status == _HTTP_FORBIDDEN and not token:
         logger.warning(
             "Webhook POST to %s returned HTTP 403 and no token was provided. "
             "Set LLM_SCAN_WEBHOOK_TOKEN if the destination requires authentication.",
             url,
         )
     else:
-        logger.warning("Webhook POST to %s returned HTTP %d", url, status)
+        logger.warning("Webhook POST to %s returned HTTP %d", url, response.status)
     return False
