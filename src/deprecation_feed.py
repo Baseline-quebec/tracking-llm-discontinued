@@ -9,12 +9,12 @@ import json
 import logging
 import time
 import urllib.request
-from datetime import UTC, date, datetime
+from datetime import date
 from typing import TYPE_CHECKING, Any
 
 
 if TYPE_CHECKING:
-    from src.deprecations import DeprecatedModel, DeprecationStatus
+    from src.deprecations import DeprecatedModel
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +55,7 @@ def fetch_deprecations() -> list[DeprecatedModel]:
 
 def _parse_feed(data: list[dict[str, Any]]) -> list[DeprecatedModel]:
     """Parse raw JSON entries into DeprecatedModel objects."""
-    from src.deprecations import DeprecatedModel
+    from src.deprecations import DeprecatedModel, status_for
 
     results: list[DeprecatedModel] = []
     for entry in data:
@@ -68,6 +68,14 @@ def _parse_feed(data: list[dict[str, Any]]) -> list[DeprecatedModel]:
         if not model_id:
             continue
 
+        # Le flux melange des model IDs et des entetes de categorie
+        # ("Agent Builder", "Reusable prompts"). Les ecrire dans le registre
+        # revenait a faire rejeter l'entree par load_registry a chaque appel,
+        # avec un avertissement, et a gonfler le fichier de lignes mortes.
+        if " " in model_id:
+            logger.info("Entete de categorie ignoree : %s", model_id)
+            continue
+
         raw_date = entry.get("shutdown_date")
         shutdown_date = _parse_date(raw_date)
         if raw_date and shutdown_date is None:
@@ -76,21 +84,11 @@ def _parse_feed(data: list[dict[str, Any]]) -> list[DeprecatedModel]:
             )
             continue
 
-        # Determine status from dates
-        status: DeprecationStatus
-        today = datetime.now(tz=UTC).date()
-        if shutdown_date is not None and shutdown_date < today:
-            status = "shutdown"
-        elif shutdown_date is not None:
-            status = "retiring"
-        else:
-            status = "deprecated"
-
         results.append(
             DeprecatedModel(
                 model=model_id,
                 provider=internal_provider,
-                status=status,
+                status=status_for(shutdown_date),
                 shutdown_date=shutdown_date,
             )
         )

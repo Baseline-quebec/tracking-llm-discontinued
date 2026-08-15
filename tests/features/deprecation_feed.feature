@@ -11,3 +11,8 @@ Feature: Deprecation feed fetching with retry
     Given a feed endpoint that always fails
     When I fetch deprecations
     Then I should receive an empty list
+
+  Scenario: Category headers are not model IDs
+    Given a feed endpoint returning the category header "Agent Builder"
+    When I fetch deprecations
+    Then I should receive an empty list

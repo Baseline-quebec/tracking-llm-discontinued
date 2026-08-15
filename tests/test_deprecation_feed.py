@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 from unittest.mock import MagicMock, patch
 
-from pytest_bdd import given, scenarios, then, when
+from pytest_bdd import given, parsers, scenarios, then, when
 
 from src.deprecation_feed import fetch_deprecations
 
@@ -46,6 +46,27 @@ def given_transient_failures() -> MagicMock:
 )
 def given_always_failing() -> MagicMock:
     return MagicMock(side_effect=OSError("Connection refused"))
+
+
+@given(
+    parsers.cfparse('a feed endpoint returning the category header "{header}"'),
+    target_fixture="mock_urlopen",
+)
+def given_category_header(header: str) -> MagicMock:
+    """Simule un flux ne renvoyant qu'un entete de section.
+
+    Le flux melange des model IDs et des entetes, reconnaissables a leur espace.
+    Les laisser passer polluait le registre d'entrees que load_registry rejette
+    ensuite une par une, avec un avertissement a chaque appel.
+    """
+    feed = [{"provider": "OpenAI", "model_id": header, "shutdown_date": "2026-06-03"}]
+    return MagicMock(
+        return_value=MagicMock(
+            read=MagicMock(return_value=json.dumps(feed).encode()),
+            __enter__=lambda s: s,
+            __exit__=MagicMock(return_value=False),
+        )
+    )
 
 
 @when(

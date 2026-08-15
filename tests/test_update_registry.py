@@ -25,7 +25,10 @@ def _make_lifecycle(
         model=model,
         provider=provider,
         status=status,
-        shutdown_date=date(2026, 10, 1),
+        # Date volontairement lointaine : load_registry requalifie en `shutdown`
+        # toute entree dont la date est passee, une date proche ferait basculer
+        # ces scenarios du jour au lendemain.
+        shutdown_date=date(2099, 10, 1),
     )
 
 

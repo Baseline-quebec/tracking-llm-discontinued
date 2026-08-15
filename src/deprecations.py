@@ -66,14 +66,50 @@ def _validate_entry(entry: dict[str, Any]) -> bool:
     return True
 
 
-def _entry_to_deprecated(entry: dict[str, Any]) -> DeprecatedModel:
+def status_for(shutdown_date: date | None, today: date | None = None) -> DeprecationStatus:
+    """Statut derive de la date d'arret.
+
+    Le flux deprecations.info ne publie pas de statut : il publie une date, dont
+    le statut se deduit. `deprecated` ne veut donc pas dire « le fournisseur l'a
+    deprecie » mais « aucune date d'arret connue ».
+    """
+    if shutdown_date is None:
+        return "deprecated"
+    reference = today if today is not None else datetime.now(tz=UTC).date()
+    return "shutdown" if shutdown_date < reference else "retiring"
+
+
+def _refresh_status(
+    status: DeprecationStatus,
+    shutdown_date: date | None,
+    today: date,
+) -> DeprecationStatus:
+    """Requalifie en `shutdown` une entree dont la date d'arret est passee.
+
+    Le statut n'est recalcule qu'au moment ou le flux renvoie l'entree. Or
+    `merge_registries` n'efface jamais : un modele que le flux cesse de publier
+    garde son statut a vie. Quatre entrees etaient ainsi encore `retiring` avec
+    une date de juillet 2026, et l'issue ouverte aurait annonce un retrait a
+    venir pour un modele deja eteint.
+
+    La requalification est a sens unique. Un `shutdown` dont la date est future
+    n'est pas ramene a `retiring` : le flux peut legitimement declarer un arret
+    en avance, et le registre ne doit pas le contredire.
+    """
+    if status != "shutdown" and shutdown_date is not None and shutdown_date < today:
+        return "shutdown"
+    return status
+
+
+def _entry_to_deprecated(entry: dict[str, Any], today: date) -> DeprecatedModel:
     """Convert a JSON entry to a DeprecatedModel object."""
     shutdown_str = entry.get("shutdown_date")
+    shutdown_date = date.fromisoformat(shutdown_str) if shutdown_str else None
     return DeprecatedModel(
         model=entry["model"],
         provider=entry["provider"],
-        status=entry["status"],
-        shutdown_date=date.fromisoformat(shutdown_str) if shutdown_str else None,
+        status=_refresh_status(entry["status"], shutdown_date, today),
+        shutdown_date=shutdown_date,
     )
 
 
@@ -102,12 +138,13 @@ def load_registry(path: Path | None = None) -> dict[str, DeprecatedModel]:
     except (OSError, json.JSONDecodeError) as exc:
         logger.warning("Could not load registry from %s: %s", registry_path, exc)
         return {}
+    today = datetime.now(tz=UTC).date()
     registry: dict[str, DeprecatedModel] = {}
     for entry in data.get("models", []):
         if not _validate_entry(entry):
             logger.warning("Skipping invalid registry entry: %s", entry)
             continue
-        dm = _entry_to_deprecated(entry)
+        dm = _entry_to_deprecated(entry, today)
         registry[dm.model.lower()] = dm
     return registry
 
