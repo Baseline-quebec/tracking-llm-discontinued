@@ -1,17 +1,38 @@
-"""BDD step definitions for model deprecation detection tests."""
+"""BDD step definitions for model deprecation detection tests.
+
+Ces scenarios s'executent contre `tests/data/registry_fige.json` et non contre
+`data/registry.json`. Le vrai registre est reecrit tous les quinze jours par le
+workflow de mise a jour : y coder en dur qu'un modele est `deprecated` faisait
+echouer la suite des que deprecations.info changeait son statut, ce qui n'apprend
+rien sur `check_deprecation`. Le registre fige teste la mecanique (les trois
+statuts, le retrait du suffixe de date, l'absence du registre) sur des donnees
+qui, elles, ne bougent pas.
+"""
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from pathlib import Path
 
+import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-from src.deprecations import DeprecatedModel, check_deprecation
+from src.deprecations import DeprecatedModel, check_deprecation, reload_deprecation_registry
 from src.issue_reporter import DeprecationAlert
 from src.scanner import scan_directory
 
 
 scenarios("features/deprecations.feature")
+
+_REGISTRE_FIGE = Path(__file__).parent / "data" / "registry_fige.json"
+
+
+@pytest.fixture(autouse=True)
+def registre_fige() -> Iterator[None]:
+    """Substitue le registre fige au registre de production le temps du test."""
+    reload_deprecation_registry(_REGISTRE_FIGE)
+    yield
+    reload_deprecation_registry()
 
 
 @given(

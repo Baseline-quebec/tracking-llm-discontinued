@@ -2,6 +2,10 @@ Feature: Model deprecation detection
   The scanner should identify deprecated or retiring models
   and provide deprecation information including shutdown dates.
 
+  Les statuts ci-dessous viennent de tests/data/registry_fige.json, pas du
+  registre de production : celui-ci est reecrit tous les quinze jours et ses
+  statuts ne sont pas des invariants testables.
+
   Scenario Outline: Detect deprecated models
     Given a model name "<model>"
     When I check its deprecation status
