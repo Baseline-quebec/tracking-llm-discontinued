@@ -53,6 +53,10 @@ Feature: LLM model pattern detection
       | model = "voyage-3-lite"                    | voyage-3-lite             | voyage   |
       | model = "gemini-embedding-001"             | gemini-embedding-001      | google   |
       | model: gemini-embedding-exp                 | gemini-embedding-exp      | google   |
+      | model = "embedding-001"                    | embedding-001             | google   |
+      | model: embedding-gecko-001                  | embedding-gecko-001       | google   |
+      | model = "embedding-2-preview"              | embedding-2-preview       | google   |
+      | model = "text-embedding-004"               | text-embedding-004        | google   |
 
   Scenario Outline: Short model names require context keywords
     Given a line containing "<line>"
@@ -122,8 +126,24 @@ Feature: LLM model pattern detection
       | model = "gpt-4o-search-preview-2025-03-11"       | gpt-4o-search-preview-2025-03-11   |
       | model = "gpt-4o-mini-tts-2025-03-20"             | gpt-4o-mini-tts-2025-03-20         |
       | model = "gpt-image-1"                            | gpt-image-1                        |
+      | model = "gpt-image-1-mini"                       | gpt-image-1-mini                   |
+      | model = "gpt-image-1.5"                          | gpt-image-1.5                      |
+      | model = "chatgpt-image-latest"                   | chatgpt-image-latest               |
       | model = "gpt-audio-mini-2025-10-06"              | gpt-audio-mini-2025-10-06          |
       | model = "gpt-realtime-mini-2025-10-06"           | gpt-realtime-mini-2025-10-06       |
+      | model = "gpt-audio"                              | gpt-audio                          |
+      | model = "gpt-realtime"                           | gpt-realtime                       |
+      | model = "gpt-audio-mini"                         | gpt-audio-mini                     |
+      | model = "gpt-4o-audio"                           | gpt-4o-audio                       |
+      | model = "gpt-4o-realtime"                        | gpt-4o-realtime                    |
+      | model = "gpt-4o-mini-audio"                      | gpt-4o-mini-audio                  |
+      | model = "gpt-4o-mini-realtime"                   | gpt-4o-mini-realtime               |
+      | model = "gpt-4o-mini-transcribe-2025-03-20"      | gpt-4o-mini-transcribe-2025-03-20  |
+      | model = "gpt-5.3-chat-latest"                    | gpt-5.3-chat-latest                |
+      | model = "gpt-3.5-turbo-completions"              | gpt-3.5-turbo-completions          |
+      | model = "gpt-4-completions"                      | gpt-4-completions                  |
+      | model = "gpt-4-0613-completions"                 | gpt-4-0613-completions             |
+      | model = "gpt-4-turbo-completions"                | gpt-4-turbo-completions            |
       | model = "gpt-5-chat-latest"                       | gpt-5-chat-latest                  |
       | model = "gpt-5.1-chat-latest"                     | gpt-5.1-chat-latest                |
       | model = "gpt-5.1-codex-mini"                      | gpt-5.1-codex-mini                 |

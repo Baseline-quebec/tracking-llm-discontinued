@@ -58,37 +58,42 @@ def _build_patterns() -> list[ModelPattern]:
     _add(
         "openai",
         "llm",
-        r"\bgpt-5(?:\.[12])?(?:-(?:mini|nano|pro|codex|chat))?"
+        r"\bgpt-5(?:\.\d)?(?:-(?:mini|nano|pro|codex|chat))?"
         r"(?:-(?:latest|mini|max)|-\d{4}-\d{2}-\d{2})?\b",
     )
     _add("openai", "llm", r"\bgpt-4\.5-preview\b")
     _add("openai", "llm", r"\bgpt-4\.1(?:-(?:mini|nano))?(?:-\d{4}-\d{2}-\d{2})?\b")
-    _add("openai", "llm", r"\bgpt-4o-audio-preview(?:-\d{4}-\d{2}-\d{2})?\b")
-    _add("openai", "llm", r"\bgpt-4o-realtime-preview(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4o-audio(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4o-realtime(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4o-search-preview(?:-\d{4}-\d{2}-\d{2})?\b")
     _add(
         "openai",
         "llm",
-        r"\bgpt-4o-mini-(?:audio|realtime|search)-preview(?:-\d{4}-\d{2}-\d{2})?\b",
+        r"\bgpt-4o-mini-(?:audio|realtime|search)(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?\b",
     )
-    _add("openai", "llm", r"\bgpt-4o-mini-tts(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-4o-mini-(?:tts|transcribe)(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bgpt-4o(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")
-    _add("openai", "llm", r"\bgpt-4-turbo-preview-completions\b")
-    _add("openai", "llm", r"\bgpt-4-turbo(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    # Suffixe `-completions` : identifiants d'endpoint publies par deprecations.info
+    # (ex: gpt-4-turbo-completions), distincts du modele servi via /chat/completions.
+    _add("openai", "llm", r"\bgpt-4-turbo(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?(?:-completions)?\b")
     _add("openai", "llm", r"\bgpt-4-vision-preview\b")
     _add("openai", "llm", r"\bgpt-4-\d{4}-vision-preview\b")
     _add("openai", "llm", r"\bgpt-4-\d{4}-preview\b")
     # gpt-4-MMDD: negative lookahead prevents matching YYYY-MM-DD date suffixes
-    _add("openai", "llm", r"\bgpt-4-\d{4}(?!-\d{2}-\d{2})\b")
+    _add("openai", "llm", r"\bgpt-4-\d{4}(?!-\d{2}-\d{2})(?:-completions)?\b")
     _add("openai", "llm", r"\bgpt-4-32k-\d{4}\b")
     # gpt-4 base: negative lookahead prevents matching gpt-4.1, gpt-4.5, gpt-4o, gpt-4-turbo
-    _add("openai", "llm", r"\bgpt-4(?!\.\d|o|-turbo)(?:-32k)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add(
+        "openai",
+        "llm",
+        r"\bgpt-4(?!\.\d|o|-turbo)(?:-32k)?(?:-\d{4}-\d{2}-\d{2})?(?:-completions)?\b",
+    )
     _add("openai", "llm", r"\bgpt-3\.5-turbo-instruct\b")
     _add("openai", "llm", r"\bgpt-3\.5-turbo-16k(?:-\d{4})?\b")
-    _add("openai", "llm", r"\bgpt-3\.5-turbo(?:-\d{4})?\b")
-    _add("openai", "llm", r"\bgpt-(?:audio|realtime)-mini(?:-\d{4}-\d{2}-\d{2})?\b")
-    _add("openai", "llm", r"\bgpt-image-\d+\b")
-    _add("openai", "llm", r"\bchatgpt-4o-latest\b")
+    _add("openai", "llm", r"\bgpt-3\.5-turbo(?:-\d{4})?(?:-completions)?\b")
+    _add("openai", "llm", r"\bgpt-(?:audio|realtime)(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add("openai", "llm", r"\bgpt-image-\d+(?:\.\d+)?(?:-mini)?\b")
+    _add("openai", "llm", r"\bchatgpt-(?:4o|image)-latest\b")
     _add(
         "openai",
         "llm",
@@ -137,8 +142,9 @@ def _build_patterns() -> list[ModelPattern]:
     _add("openai", "llm", r"(?<![a-z0-9-])davinci(?:-\d{3})?\b", context_required=True)
 
     # --- Anthropic ---
-    _add("anthropic", "llm", r"\bclaude-opus-4(?:-\d{8})?\b")
-    _add("anthropic", "llm", r"\bclaude-sonnet-4(?:-\d{8})?\b")
+    # Le point de version mineur est un tiret chez Anthropic : claude-opus-4-1-20250805.
+    _add("anthropic", "llm", r"\bclaude-opus-4(?:-\d)?(?:-\d{8})?\b")
+    _add("anthropic", "llm", r"\bclaude-sonnet-4(?:-\d)?(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3[\.-]7-sonnet(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3[\.-]5-sonnet(?:-\d{8})?\b")
     _add("anthropic", "llm", r"\bclaude-3[\.-]5-haiku(?:-\d{8})?\b")
@@ -166,6 +172,11 @@ def _build_patterns() -> list[ModelPattern]:
 
     # --- Google Embeddings ---
     _add("google", "embedding", r"\bgemini-embedding(?:-[a-z0-9]+)*\b")
+    # Anciens identifiants PaLM/Gemini sans prefixe de famille. Le lookbehind evite
+    # de re-matcher la fin de `gemini-embedding-001` ou `text-embedding-004`.
+    _add("google", "embedding", r"(?<![a-z0-9-])embedding-(?:gecko-)?\d{3}\b")
+    _add("google", "embedding", r"(?<![a-z0-9-])embedding-\d+-preview\b")
+    _add("google", "embedding", r"\btext-embedding-\d{3}\b")
 
     # --- OpenAI Embeddings ---
     _add("openai", "embedding", r"\btext-embedding-3-(?:small|large)\b")
