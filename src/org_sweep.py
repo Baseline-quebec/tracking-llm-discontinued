@@ -15,14 +15,13 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import subprocess
 import sys
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from src.deprecations import check_deprecation
-from src.issue_reporter import DeprecationAlert, create_issues
+from src.gh import run_gh
+from src.issue_reporter import alerts_from_matches, create_issues
 from src.scanner import scan_directory
 from src.slack_report import send_report
 
@@ -68,22 +67,17 @@ def list_repositories(org: str, excluded: set[str] | None = None) -> list[Reposi
     Archived repositories are dropped on purpose: they cannot receive issues, and
     a deprecated model in code nobody runs is not actionable.
     """
-    try:
-        result = subprocess.run(
-            [
-                "gh",
-                "api",
-                "--paginate",
-                f"/installation/repositories?per_page={REPO_PAGE_SIZE}",
-                "--jq",
-                ".repositories[] | {full_name, archived, has_issues}",
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=GH_TIMEOUT_SECONDS,
-        )
-    except subprocess.TimeoutExpired:
+    result = run_gh(
+        [
+            "api",
+            "--paginate",
+            f"/installation/repositories?per_page={REPO_PAGE_SIZE}",
+            "--jq",
+            ".repositories[] | {full_name, archived, has_issues}",
+        ],
+        timeout=GH_TIMEOUT_SECONDS,
+    )
+    if result is None:
         logger.error("Timeout listing repositories for %s", org)
         return []
 
@@ -119,25 +113,20 @@ def list_repositories(org: str, excluded: set[str] | None = None) -> list[Reposi
 
 def clone(repository: Repository, destination: Path) -> bool:
     """Shallow-clone a repository. Returns True on success."""
-    try:
-        result = subprocess.run(
-            [
-                "gh",
-                "repo",
-                "clone",
-                repository.name_with_owner,
-                str(destination),
-                "--",
-                "--depth",
-                "1",
-                "--single-branch",
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=CLONE_TIMEOUT_SECONDS,
-        )
-    except subprocess.TimeoutExpired:
+    result = run_gh(
+        [
+            "repo",
+            "clone",
+            repository.name_with_owner,
+            str(destination),
+            "--",
+            "--depth",
+            "1",
+            "--single-branch",
+        ],
+        timeout=CLONE_TIMEOUT_SECONDS,
+    )
+    if result is None:
         logger.warning("Timeout cloning %s", repository.name_with_owner)
         return False
     if result.returncode != 0:
@@ -164,11 +153,7 @@ def sweep_repository(
         scan = scan_directory(destination, repository.name_with_owner)
         outcome.scanned = True
 
-        alerts = [
-            DeprecationAlert(match=match, lifecycle=lifecycle)
-            for match in scan.matches
-            if (lifecycle := check_deprecation(match.model)) is not None
-        ]
+        alerts = alerts_from_matches(scan.matches)
         outcome.deprecated_models = sorted({alert.lifecycle.model for alert in alerts})
 
         if not alerts:

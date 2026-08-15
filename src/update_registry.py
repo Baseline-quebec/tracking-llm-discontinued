@@ -10,7 +10,6 @@ import argparse
 import logging
 import os
 import re
-import subprocess
 from pathlib import Path
 
 from src.deprecation_feed import fetch_deprecations
@@ -21,6 +20,7 @@ from src.deprecations import (
     merge_registries,
     save_registry,
 )
+from src.gh import run_gh
 
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,6 @@ def _create_feed_failure_issue(error_detail: str) -> None:
     )
 
     cmd = [
-        "gh",
         "issue",
         "create",
         "--title",
@@ -76,19 +75,16 @@ def _create_feed_failure_issue(error_detail: str) -> None:
         cmd.extend(["--assignee", assignees])
 
     try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=_GH_TIMEOUT,
-        )
-        if result.returncode == 0:
-            logger.info("Issue creee : %s", result.stdout.strip())
-        else:
-            logger.warning("Impossible de creer l'issue : %s", result.stderr)
-    except (OSError, subprocess.TimeoutExpired) as exc:
+        result = run_gh(cmd, timeout=_GH_TIMEOUT)
+    except OSError as exc:
         logger.warning("Erreur lors de la creation de l'issue : %s", exc)
+        return
+    if result is None:
+        logger.warning("Erreur lors de la creation de l'issue : delai depasse")
+    elif result.returncode == 0:
+        logger.info("Issue creee : %s", result.stdout.strip())
+    else:
+        logger.warning("Impossible de creer l'issue : %s", result.stderr)
 
 
 _README_MARKER_START = "<!-- REGISTRY_START -->"

@@ -10,12 +10,12 @@ import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from src.deprecations import check_deprecation
-from src.issue_reporter import DeprecationAlert, create_issues
+from src.issue_reporter import alerts_from_matches, create_issues, unique_lifecycles
 from src.scanner import scan_directory
 
 
 if TYPE_CHECKING:
+    from src.issue_reporter import DeprecationAlert
     from src.models import ScanMatch
 
 
@@ -71,13 +71,11 @@ def main(argv: list[str] | None = None) -> None:
     logger.info("Found %d model references in %s", result.match_count, args.repo_name)
 
     # Step 2: Check for deprecated models
-    alerts = _find_deprecated(result.matches)
+    alerts = alerts_from_matches(result.matches)
     logger.info("Found %d deprecated model references", len(alerts))
 
     # Step 3: Create issues for deprecated models
-    assignees = (
-        [a.strip() for a in args.assignees.split(",") if a.strip()] if args.assignees else None
-    )
+    assignees = [a.strip() for a in args.assignees.split(",") if a.strip()] or None
     issues_created, issues_failed = create_issues(
         alerts,
         assignees=assignees,
@@ -105,31 +103,17 @@ def main(argv: list[str] | None = None) -> None:
     _set_github_output("deprecated-summary", json.dumps(deprecated_summary))
 
 
-def _find_deprecated(matches: list[ScanMatch]) -> list[DeprecationAlert]:
-    """Check each LLM match against the deprecation registry."""
-    alerts: list[DeprecationAlert] = []
-    for match in matches:
-        lifecycle = check_deprecation(match.model)
-        if lifecycle is not None:
-            alerts.append(DeprecationAlert(match=match, lifecycle=lifecycle))
-    return alerts
-
-
 def _build_deprecated_summary(alerts: list[DeprecationAlert]) -> list[dict[str, str]]:
     """Build a JSON-serializable summary of deprecated models (deduplicated)."""
-    seen: set[str] = set()
     summary: list[dict[str, str]] = []
-    for alert in alerts:
-        if alert.lifecycle.model in seen:
-            continue
-        seen.add(alert.lifecycle.model)
+    for lifecycle in unique_lifecycles(alerts):
         entry: dict[str, str] = {
-            "model": alert.lifecycle.model,
-            "provider": alert.lifecycle.provider,
-            "status": alert.lifecycle.status,
+            "model": lifecycle.model,
+            "provider": lifecycle.provider,
+            "status": lifecycle.status,
         }
-        if alert.lifecycle.shutdown_date:
-            entry["shutdown_date"] = alert.lifecycle.shutdown_date.isoformat()
+        if lifecycle.shutdown_date:
+            entry["shutdown_date"] = lifecycle.shutdown_date.isoformat()
         summary.append(entry)
     return summary
 
@@ -145,12 +129,7 @@ def _print_summary(matches: list[ScanMatch], alerts: list[DeprecationAlert]) -> 
     if alerts:
         logger.info("─" * 40)
         logger.info("Deprecated models:")
-        seen: set[str] = set()
-        for alert in alerts:
-            if alert.lifecycle.model in seen:
-                continue
-            seen.add(alert.lifecycle.model)
-            lc = alert.lifecycle
+        for lc in unique_lifecycles(alerts):
             shutdown = f" (shutdown: {lc.shutdown_date})" if lc.shutdown_date else ""
             logger.info("  - %s [%s]%s", lc.model, lc.status, shutdown)
 

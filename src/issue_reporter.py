@@ -5,10 +5,11 @@ from __future__ import annotations
 import json
 import logging
 import re
-import subprocess
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from src.deprecations import check_deprecation
+from src.gh import run_gh
 from src.webhook import send_webhook
 
 
@@ -35,6 +36,35 @@ class DeprecationAlert:
 
     match: ScanMatch
     lifecycle: DeprecatedModel
+
+
+def alerts_from_matches(matches: list[ScanMatch]) -> list[DeprecationAlert]:
+    """Croise les correspondances du scanner avec le registre de deprecation.
+
+    Seul le sous-ensemble deprecie ressort : une correspondance sur un modele
+    encore supporte n'est pas une alerte.
+    """
+    return [
+        DeprecationAlert(match=match, lifecycle=lifecycle)
+        for match in matches
+        if (lifecycle := check_deprecation(match.model)) is not None
+    ]
+
+
+def unique_lifecycles(alerts: list[DeprecationAlert]) -> list[DeprecatedModel]:
+    """Un cycle de vie par modele, dans l'ordre de premiere apparition.
+
+    Un meme modele est signale autant de fois qu'il apparait de fichiers ; tout
+    ce qui resume les alertes doit d'abord replier cette dimension.
+    """
+    seen: set[str] = set()
+    lifecycles: list[DeprecatedModel] = []
+    for alert in alerts:
+        if alert.lifecycle.model in seen:
+            continue
+        seen.add(alert.lifecycle.model)
+        lifecycles.append(alert.lifecycle)
+    return lifecycles
 
 
 def create_issues(
@@ -83,7 +113,7 @@ def create_issues(
             continue
 
         lifecycle = model_alerts[0].lifecycle
-        title = _build_title(lifecycle)
+        title = _build_title(lifecycle.model)
         body = _build_body(lifecycle, model_alerts)
 
         if dry_run:
@@ -139,26 +169,21 @@ def _repo_flag(target_repo: str | None) -> list[str]:
 
 def _ensure_label(target_repo: str | None = None) -> None:
     """Create the deprecated-model label if it doesn't exist."""
-    try:
-        result = subprocess.run(
-            [
-                "gh",
-                "label",
-                "create",
-                ISSUE_LABEL,
-                "--description",
-                "Model deprecation alert",
-                "--color",
-                "D93F0B",
-                "--force",
-                *_repo_flag(target_repo),
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=GH_TIMEOUT_SECONDS,
-        )
-    except subprocess.TimeoutExpired:
+    result = run_gh(
+        [
+            "label",
+            "create",
+            ISSUE_LABEL,
+            "--description",
+            "Model deprecation alert",
+            "--color",
+            "D93F0B",
+            "--force",
+            *_repo_flag(target_repo),
+        ],
+        timeout=GH_TIMEOUT_SECONDS,
+    )
+    if result is None:
         logger.warning("Timeout creating label '%s'", ISSUE_LABEL)
         return
     if result.returncode != 0 and "already exists" not in result.stderr:
@@ -175,28 +200,23 @@ def _issue_exists(model: str, target_repo: str | None = None) -> bool:
         logger.warning("Suspicious model name, skipping search: %s", model)
         return False
 
-    try:
-        result = subprocess.run(
-            [
-                "gh",
-                "issue",
-                "list",
-                "--label",
-                ISSUE_LABEL,
-                "--search",
-                f'"{model}" in:title',
-                "--state",
-                "open",
-                "--json",
-                "number,title",
-                *_repo_flag(target_repo),
-            ],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=GH_TIMEOUT_SECONDS,
-        )
-    except subprocess.TimeoutExpired:
+    result = run_gh(
+        [
+            "issue",
+            "list",
+            "--label",
+            ISSUE_LABEL,
+            "--search",
+            f'"{model}" in:title',
+            "--state",
+            "open",
+            "--json",
+            "number,title",
+            *_repo_flag(target_repo),
+        ],
+        timeout=GH_TIMEOUT_SECONDS,
+    )
+    if result is None:
         logger.warning("Timeout searching issues for '%s'", model)
         return False
     if result.returncode != 0:
@@ -211,7 +231,7 @@ def _issue_exists(model: str, target_repo: str | None = None) -> bool:
 
     # Verify the title matches exactly: a substring check would falsely match
     # e.g. "gpt-4" against an open issue titled "Modèle déprécié : gpt-4o".
-    expected_title = _build_title_for_model(model)
+    expected_title = _build_title(model)
     return any(str(issue.get("title", "")) == expected_title for issue in issues)
 
 
@@ -223,7 +243,6 @@ def _create_issue(
 ) -> str | None:
     """Create a single GitHub issue. Returns the issue URL on success, None on failure."""
     cmd = [
-        "gh",
         "issue",
         "create",
         "--title",
@@ -237,15 +256,8 @@ def _create_issue(
     if assignees:
         cmd.extend(["--assignee", ",".join(assignees)])
 
-    try:
-        result = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=GH_TIMEOUT_SECONDS,
-        )
-    except subprocess.TimeoutExpired:
+    result = run_gh(cmd, timeout=GH_TIMEOUT_SECONDS)
+    if result is None:
         logger.warning("Timeout creating issue '%s'", title)
         return None
     if result.returncode == 0:
@@ -256,14 +268,9 @@ def _create_issue(
     return None
 
 
-def _build_title_for_model(model: str) -> str:
+def _build_title(model: str) -> str:
     """Build the issue title from a model name."""
     return f"Modèle déprécié : {model}"
-
-
-def _build_title(lifecycle: DeprecatedModel) -> str:
-    """Build the issue title."""
-    return _build_title_for_model(lifecycle.model)
 
 
 def _build_body(
