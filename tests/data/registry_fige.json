@@ -23,19 +23,25 @@
       "model": "gpt-3.5-turbo",
       "provider": "openai",
       "status": "retiring",
-      "shutdown_date": "2026-10-23"
+      "shutdown_date": "2099-10-23"
     },
     {
       "model": "gpt-4o",
       "provider": "openai",
       "status": "retiring",
-      "shutdown_date": "2026-10-01"
+      "shutdown_date": "2099-10-01"
+    },
+    {
+      "model": "gpt-4o-audio-preview-2024-12-17",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2020-07-23"
     },
     {
       "model": "gpt-4o-mini",
       "provider": "openai",
       "status": "retiring",
-      "shutdown_date": "2026-10-01"
+      "shutdown_date": "2099-10-01"
     },
     {
       "model": "o1-preview",
@@ -47,7 +53,7 @@
       "model": "text-embedding-ada-002",
       "provider": "openai",
       "status": "retiring",
-      "shutdown_date": "2026-01-04"
+      "shutdown_date": "2099-01-04"
     }
   ]
 }

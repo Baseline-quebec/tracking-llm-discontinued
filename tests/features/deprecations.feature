@@ -19,6 +19,14 @@ Feature: Model deprecation detection
       | o1-preview             | shutdown   |
       | text-embedding-ada-002 | retiring   |
 
+  Scenario: A retiring entry whose shutdown date has passed is reported as shutdown
+    # merge_registries n'efface jamais : un modele que le flux cesse de publier
+    # garderait sinon son statut "retiring" a vie, et l'issue annoncerait un
+    # retrait a venir pour un modele deja eteint.
+    Given a model name "gpt-4o-audio-preview-2024-12-17"
+    When I check its deprecation status
+    Then the model should be "shutdown"
+
   Scenario Outline: Date-suffixed models match base deprecation
     Given a model name "<model>"
     When I check its deprecation status

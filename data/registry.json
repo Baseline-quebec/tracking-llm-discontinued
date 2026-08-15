@@ -94,7 +94,7 @@
     {
       "model": "claude-3.5-haiku",
       "provider": "anthropic",
-      "status": "deprecated",
+      "status": "shutdown",
       "shutdown_date": "2026-02-19"
     },
     {
@@ -530,24 +530,6 @@
       "shutdown_date": "2025-11-12"
     },
     {
-      "model": "Agent Builder",
-      "provider": "openai",
-      "status": "shutdown",
-      "shutdown_date": "2026-06-03"
-    },
-    {
-      "model": "Evals platform",
-      "provider": "openai",
-      "status": "shutdown",
-      "shutdown_date": "2026-06-03"
-    },
-    {
-      "model": "Reusable prompts",
-      "provider": "openai",
-      "status": "shutdown",
-      "shutdown_date": "2026-06-03"
-    },
-    {
       "model": "ada",
       "provider": "openai",
       "status": "shutdown",
@@ -916,7 +898,7 @@
     {
       "model": "gpt-4o-audio-preview-2024-12-17",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-07-23"
     },
     {
@@ -940,7 +922,7 @@
     {
       "model": "gpt-4o-mini-audio-preview-2024-12-17",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-07-23"
     },
     {
@@ -958,7 +940,7 @@
     {
       "model": "gpt-4o-mini-realtime-preview-2024-12-17",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-07-23"
     },
     {
@@ -976,7 +958,7 @@
     {
       "model": "gpt-4o-mini-tts-2025-03-20",
       "provider": "openai",
-      "status": "retiring",
+      "status": "shutdown",
       "shutdown_date": "2026-07-23"
     },
     {
