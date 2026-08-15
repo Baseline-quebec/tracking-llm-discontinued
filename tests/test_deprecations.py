@@ -11,28 +11,19 @@ qui, elles, ne bougent pas.
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
-from src.deprecations import DeprecatedModel, check_deprecation, reload_deprecation_registry
+from src.deprecations import DeprecatedModel, check_deprecation
 from src.issue_reporter import DeprecationAlert
 from src.scanner import scan_directory
 
 
 scenarios("features/deprecations.feature")
 
-_REGISTRE_FIGE = Path(__file__).parent / "data" / "registry_fige.json"
-
-
-@pytest.fixture(autouse=True)
-def registre_fige() -> Iterator[None]:
-    """Substitue le registre fige au registre de production le temps du test."""
-    reload_deprecation_registry(_REGISTRE_FIGE)
-    yield
-    reload_deprecation_registry()
+pytestmark = pytest.mark.usefixtures("registre_fige")
 
 
 @given(

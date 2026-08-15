@@ -1,4 +1,11 @@
-"""BDD step definitions for main CLI module tests."""
+"""BDD step definitions for main CLI module tests.
+
+Les scenarios de bout en bout s'executent contre `tests/data/registry_fige.json`
+et non contre `data/registry.json`. Ils affirment qu'un modele est deprecie et
+qu'un autre ne l'est pas ; or le vrai registre est reecrit tous les quinze jours
+depuis deprecations.info. « `gpt-4.1` n'est pas signale » est vrai aujourd'hui et
+faux le jour ou OpenAI annonce son retrait, sans qu'une ligne de code ait bouge.
+"""
 
 from __future__ import annotations
 
@@ -6,6 +13,7 @@ from datetime import date
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
 from pytest_bdd import given, parsers, scenarios, then, when
 
 from src.deprecations import DeprecatedModel
@@ -16,6 +24,8 @@ from src.scanner import scan_directory
 
 
 scenarios("features/main.feature")
+
+pytestmark = pytest.mark.usefixtures("registre_fige")
 
 
 def _make_match(model: str, match_type: str = "llm") -> ScanMatch:
