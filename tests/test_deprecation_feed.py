@@ -13,6 +13,16 @@ from src.deprecation_feed import fetch_deprecations
 scenarios("features/deprecation_feed.feature")
 
 
+def _reponse_ok(feed: list[dict[str, str]]) -> MagicMock:
+    """Reponse HTTP 200 dont le corps est le flux serialise."""
+    reponse = MagicMock()
+    reponse.status = 200
+    reponse.read = MagicMock(return_value=json.dumps(feed).encode())
+    reponse.__enter__ = MagicMock(return_value=reponse)
+    reponse.__exit__ = MagicMock(return_value=False)
+    return reponse
+
+
 _SAMPLE_FEED = [
     {
         "provider": "OpenAI",
@@ -30,11 +40,7 @@ def given_transient_failures() -> MagicMock:
     responses: list[object] = [
         OSError("Connection refused"),
         OSError("Connection reset"),
-        MagicMock(
-            read=MagicMock(return_value=json.dumps(_SAMPLE_FEED).encode()),
-            __enter__=lambda s: s,
-            __exit__=MagicMock(return_value=False),
-        ),
+        _reponse_ok(_SAMPLE_FEED),
     ]
     mock = MagicMock(side_effect=responses)
     return mock
@@ -60,13 +66,7 @@ def given_category_header(header: str) -> MagicMock:
     ensuite une par une, avec un avertissement a chaque appel.
     """
     feed = [{"provider": "OpenAI", "model_id": header, "shutdown_date": "2026-06-03"}]
-    return MagicMock(
-        return_value=MagicMock(
-            read=MagicMock(return_value=json.dumps(feed).encode()),
-            __enter__=lambda s: s,
-            __exit__=MagicMock(return_value=False),
-        )
-    )
+    return MagicMock(return_value=_reponse_ok(feed))
 
 
 @when(
@@ -75,7 +75,7 @@ def given_category_header(header: str) -> MagicMock:
 )
 def fetch(mock_urlopen: MagicMock) -> list[object]:
     with (
-        patch("src.deprecation_feed.urllib.request.urlopen", mock_urlopen),
+        patch("src.http.urlopen", mock_urlopen),
         patch("src.deprecation_feed.time.sleep"),
     ):
         return fetch_deprecations()

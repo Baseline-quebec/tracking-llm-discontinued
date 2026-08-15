@@ -12,12 +12,11 @@ still runs and still opens GitHub issues; only the Slack message is skipped.
 
 from __future__ import annotations
 
-import json
 import logging
 import os
-import urllib.error
-import urllib.request
 from dataclasses import dataclass
+
+from src.http import request_json
 
 
 logger = logging.getLogger(__name__)
@@ -72,23 +71,18 @@ def send_report(
         "total_analyses": total_scanned,
         "channel_id": channel_id,
     }
-    request = urllib.request.Request(  # noqa: S310 - the URL comes from our own configuration
+    response = request_json(
         config.webhook_url,
-        data=json.dumps(payload).encode(),
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {config.token}",
-            "Content-Type": "application/json",
-        },
+        payload=payload,
+        token=config.token,
+        timeout=TIMEOUT_SECONDS,
     )
 
-    try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:  # noqa: S310
-            logger.info("Slack report sent (HTTP %s)", response.status)
-            return True
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode(errors="replace")[:300]
-        logger.warning("Windmill returned HTTP %s: %s", exc.code, detail)
-    except (urllib.error.URLError, TimeoutError) as exc:
-        logger.warning("Could not reach Windmill: %s", exc)
+    if response.ok:
+        logger.info("Slack report sent (HTTP %s)", response.status)
+        return True
+    if response.status is None:
+        logger.warning("Could not reach Windmill: %s", response.erreur)
+    else:
+        logger.warning("Windmill returned HTTP %s: %s", response.status, response.body[:300])
     return False

@@ -54,3 +54,13 @@ Feature: Webhook notifications for CRM integration
     And a webhook URL that returns HTTP 200
     When I send the webhook
     Then the request should carry no authorization header
+
+  Scenario: A 403 without a token names the variable to set
+    # urlopen leve HTTPError pour tout code >= 400 : le code de statut etait
+    # rattrape avec les pannes reseau, et ce message -- la raison meme pour
+    # laquelle le module distingue l'URL du secret -- ne sortait jamais.
+    Given no webhook token is configured
+    And a webhook URL that returns HTTP 403
+    When I send the webhook
+    Then the webhook result should be False
+    And the warning should mention "LLM_SCAN_WEBHOOK_TOKEN"
