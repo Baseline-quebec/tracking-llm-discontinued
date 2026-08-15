@@ -1,3 +1,25 @@
+# Mise a jour bimensuelle du registre depuis deprecations.info.
+#
+# Prerequis : une GitHub App installee sur ce depot, dont l'identifiant et la
+# cle privee sont les secrets REGISTRY_APP_ID et REGISTRY_APP_KEY. Permissions
+# requises : Contents en ecriture pour pousser la branche, Pull requests en
+# ecriture pour ouvrir la PR, Issues en ecriture pour signaler un flux
+# injoignable.
+#
+# Une App plutot que le jeton par defaut, alors que celui-ci aurait les droits :
+# GitHub refuse de declencher un workflow sur un evenement produit par
+# GITHUB_TOKEN. Une PR poussee avec ce jeton n'a donc AUCUNE CI, et affiche
+# "no checks reported" plutot que "checks failed". Le 2026-08-15, la PR #247
+# est arrivee avec vingt modeles qu'aucun pattern ne detectait et vingt-et-un
+# tests casses, sans le moindre signal. Le jeton d'installation d'une App
+# n'a pas cette restriction : la CI tourne, et une PR cassee se voit.
+#
+# L'App est distincte de celle du balayage d'organisation
+# (ORG_SWEEP_APP_ID / ORG_SWEEP_APP_KEY) : celle-ci est installee sur tous les
+# depots de l'organisation et n'a besoin que de Contents en LECTURE. Lui
+# accorder l'ecriture pour ce seul workflow etendrait ce droit a toute
+# l'organisation.
+
 name: Mise a jour du registre de deprecation
 
 on:
@@ -5,6 +27,9 @@ on:
     - cron: "0 6 1,15 * *"  # Le 1er et 15 de chaque mois a 06:00 UTC
   workflow_dispatch:
 
+# Les droits ci-dessous sont ceux de GITHUB_TOKEN, que seule l'action Claude
+# utilise encore en dernier recours. Le push et la PR passent par le jeton de
+# l'App.
 permissions:
   contents: write
   issues: write
@@ -14,7 +39,18 @@ jobs:
   update:
     runs-on: ubuntu-latest
     steps:
+      - name: Obtenir un jeton d'installation
+        id: jeton
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.REGISTRY_APP_ID }}
+          private-key: ${{ secrets.REGISTRY_APP_KEY }}
+
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Le jeton est conserve dans .git/config : c'est lui qui authentifie
+          # le `git push` plus bas, et donc lui qui declenche la CI sur la PR.
+          token: ${{ steps.jeton.outputs.token }}
 
       - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
@@ -24,7 +60,7 @@ jobs:
         run: python -m src.update_registry
         env:
           PYTHONPATH: ${{ github.workspace }}
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.jeton.outputs.token }}
           LLM_SCAN_ASSIGNEES: ${{ vars.LLM_SCAN_ASSIGNEES || '' }}
 
       - name: Detecter les changements du registre
@@ -48,7 +84,7 @@ jobs:
         id: push-branch
         if: steps.detect-changes.outputs.changed == 'true'
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.jeton.outputs.token }}
         run: |
           BRANCH="chore/update-registry-$(date +%Y-%m-%d)"
           git config user.name "github-actions[bot]"
@@ -71,6 +107,9 @@ jobs:
         uses: anthropics/claude-code-action@6c0083bb7289c31716797a039b6367b3079cc46e # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Le jeton de l'App, pour que le commit correctif de Claude declenche
+          # lui aussi la CI sur la PR.
+          github_token: ${{ steps.jeton.outputs.token }}
           prompt: |
             Le registre data/registry.json vient d'etre mis a jour avec de nouveaux
             modeles deprecies. Verifie que les patterns regex et les tests sont a jour.
@@ -80,6 +119,10 @@ jobs:
               (ex: "Chat model updates"), pas des model IDs. Elles sont ignorees par
               validate_patterns et le test de coherence. Ne cree PAS de patterns pour elles.
             - Les cles du registre sont en minuscules. Les patterns sont case-insensitive.
+            - tests/features/deprecations.feature s'execute contre le registre fige
+              tests/data/registry_fige.json, pas contre data/registry.json. Ne le
+              modifie PAS pour suivre un changement de statut amont : s'il echoue,
+              c'est un vrai bug de check_deprecation.
 
             1. Execute la validation des patterns :
                PYTHONPATH=. python -m src.validate_patterns --output-json
@@ -89,10 +132,8 @@ jobs:
             3. Execute les tests :
                PYTHONPATH=. python -m pytest tests/ -v --rootdir=.
             4. Si des tests echouent :
-               a. Corrige tests/features/deprecations.feature si des modeles ont change de
-                  statut (ex: un modele "actif" est maintenant deprecie dans le registre)
-               b. Corrige les autres tests BDD si necessaire
-               c. Re-execute les tests jusqu'a ce qu'ils passent
+               a. Corrige les tests BDD concernes, sauf deprecations.feature (voir ci-dessus)
+               b. Re-execute les tests jusqu'a ce qu'ils passent
             5. Execute le linter : ruff check src/ tests/ --fix && ruff format src/ tests/
             6. Si des changements ont ete faits, commit avec le message :
                "feat: update patterns and tests for new registry models"
@@ -109,7 +150,7 @@ jobs:
         id: create-pr
         if: steps.push-branch.outputs.branch != ''
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.jeton.outputs.token }}
         run: |
           gh pr create \
             --title "chore: mise a jour du registre de deprecation" \

@@ -1,0 +1,53 @@
+{
+  "updated_at": "2026-01-01T00:00:00+00:00",
+  "models": [
+    {
+      "model": "claude-3-opus",
+      "provider": "anthropic",
+      "status": "shutdown",
+      "shutdown_date": "2026-01-05"
+    },
+    {
+      "model": "claude-3.5-haiku",
+      "provider": "anthropic",
+      "status": "deprecated",
+      "shutdown_date": null
+    },
+    {
+      "model": "claude-3.5-sonnet",
+      "provider": "anthropic",
+      "status": "shutdown",
+      "shutdown_date": "2025-10-28"
+    },
+    {
+      "model": "gpt-3.5-turbo",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-23"
+    },
+    {
+      "model": "gpt-4o",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-01"
+    },
+    {
+      "model": "gpt-4o-mini",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-10-01"
+    },
+    {
+      "model": "o1-preview",
+      "provider": "openai",
+      "status": "shutdown",
+      "shutdown_date": "2025-07-28"
+    },
+    {
+      "model": "text-embedding-ada-002",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2026-01-04"
+    }
+  ]
+}
