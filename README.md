@@ -80,6 +80,7 @@ flowchart TD
 | gemini-2.5-flash-exp-native-audio-thinking-dialog | google | shutdown | 2025-10-20 |
 | gemini-2.5-flash-image | google | retiring | 2026-10-02 |
 | gemini-2.5-flash-image-preview | google | shutdown | 2026-01-15 |
+| gemini-2.5-flash-lite | google | retiring | 2026-10-16 |
 | gemini-2.5-flash-lite-preview-06-17 | google | shutdown | 2025-11-18 |
 | gemini-2.5-flash-lite-preview-09-2025 | google | shutdown | 2026-03-31 |
 | gemini-2.5-flash-native-audio-preview-09-2025 | google | deprecated |  |
