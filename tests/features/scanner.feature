@@ -77,3 +77,70 @@ Feature: Repository file scanner
     And the results should contain model "gpt-4o"
     And the results should contain model "claude-3-opus"
     And the results should contain model "gpt-4-turbo"
+
+  # Un journal des changements raconte ce qui a change, pas ce qui tourne. Six
+  # depots de l'organisation ont ouvert une issue sur leur seul CHANGELOG le
+  # 2026-08-16 ; la regle appartient donc au scanner, pas a chaque depot.
+  Scenario Outline: Changelogs are not configuration
+    Given a temporary directory with the following files:
+      | path        | content            |
+      | src/app.py  | model = "gpt-4o"   |
+      | <journal>   | model = "gpt-4"    |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
+
+    Examples:
+      | journal                  |
+      | CHANGELOG.md             |
+      | apps/backend/CHANGELOG.md|
+      | CHANGES.txt              |
+      | HISTORY.md               |
+      | RELEASES.md              |
+
+  # Une declaration mise en commentaire est du code desactive. Le scanner la
+  # presentait comme un modele en service : un bloc commente d'agents-support a
+  # ouvert l'issue la plus alarmante de l'organisation, sur un modele arrete
+  # depuis treize mois que plus rien n'appelait.
+  Scenario: A commented-out declaration is disabled code
+    Given a temporary directory with the following files:
+      | path        | content                                            |
+      | live.py     | model = "gpt-4o"                                   |
+      | dead.py     | #    model = "anthropic.claude-3-sonnet-20240229"  |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
+
+  # La configuration reste active : seul le premier caractere non blanc compte.
+  Scenario: A trailing comment does not disable the line
+    Given a temporary directory with the following files:
+      | path      | content                            |
+      | app.py    | model = "gpt-4o"  # a bumper       |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
+
+  Scenario Outline: Comment markers follow the language
+    Given a temporary directory with the following files:
+      | path     | content     |
+      | <path>   | <contenu>   |
+    When I scan the directory for repo "test-repo"
+    Then I should find 0 scan matches
+
+    Examples:
+      | path        | contenu                     |
+      | conf.py     | # model = "gpt-4o"          |
+      | app.ts      | // model = "gpt-4o"         |
+      | infra.tf    | // model = "gpt-4o"         |
+      | setup.cfg   | ; model = "gpt-4o"          |
+      | deploy.yml  |    # model = "gpt-4o"       |
+
+  # `#` ouvre un titre en markdown, pas un commentaire : une ligne de prose qui
+  # commence par `#` doit rester visible.
+  Scenario: A markdown heading is prose, not a comment
+    Given a temporary directory with the following files:
+      | path      | content                          |
+      | guide.md  | # Modeles evalues : gpt-4o       |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
