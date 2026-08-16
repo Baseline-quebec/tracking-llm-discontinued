@@ -42,6 +42,32 @@ EXCLUDED_DIRS: frozenset[str] = frozenset(
     }
 )
 
+# Un journal des changements raconte ce qui a change, pas ce qui tourne.
+# « update response llm to gpt-5-chat-latest (#25) » date une bascule ; le
+# passage suivant ajoutera une ligne, et les deux resteront vraies. Une entree
+# de journal ne se reecrit pas : corrigee apres coup, elle ne sert plus a
+# reconstituer l'historique. La signaler revient donc a demander une correction
+# qu'il ne faut pas faire.
+#
+# Le 2026-08-16, six depots de l'organisation ont ouvert une issue sur leur seul
+# CHANGELOG : yvan, noa-westwood, sfppn-maintenance-assistee, cmac-monorepo,
+# metal-marquis-monorepo et librairies-martin-chatbot. Chacun aurait du declarer
+# la meme exclusion ; c'est le signe que la regle appartient au scanner.
+#
+# La comparaison porte sur le nom sans extension, en majuscules : CHANGELOG.md,
+# CHANGELOG.rst, CHANGES.txt, HISTORY.md, RELEASES.md.
+EXCLUDED_STEMS: frozenset[str] = frozenset(
+    {
+        "CHANGELOG",
+        "CHANGES",
+        "HISTORY",
+        "NEWS",
+        "RELEASES",
+        "RELEASE-NOTES",
+        "RELEASE_NOTES",
+    }
+)
+
 # File extensions to scan
 SCANNABLE_EXTENSIONS: frozenset[str] = frozenset(
     {
@@ -83,11 +109,52 @@ SCANNABLE_FILENAMES: frozenset[str] = frozenset(
 MAX_FILE_SIZE: int = 1_048_576
 
 
+# Extensions ou une ligne entierement commentee est du code desactive, donc rien
+# qui s'execute. `.md` et `.txt` en sont volontairement absents : `#` y ouvre un
+# titre, pas un commentaire, et « # Modeles evalues : gpt-4o » est de la prose
+# qu'on veut continuer de voir.
+_MARQUEURS_COMMENTAIRE: dict[str, tuple[str, ...]] = {
+    ".py": ("#",),
+    ".sh": ("#",),
+    ".yaml": ("#",),
+    ".yml": ("#",),
+    ".toml": ("#",),
+    ".cfg": ("#", ";"),
+    ".ini": ("#", ";"),
+    ".env": ("#",),
+    ".tf": ("#", "//"),
+    ".hcl": ("#", "//"),
+    ".js": ("//",),
+    ".ts": ("//",),
+    ".jsx": ("//",),
+    ".tsx": ("//",),
+}
+
+
 def _should_scan_file(path: Path) -> bool:
     """Determine if a file should be scanned based on extension and name."""
+    if path.stem.upper() in EXCLUDED_STEMS:
+        return False
     if path.name in SCANNABLE_FILENAMES:
         return True
     return path.suffix.lower() in SCANNABLE_EXTENSIONS
+
+
+def _est_ligne_commentee(ligne: str, marqueurs: tuple[str, ...]) -> bool:
+    """Vrai si la ligne entiere est un commentaire, dans un langage qui en a.
+
+    Seule une ligne dont le PREMIER caractere non blanc ouvre un commentaire est
+    ecartee. Un commentaire de fin de ligne ne l'est pas : dans
+    `model = "gpt-4o"  # a bumper`, la configuration est bien active.
+
+    Ce que ce filtre evite : une declaration mise en commentaire est du code
+    desactive, et le scanner la presentait comme un modele en service. Cas reel
+    du 2026-08-16 dans agents-support, ou un bloc commente contenant
+    `anthropic.claude-3-sonnet-20240229-v1:0` a ouvert l'issue la plus alarmante
+    de l'organisation -- un modele arrete depuis treize mois -- alors que rien
+    ne l'appelait.
+    """
+    return ligne.lstrip().startswith(marqueurs)
 
 
 def _should_skip_dir(dirname: str) -> bool:
@@ -215,7 +282,11 @@ def _scan_file(
         logger.warning("Could not read %s: %s", relative_path, exc)
         return
 
+    marqueurs = _MARQUEURS_COMMENTAIRE.get(file_path.suffix.lower(), ())
+
     for line_num, line in enumerate(content.splitlines(), start=1):
+        if marqueurs and _est_ligne_commentee(line, marqueurs):
+            continue
         # Une ligne aussi longue n'est pas du code ecrit par un humain : c'est du
         # minifie ou un bundle. Le probleme n'est pas seulement le bruit, c'est
         # que la detection de contexte raisonne PAR LIGNE. Un fichier minifie

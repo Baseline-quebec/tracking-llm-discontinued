@@ -358,6 +358,31 @@ configuré, le journal le dit explicitement au lieu de laisser un code d'erreur 
 
 Les issues sont désactivées par défaut sur les forks GitHub. L'action échouera si elle détecte des modèles dépréciés mais ne peut pas créer d'issues. Activez les issues dans **Settings > General > Features > Issues** du repo.
 
+### Ce que le scanner ignore de lui-même
+
+Deux catégories n'ont pas à être déclarées : elles ne sont jamais de la
+configuration, quel que soit le dépôt.
+
+**Les journaux de changements** (`CHANGELOG`, `CHANGES`, `HISTORY`, `NEWS`,
+`RELEASES`, `RELEASE-NOTES`, quelle que soit l'extension). Une entrée comme
+« update response llm to gpt-5-chat-latest » date une bascule ; le passage
+suivant ajoutera une ligne, et les deux resteront vraies. Une entrée de journal
+ne se réécrit pas : corrigée après coup, elle ne sert plus à reconstituer
+l'historique. La signaler revenait à demander une correction qu'il ne faut pas
+faire. Six dépôts de l'organisation avaient ouvert une issue sur leur seul
+CHANGELOG.
+
+**Les lignes entièrement commentées**, dans les langages qui ont des
+commentaires (`.py`, `.js`, `.ts`, `.yaml`, `.toml`, `.tf`, `.cfg`…). Une
+déclaration mise en commentaire est du code désactivé. Un commentaire de fin de
+ligne ne compte pas : dans `model = "gpt-4o"  # à bumper`, la configuration est
+bien active. `.md` et `.txt` sont volontairement exclus de cette règle, car `#`
+y ouvre un titre et non un commentaire.
+
+Cette seconde règle corrige le plus trompeur des faux positifs : un bloc commenté
+contenant `claude-3-sonnet-20240229` avait produit l'issue la plus alarmante de
+l'organisation, sur un modèle arrêté depuis treize mois que plus rien n'appelait.
+
 ### Exclure des fichiers qui ne sont pas de la configuration
 
 Le scanner compare des chaînes de caractères ; il ne sait pas distinguer
