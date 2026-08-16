@@ -4,9 +4,15 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from src.models import ScanMatch, ScanResult
 from src.patterns import find_matches_in_line
+from src.scan_ignore import ScanIgnore, load_ignore
+
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 logger = logging.getLogger(__name__)
@@ -89,12 +95,24 @@ def _should_skip_dir(dirname: str) -> bool:
     return dirname in EXCLUDED_DIRS or dirname.endswith(".egg-info")
 
 
-def scan_directory(scan_path: Path, repo_name: str) -> ScanResult:
+def scan_directory(
+    scan_path: Path,
+    repo_name: str,
+    *,
+    extra_ignore_patterns: Iterable[str] = (),
+) -> ScanResult:
     """Scan a directory tree for LLM model references.
+
+    Les exclusions declarees par le depot analyse (`.llm-scan-ignore` a sa
+    racine) sont chargees ici, et non par l'appelant : tout point d'entree du
+    scanner les respecte donc, y compris le balayage d'organisation qui clone
+    des depots dont il ne connait pas la configuration.
 
     Args:
         scan_path: Root directory to scan.
         repo_name: Name of the repository (used in results).
+        extra_ignore_patterns: Motifs d'exclusion supplementaires, fusionnes
+            avec ceux du depot.
 
     Returns:
         ScanResult with deduplicated matches.
@@ -102,20 +120,45 @@ def scan_directory(scan_path: Path, repo_name: str) -> ScanResult:
     seen: set[tuple[str, str, str]] = set()  # (model, file, match_type) for dedup
     matches: list[ScanMatch] = []
 
-    for file_path in _walk_files(scan_path):
+    ignore = load_ignore(scan_path, extra_ignore_patterns)
+    files, ignored_paths = _walk_files(scan_path, ignore)
+
+    for file_path in files:
         relative_path = str(file_path.relative_to(scan_path))
         _scan_file(file_path, relative_path, seen, matches)
+
+    # Une exclusion qui n'est pas dite est une exclusion invisible : sans cette
+    # trace, un motif trop large ferait taire des pans entiers du depot et le
+    # scan sortirait « 0 modele deprecie » avec la meme assurance que s'il
+    # avait tout lu. Les chemins sont nommes, pas seulement comptes, parce que
+    # c'est le nom qui permet de voir qu'un motif a mordu trop large.
+    if ignored_paths:
+        logger.info(
+            "Excluded from %s by scan exclusions: %s",
+            repo_name,
+            ", ".join(ignored_paths),
+        )
 
     logger.info("Scanned %s: found %d unique matches", repo_name, len(matches))
     return ScanResult(repo_name=repo_name, matches=matches)
 
 
-def _walk_files(root: Path) -> list[Path]:
-    """Walk directory tree returning scannable files (iterative)."""
+def _walk_files(root: Path, ignore: ScanIgnore | None = None) -> tuple[list[Path], list[str]]:
+    """Walk directory tree returning scannable files (iterative).
+
+    Returns:
+        Le couple (fichiers a scanner, chemins ecartes par une exclusion). Un
+        dossier exclu compte pour un seul chemin, celui du dossier : il n'est
+        pas parcouru. Les fichiers ecartes par une regle du scanner lui-meme
+        (extension, taille, dossier exclu en dur) ne sont pas listes, ce ne
+        sont pas des decisions du depot.
+    """
     files: list[Path] = []
+    ignored: list[str] = []
+    exclusions = ignore or ScanIgnore()
 
     if not root.is_dir():
-        return files
+        return files, ignored
 
     stack: list[Path] = [root]
     while stack:
@@ -125,15 +168,25 @@ def _walk_files(root: Path) -> list[Path]:
         except OSError:
             continue
         for item in children:
+            relative = item.relative_to(root).as_posix()
             if item.is_dir():
-                if not _should_skip_dir(item.name):
-                    stack.append(item)
+                if _should_skip_dir(item.name):
+                    continue
+                # Un dossier exclu n'est pas parcouru du tout : inutile de
+                # descendre pour rejeter chaque fichier un par un.
+                if exclusions.matches(relative):
+                    ignored.append(f"{relative}/")
+                    continue
+                stack.append(item)
             elif (
                 item.is_file() and _should_scan_file(item) and item.stat().st_size <= MAX_FILE_SIZE
             ):
+                if exclusions.matches(relative):
+                    ignored.append(relative)
+                    continue
                 files.append(item)
 
-    return files
+    return files, sorted(ignored)
 
 
 def _is_minified(file_path: Path) -> bool:

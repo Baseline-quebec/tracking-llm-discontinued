@@ -13,6 +13,15 @@ inputs:
     description: "If true, scan only without creating issues"
     required: false
     default: "false"
+  exclude-paths:
+    description: >
+      Motifs de chemins a exclure du scan, separes par des virgules ou des
+      sauts de ligne. S'ajoutent au fichier .llm-scan-ignore du depot analyse,
+      qui reste le moyen recommande : une exclusion versionnee dans le depot
+      qu'elle concerne se relit avec lui, alors qu'une exclusion posee ici est
+      invisible depuis le code qu'elle fait taire.
+    required: false
+    default: ""
   webhook-url:
     description: >
       Optional webhook URL to POST issue details for CRM integration. Pass it
@@ -56,6 +65,7 @@ runs:
         SCAN_PATH: ${{ github.workspace }}
         SCAN_ASSIGNEES: ${{ inputs.assignees }}
         SCAN_DRY_RUN: ${{ inputs.dry-run }}
+        SCAN_EXCLUDE_PATHS: ${{ inputs.exclude-paths }}
         SCAN_WEBHOOK_URL: ${{ inputs.webhook-url }}
         LLM_SCAN_WEBHOOK_TOKEN: ${{ inputs.webhook-token }}
         PYTHONPATH: ${{ github.action_path }}
@@ -69,6 +79,10 @@ runs:
 
         if [ "$SCAN_DRY_RUN" = "true" ]; then
           ARGS+=(--dry-run)
+        fi
+
+        if [ -n "$SCAN_EXCLUDE_PATHS" ]; then
+          ARGS+=(--exclude-paths "$SCAN_EXCLUDE_PATHS")
         fi
 
         if [ -n "$SCAN_WEBHOOK_URL" ]; then

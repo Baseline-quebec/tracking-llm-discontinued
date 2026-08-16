@@ -358,6 +358,60 @@ configuré, le journal le dit explicitement au lieu de laisser un code d'erreur 
 
 Les issues sont désactivées par défaut sur les forks GitHub. L'action échouera si elle détecte des modèles dépréciés mais ne peut pas créer d'issues. Activez les issues dans **Settings > General > Features > Issues** du repo.
 
+### Exclure des fichiers qui ne sont pas de la configuration
+
+Le scanner compare des chaînes de caractères ; il ne sait pas distinguer
+`model = "o4-mini"` d'une phrase de prose qui cite `o4-mini`. Un dépôt qui
+contient de la donnée, des fixtures ou de la veille technologique déclenchera
+donc des faux positifs qui reviennent à chaque passage.
+
+Le dépôt scanné déclare lui-même ce qui n'est pas de la configuration, dans un
+fichier **`.llm-scan-ignore`** à sa racine :
+
+```gitignore
+# Résumés d'articles de veille : citent des noms de modèles en prose,
+# aucune configuration.
+src/baseline_automation/windmill/f/bgy/ingestion/_articles_seed.py
+
+# Jeux de données de test
+tests/fixtures/
+```
+
+Règles de correspondance :
+
+| Motif | Ce qu'il couvre |
+|---|---|
+| `seed.py` | ce nom de fichier **à n'importe quelle profondeur** |
+| `fixtures/` | ce dossier et tout son contenu, qui n'est même pas parcouru |
+| `src/data/seed.py` | ce chemin précis, relatif à la racine du dépôt |
+| `*_seed.py` | tout fichier dont le nom finit ainsi |
+| `docs/*.md` | les fichiers `.md` sous `docs/` |
+
+Les lignes vides et celles commençant par `#` sont ignorées. Les chemins sont
+comparés en séparateurs POSIX, donc un motif écrit une fois vaut sur les trois
+systèmes.
+
+Chaque chemin écarté est **nommé dans le journal du scan**, pas seulement
+compté. Un motif trop large est ainsi visible dans les logs de l'exécution, au
+lieu de produire un « 0 modèle déprécié » qui aurait l'air d'un scan complet.
+
+Le fichier est lu depuis le dépôt analysé, y compris lors du balayage mensuel
+de l'organisation : aucune configuration centrale à tenir à jour.
+
+En dernier recours, l'action accepte aussi un `exclude-paths`, qui s'ajoute au
+fichier du dépôt :
+
+```yaml
+      - uses: Baseline-quebec/tracking-llm-discontinued@main
+        with:
+          repo-name: ${{ github.repository }}
+          exclude-paths: "docs/veille/, *_seed.py"
+```
+
+Préférez le fichier. Une exclusion versionnée dans le dépôt qu'elle concerne se
+relit avec lui ; une exclusion posée dans le workflow est invisible depuis le
+code qu'elle fait taire.
+
 ---
 
 ## Développement et maintenance du repo
@@ -444,6 +498,7 @@ data/
 src/
   patterns.py            # Patterns regex pour la detection de modeles
   scanner.py             # Parcours de repertoire et scan de fichiers
+  scan_ignore.py         # Exclusions declarees par le depot (.llm-scan-ignore)
   models.py              # Modeles de donnees (ScanMatch, ScanResult)
   deprecations.py        # Chargement du registre + gestion des suffixes de date
   deprecation_feed.py    # Flux live depuis deprecations.info

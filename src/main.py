@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from src.issue_reporter import alerts_from_matches, create_issues, unique_lifecycles
+from src.scan_ignore import IGNORE_FILENAME, parse_inline_patterns
 from src.scanner import scan_directory
 
 
@@ -52,6 +53,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default="",
         help="Optional webhook URL to POST issue details for CRM integration",
     )
+    parser.add_argument(
+        "--exclude-paths",
+        default="",
+        help=(
+            "Motifs de chemins a exclure du scan, separes par des virgules ou "
+            f"des sauts de ligne. S'ajoutent au {IGNORE_FILENAME} du depot."
+        ),
+    )
     return parser.parse_args(argv)
 
 
@@ -67,7 +76,11 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(1)
 
     # Step 1: Scan for model references
-    result = scan_directory(scan_path, args.repo_name)
+    result = scan_directory(
+        scan_path,
+        args.repo_name,
+        extra_ignore_patterns=parse_inline_patterns(args.exclude_paths),
+    )
     logger.info("Found %d model references in %s", result.match_count, args.repo_name)
 
     # Step 2: Check for deprecated models
