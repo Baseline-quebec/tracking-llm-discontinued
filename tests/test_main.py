@@ -256,6 +256,15 @@ def check_e2e_deprecated_includes(
     assert model in models, f"Expected '{model}' in deprecated models {models}"
 
 
+@then(parsers.cfparse('deprecated models should not include "{model}"'))
+def check_e2e_deprecated_excludes(
+    e2e_result: dict[str, list[DeprecationAlert] | list[ScanMatch]], model: str
+) -> None:
+    alerts: list[DeprecationAlert] = e2e_result["alerts"]  # type: ignore[assignment]
+    models = [a.lifecycle.model for a in alerts]
+    assert model not in models, f"'{model}' should not be reported, got {models}"
+
+
 @then(parsers.cfparse('active models should not be flagged: "{models_str}"'))
 def check_active_not_flagged(
     e2e_result: dict[str, list[DeprecationAlert] | list[ScanMatch]], models_str: str

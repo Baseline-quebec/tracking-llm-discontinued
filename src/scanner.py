@@ -69,6 +69,34 @@ EXCLUDED_STEMS: frozenset[str] = frozenset(
     }
 )
 
+# Une suite de tests n'est pas ce qui tourne. Un modele fixe dans une fixture
+# sert a faire passer un test, il n'est appele par aucun service, et le migrer
+# ne change rien a ce qui repond en production. Un test qui epingle vraiment un
+# modele arrete se signale d'ailleurs tout seul : la suite passe au rouge, ce
+# qui est un signal plus sur qu'une issue ouverte a cote.
+#
+# Le 2026-08-18, trois depots de l'organisation avaient une issue ouverte sur
+# leur seul `tests/conftest.py` : cmac-monorepo, metal-marquis-monorepo et
+# tourisme-monteregie-chatbot. Trois depots qui declareraient la meme
+# exclusion : la regle appartient au scanner.
+#
+# Un dossier de tests n'est pas parcouru du tout ; hors de ces dossiers, c'est
+# le nom du fichier qui tranche.
+EXCLUDED_TEST_DIRS: frozenset[str] = frozenset(
+    {
+        "tests",
+        "test",
+        "__tests__",
+        "__mocks__",
+        "testdata",
+    }
+)
+
+# Conventions de nommage des fichiers de test, dans les langages scannes :
+# `conftest.py`, `test_x.py`, `x_test.py`, `x.test.ts`, `x.spec.js`, `x_test.go`.
+_NOMS_DE_TEST: frozenset[str] = frozenset({"conftest.py"})
+_SUFFIXES_DE_TEST: tuple[str, ...] = (".test", ".spec")
+
 # File extensions to scan
 SCANNABLE_EXTENSIONS: frozenset[str] = frozenset(
     {
@@ -157,9 +185,27 @@ _CLOTURE_BLOC: re.Pattern[str] = re.compile(r"^ {0,3}(?P<marque>`{3,}|~{3,})")
 _SPAN_CODE: re.Pattern[str] = re.compile(r"(`+)(?P<code>[^`]+)\1")
 
 
+def _est_fichier_de_test(path: Path) -> bool:
+    """Vrai si le nom du fichier suit une convention de test.
+
+    Couvre les fichiers de test qui vivent a cote du code qu'ils testent, hors
+    d'un dossier `tests/` : `conftest.py`, `test_extraction.py`,
+    `pricing_test.py`, `VariantsPanel.test.tsx`, `agent.spec.ts`,
+    `handler_test.go`.
+    """
+    if path.name in _NOMS_DE_TEST:
+        return True
+    tige = path.stem.lower()
+    if tige.startswith("test_") or tige.endswith("_test"):
+        return True
+    return Path(tige).suffix in _SUFFIXES_DE_TEST
+
+
 def _should_scan_file(path: Path) -> bool:
     """Determine if a file should be scanned based on extension and name."""
     if path.stem.upper() in EXCLUDED_STEMS:
+        return False
+    if _est_fichier_de_test(path):
         return False
     if path.name in SCANNABLE_FILENAMES:
         return True
@@ -233,7 +279,11 @@ def _reduire_markdown_au_code(lignes: list[str]) -> list[str]:
 
 def _should_skip_dir(dirname: str) -> bool:
     """Determine if a directory should be skipped."""
-    return dirname in EXCLUDED_DIRS or dirname.endswith(".egg-info")
+    return (
+        dirname in EXCLUDED_DIRS
+        or dirname.lower() in EXCLUDED_TEST_DIRS
+        or dirname.endswith(".egg-info")
+    )
 
 
 def scan_directory(

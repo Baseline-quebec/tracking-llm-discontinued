@@ -135,6 +135,48 @@ Feature: Repository file scanner
       | setup.cfg   | ; model = "gpt-4o"          |
       | deploy.yml  |    # model = "gpt-4o"       |
 
+  # Une suite de tests n'est pas ce qui tourne : un modele fixe dans une fixture
+  # sert a faire passer un test, rien ne l'appelle. Trois depots avaient une
+  # issue ouverte sur leur seul `tests/conftest.py` le 2026-08-18 : cmac-monorepo,
+  # metal-marquis-monorepo et tourisme-monteregie-chatbot.
+  Scenario Outline: A test fixture is not configuration
+    Given a temporary directory with the following files:
+      | path        | content            |
+      | src/app.py  | model = "gpt-4o"   |
+      | <fixture>   | model = "gpt-4"    |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
+
+    Examples:
+      | fixture                              |
+      | tests/conftest.py                    |
+      | apps/backend/tests/conftest.py       |
+      | test/helpers.py                      |
+      | src/__tests__/agent.ts               |
+      | src/components/Panel.test.tsx        |
+      | src/services/agent.spec.ts           |
+      | scripts/test_extraction_models.py    |
+      | src/acquisition/pricing_test.py      |
+      | internal/handler_test.go             |
+
+  # Le nom seul ne suffit pas a faire un fichier de test : `latest_model.py` ou
+  # `contest.py` restent du code qui tourne.
+  Scenario Outline: A name that merely resembles a test is still code
+    Given a temporary directory with the following files:
+      | path      | content            |
+      | <fichier> | model = "gpt-4o"   |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
+
+    Examples:
+      | fichier                    |
+      | src/latest_model.py        |
+      | src/contest.py             |
+      | src/testing_utils.py       |
+      | src/protest.ts             |
+
   # `#` ouvre un titre en markdown, pas un commentaire : une ligne qui commence
   # par `#` n'est pas ecartee comme du code desactive.
   Scenario: A markdown heading is not a comment

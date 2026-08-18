@@ -360,7 +360,7 @@ Les issues sont désactivées par défaut sur les forks GitHub. L'action échoue
 
 ### Ce que le scanner ignore de lui-même
 
-Trois catégories n'ont pas à être déclarées : elles ne sont jamais de la
+Quatre catégories n'ont pas à être déclarées : elles ne sont jamais de la
 configuration, quel que soit le dépôt.
 
 **Les journaux de changements** (`CHANGELOG`, `CHANGES`, `HISTORY`, `NEWS`,
@@ -400,6 +400,22 @@ les trois vraies configurations.
 la prose ; un fichier de notes se déclare dans `.llm-scan-ignore`. Un tableau
 Markdown dont la cellule ne porte pas de backticks est de la prose lui aussi :
 `| Modèle | gpt-4o |` n'est plus signalé, `` | Modèle | `gpt-4o` | `` l'est.
+
+**Les fichiers et dossiers de test.** Un modèle fixé dans une fixture sert à
+faire passer un test ; il n'est appelé par aucun service, et le migrer ne change
+rien à ce qui répond en production. Un test qui épingle vraiment un modèle
+arrêté se signale d'ailleurs tout seul : la suite passe au rouge, ce qui est un
+signal plus sûr qu'une issue ouverte à côté.
+
+Sont écartés les dossiers `tests/`, `test/`, `__tests__/`, `__mocks__/` et
+`testdata/` — qui ne sont pas parcourus du tout — et, ailleurs, les fichiers
+dont le nom suit une convention de test : `conftest.py`, `test_extraction.py`,
+`pricing_test.py`, `VariantsPanel.test.tsx`, `agent.spec.ts`, `handler_test.go`.
+Le nom seul ne suffit pas : `latest_model.py`, `contest.py` et `testing_utils.py`
+restent du code qui tourne.
+
+Trois dépôts avaient une issue ouverte sur leur seul `tests/conftest.py` :
+`cmac-monorepo`, `metal-marquis-monorepo` et `tourisme-monteregie-chatbot`.
 
 ### Exclure des fichiers qui ne sont pas de la configuration
 
