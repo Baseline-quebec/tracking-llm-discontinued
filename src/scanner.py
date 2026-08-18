@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from src.models import ScanMatch, ScanResult
 from src.patterns import find_matches_in_line
-from src.scan_ignore import ScanIgnore, load_ignore
+from src.scan_ignore import ScanIgnore, load_ignore, read_ignore_file
 
 
 if TYPE_CHECKING:
@@ -170,10 +170,11 @@ def scan_directory(
 ) -> ScanResult:
     """Scan a directory tree for LLM model references.
 
-    Les exclusions declarees par le depot analyse (`.llm-scan-ignore` a sa
-    racine) sont chargees ici, et non par l'appelant : tout point d'entree du
-    scanner les respecte donc, y compris le balayage d'organisation qui clone
-    des depots dont il ne connait pas la configuration.
+    Les exclusions declarees par le depot analyse (`.llm-scan-ignore`, a sa
+    racine ou dans n'importe quel sous-dossier) sont chargees ici, et non par
+    l'appelant : tout point d'entree du scanner les respecte donc, y compris le
+    balayage d'organisation qui clone des depots dont il ne connait pas la
+    configuration.
 
     Args:
         scan_path: Root directory to scan.
@@ -213,6 +214,11 @@ def scan_directory(
 def _walk_files(root: Path, ignore: ScanIgnore | None = None) -> tuple[list[Path], list[str]]:
     """Walk directory tree returning scannable files (iterative).
 
+    Un `.llm-scan-ignore` rencontre dans un sous-dossier est charge en descendant,
+    avant que les enfants de ce dossier ne soient examines, et ses motifs ne
+    valent que pour ce sous-arbre. Un dossier deja exclu n'est pas ouvert, donc
+    un fichier d'exclusion qu'il contiendrait n'a rien a dire de plus.
+
     Returns:
         Le couple (fichiers a scanner, chemins ecartes par une exclusion). Un
         dossier exclu compte pour un seul chemin, celui du dossier : il n'est
@@ -230,6 +236,15 @@ def _walk_files(root: Path, ignore: ScanIgnore | None = None) -> tuple[list[Path
     stack: list[Path] = [root]
     while stack:
         current = stack.pop()
+        if current != root:
+            # Les motifs d'un sous-dossier sont portes par leur prefixe, donc les
+            # ajouter aux exclusions communes ne peut pas mordre ailleurs dans
+            # l'arborescence.
+            base = current.relative_to(root).as_posix()
+            motifs = read_ignore_file(current)
+            if motifs:
+                logger.info("Exclusions declarees dans %s : %s", base, ", ".join(motifs))
+                exclusions = exclusions.with_subtree(base, motifs)
         try:
             children = sorted(current.iterdir(), reverse=True)
         except OSError:

@@ -106,3 +106,46 @@ def test_ignore_file_itself_is_never_scanned(tmp_path: Path):
     (tmp_path / IGNORE_FILENAME).write_text("# model = gpt-4o\n", encoding="utf-8")
     resultat = scan_directory(tmp_path, "test-repo")
     assert resultat.match_count == 0
+
+
+def test_subtree_patterns_apply_only_under_their_base():
+    """Les motifs d'un sous-dossier ne debordent pas sur un dossier voisin.
+
+    `ODS/.llm-scan-ignore` contenant `*` exclut tout le contenu de `ODS`, et rien
+    d'autre : ni la racine, ni un dossier dont le nom commence par les memes
+    lettres.
+    """
+    exclusions = ScanIgnore().with_subtree("ODS", ["*"])
+
+    assert exclusions.matches("ODS/Evolia/audit.md")
+    assert not exclusions.matches("ODS-archive/audit.md")
+    assert not exclusions.matches("formations/app.py")
+
+
+def test_subtree_patterns_are_relative_to_their_base():
+    """Un fichier d'exclusion parle de ce qui l'entoure, pas du chemin complet.
+
+    C'est ce qui le rend valide apres un deplacement du dossier : `Mandat/` ecrit
+    dans `ODS/.llm-scan-ignore` designe `ODS/Mandat`, sans que l'auteur ait a
+    connaitre la position de `ODS` dans l'arborescence.
+    """
+    exclusions = ScanIgnore().with_subtree("ODS", ["Mandat/"])
+
+    assert exclusions.matches("ODS/Mandat/sow.md")
+    assert not exclusions.matches("Mandat/app.py")
+
+
+def test_root_and_subtree_patterns_coexist():
+    exclusions = ScanIgnore(patterns=("seed.py",)).with_subtree("ODS", ["*.md"])
+
+    assert exclusions.matches("src/seed.py")
+    assert exclusions.matches("ODS/audit.md")
+    assert not exclusions.matches("src/app.py")
+    assert not exclusions.matches("ODS/app.py")
+
+
+def test_subtree_without_pattern_changes_nothing():
+    """Un fichier d'exclusion vide ou tout en commentaires ne doit rien exclure."""
+    exclusions = ScanIgnore()
+    assert exclusions.with_subtree("ODS", []) == exclusions
+    assert not exclusions.with_subtree("ODS", [])
