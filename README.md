@@ -360,7 +360,7 @@ Les issues sont désactivées par défaut sur les forks GitHub. L'action échoue
 
 ### Ce que le scanner ignore de lui-même
 
-Deux catégories n'ont pas à être déclarées : elles ne sont jamais de la
+Trois catégories n'ont pas à être déclarées : elles ne sont jamais de la
 configuration, quel que soit le dépôt.
 
 **Les journaux de changements** (`CHANGELOG`, `CHANGES`, `HISTORY`, `NEWS`,
@@ -382,6 +382,24 @@ y ouvre un titre et non un commentaire.
 Cette seconde règle corrige le plus trompeur des faux positifs : un bloc commenté
 contenant `claude-3-sonnet-20240229` avait produit l'issue la plus alarmante de
 l'organisation, sur un modèle arrêté depuis treize mois que plus rien n'appelait.
+
+**La prose des fichiers Markdown.** Markdown marque lui-même ce qui est du
+code : les clôtures ```` ``` ```` ou `~~~`, et les backticks au fil du texte.
+Hors de ces marques, un nom de modèle est cité dans une phrase, il n'y est pas
+déclaré. Une configuration réellement documentée reste vue, parce qu'on l'écrit
+en code — `MODEL="gpt-4o"` au fil d'une phrase, ou un bloc d'exemple.
+
+L'issue #77 d'`agents-support` listait trois fichiers pour `gpt-4o` : un seul le
+configurait. Les deux autres en parlaient — une fiche client résumant les
+technologies d'un mandat livré en 2024, une étude de cas racontant une bascule.
+Ni l'une ni l'autre ne se migre : corriger ce texte réécrirait un compte rendu.
+Sur l'ensemble du dépôt, la règle retire dix signalements de ce type et garde
+les trois vraies configurations.
+
+`.txt` reste hors de cette règle, faute d'une convention qui y sépare le code de
+la prose ; un fichier de notes se déclare dans `.llm-scan-ignore`. Un tableau
+Markdown dont la cellule ne porte pas de backticks est de la prose lui aussi :
+`| Modèle | gpt-4o |` n'est plus signalé, `` | Modèle | `gpt-4o` | `` l'est.
 
 ### Exclure des fichiers qui ne sont pas de la configuration
 

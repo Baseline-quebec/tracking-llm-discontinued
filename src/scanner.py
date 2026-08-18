@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import re
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -130,6 +131,31 @@ _MARQUEURS_COMMENTAIRE: dict[str, tuple[str, ...]] = {
     ".tsx": ("//",),
 }
 
+# Markdown marque lui-meme ce qui est du code : les clotures ``` ou ~~~, et les
+# backticks au fil du texte. Hors de ces marques, un nom de modele est cite dans
+# une phrase ; il n'y est pas declare.
+#
+# Le 2026-08-18, l'issue #77 d'agents-support listait trois fichiers pour
+# `gpt-4o`. Un seul le configurait (`cli.py`). Les deux autres en parlaient :
+# une fiche client resumant les technologies d'un mandat livre en 2024
+# (« OpenAI ChatGPT (GPT-4o / GPT-4o-mini), embeddings OpenAI »), et une etude
+# de cas racontant une bascule (« Le CHANGELOG de la version v0.4.0 porte la
+# ligne "switch to gpt-4o" »). Ni l'une ni l'autre ne se migre : corriger ce
+# texte reecrirait un compte rendu.
+#
+# Une configuration reellement documentee reste vue, parce qu'on l'ecrit en
+# code : `MODEL="gpt-4o"` au fil d'une phrase, ou un bloc cloture d'exemple.
+# `.txt` reste hors de cette regle, faute d'une convention qui y separe le code
+# de la prose ; un fichier de notes se declare dans `.llm-scan-ignore`.
+_EXTENSIONS_PROSE: frozenset[str] = frozenset({".md"})
+
+# Une cloture de bloc de code : au plus trois espaces d'indentation, puis au
+# moins trois backticks ou tildes (CommonMark).
+_CLOTURE_BLOC: re.Pattern[str] = re.compile(r"^ {0,3}(?P<marque>`{3,}|~{3,})")
+
+# Un span de code au fil du texte : n backticks, du contenu, n backticks.
+_SPAN_CODE: re.Pattern[str] = re.compile(r"(`+)(?P<code>[^`]+)\1")
+
 
 def _should_scan_file(path: Path) -> bool:
     """Determine if a file should be scanned based on extension and name."""
@@ -155,6 +181,54 @@ def _est_ligne_commentee(ligne: str, marqueurs: tuple[str, ...]) -> bool:
     ne l'appelait.
     """
     return ligne.lstrip().startswith(marqueurs)
+
+
+def _masquer_hors_code(ligne: str) -> str:
+    """Ne laisse subsister d'une ligne de prose que le contenu ecrit en code.
+
+    Le masquage remplace le reste par des espaces, donc les positions sont
+    conservees : la detection de contexte raisonne sur les caracteres voisins,
+    et un mot-cle de prose ne doit pas valider un nom de modele qui se trouve
+    dans un span de code trois mots plus loin.
+    """
+    masquee = [" "] * len(ligne)
+    for span in _SPAN_CODE.finditer(ligne):
+        debut, fin = span.span("code")
+        masquee[debut:fin] = ligne[debut:fin]
+    return "".join(masquee)
+
+
+def _reduire_markdown_au_code(lignes: list[str]) -> list[str]:
+    """Ne garde de chaque ligne markdown que ce que l'auteur a ecrit en code.
+
+    Le contenu d'un bloc cloture est rendu tel quel ; ailleurs, seuls les spans
+    entre backticks subsistent. Le nombre de lignes ne change pas, pour que le
+    numero rapporte reste celui du fichier.
+
+    Un bloc ouvert et jamais referme court jusqu'a la fin du fichier, comme le
+    veut CommonMark : mieux vaut lire un exemple de configuration jusqu'au bout
+    que de le perdre parce qu'une cloture manque.
+    """
+    reduites: list[str] = []
+    cloture: str | None = None
+
+    for ligne in lignes:
+        marque = _CLOTURE_BLOC.match(ligne)
+        if cloture is None:
+            if marque is not None:
+                cloture = marque.group("marque")
+                reduites.append("")
+            else:
+                reduites.append(_masquer_hors_code(ligne))
+            continue
+        ouverture = marque.group("marque") if marque is not None else ""
+        if ouverture.startswith(cloture[0]) and len(ouverture) >= len(cloture):
+            cloture = None
+            reduites.append("")
+        else:
+            reduites.append(ligne)
+
+    return reduites
 
 
 def _should_skip_dir(dirname: str) -> bool:
@@ -297,9 +371,14 @@ def _scan_file(
         logger.warning("Could not read %s: %s", relative_path, exc)
         return
 
-    marqueurs = _MARQUEURS_COMMENTAIRE.get(file_path.suffix.lower(), ())
+    extension = file_path.suffix.lower()
+    marqueurs = _MARQUEURS_COMMENTAIRE.get(extension, ())
 
-    for line_num, line in enumerate(content.splitlines(), start=1):
+    lignes = content.splitlines()
+    if extension in _EXTENSIONS_PROSE:
+        lignes = _reduire_markdown_au_code(lignes)
+
+    for line_num, line in enumerate(lignes, start=1):
         if marqueurs and _est_ligne_commentee(line, marqueurs):
             continue
         # Une ligne aussi longue n'est pas du code ecrit par un humain : c'est du
