@@ -94,3 +94,38 @@ Feature: Scan exclusions declared by the scanned repository
       | docs/*.md         | docs/guide.md               | excluded |
       | data              | src/data_seed.py            | kept     |
       | /                 | src/app.py                  | kept     |
+
+  # Regression du 2026-08-18 dans Ventes : la PR #154 a remonte la racine du
+  # depot d'un niveau, le fichier d'exclusion s'est retrouve dans ODS/, et les
+  # issues #155 a #159 sont revenues sur les memes offres de service.
+  Scenario: An exclusion file in a subdirectory covers that subtree
+    Given a temporary directory with the following files:
+      | path                  | content                                       |
+      | ODS/.llm-scan-ignore  | # offres de service, pas de la configuration\n* |
+      | ODS/Evolia/audit.md   | Le systeme audite utilise le modele gpt-4o.   |
+      | ODS/note.md           | model = "gemini-pro"                          |
+      | formations/app.py     | MODEL = "claude-3-opus"                       |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "claude-3-opus"
+
+  Scenario: Patterns of a subdirectory are relative to that subdirectory
+    Given a temporary directory with the following files:
+      | path                  | content                  |
+      | ODS/.llm-scan-ignore  | Mandat/                  |
+      | ODS/Mandat/sow.md     | model = "gpt-4o"         |
+      | Mandat/app.py         | MODEL = "claude-3-opus"  |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "claude-3-opus"
+
+  Scenario: A subdirectory already excluded at the root is not reopened
+    Given a temporary directory with the following files:
+      | path                  | content            |
+      | .llm-scan-ignore      | ODS/               |
+      | ODS/.llm-scan-ignore  | *.py               |
+      | ODS/audit.md          | model = "gpt-4o"   |
+      | app.py                | MODEL = "gpt-4"    |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4"

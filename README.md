@@ -391,7 +391,7 @@ contient de la donnée, des fixtures ou de la veille technologique déclenchera
 donc des faux positifs qui reviennent à chaque passage.
 
 Le dépôt scanné déclare lui-même ce qui n'est pas de la configuration, dans un
-fichier **`.llm-scan-ignore`** à sa racine :
+fichier **`.llm-scan-ignore`**, à sa racine ou dans n'importe quel sous-dossier :
 
 ```gitignore
 # Résumés d'articles de veille : citent des noms de modèles en prose,
@@ -422,6 +422,17 @@ lieu de produire un « 0 modèle déprécié » qui aurait l'air d'un scan compl
 
 Le fichier est lu depuis le dépôt analysé, y compris lors du balayage mensuel
 de l'organisation : aucune configuration centrale à tenir à jour.
+
+**Un fichier placé dans un sous-dossier ne vaut que pour ce sous-arbre**, et ses
+motifs sont relatifs à ce dossier, comme un `.gitignore`. `Mandat/` écrit dans
+`ODS/.llm-scan-ignore` désigne `ODS/Mandat`, pas le `Mandat/` de la racine. Un
+fichier d'exclusion reste donc valide quand son dossier est déplacé — c'est
+précisément ce qui avait manqué : le `.llm-scan-ignore` de `Ventes` excluait tout
+le dépôt jusqu'à ce qu'une remontée de racine le range sous `ODS/`, et les cinq
+issues de faux positifs sont revenues sur les mêmes offres de service.
+
+Un dossier déjà écarté par la racine n'est pas ouvert du tout : le fichier
+d'exclusion qu'il contiendrait n'a alors rien à ajouter.
 
 En dernier recours, l'action accepte aussi un `exclude-paths`, qui s'ajoute au
 fichier du dépôt :
