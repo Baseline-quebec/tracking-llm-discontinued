@@ -77,3 +77,58 @@ Feature: Repository file scanner
     And the results should contain model "gpt-4o"
     And the results should contain model "claude-3-opus"
     And the results should contain model "gpt-4-turbo"
+
+  Scenario: Scanner honore l'exclusion complete declaree par le depot
+    Given a temporary directory with the following files:
+      | path                | content                                        |
+      | .llm-scan-ignore    | # depot d'offres de service\n*                 |
+      | ODS/audit.md        | La solution proposee utilise le modele gpt-4o. |
+      | ODS/Mandat/sow.md   | model = "claude-3-opus"                        |
+    When I scan the directory for repo "test-repo"
+    Then I should find 0 scan matches
+
+  Scenario: Une reinjection garde le code scanne dans un depot exclu
+    Given a temporary directory with the following files:
+      | path              | content                                        |
+      | .llm-scan-ignore  | *\n!src/                                       |
+      | ODS/audit.md      | La solution proposee utilise le modele gpt-4o. |
+      | src/client.py     | MODEL = "gpt-4o"                               |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
+
+  Scenario: Une regle de dossier exclut tout ce qui se trouve dessous
+    Given a temporary directory with the following files:
+      | path                 | content                  |
+      | .llm-scan-ignore     | docs/                    |
+      | docs/deep/spec.md    | model = "gpt-4o"         |
+      | app.py               | MODEL = "claude-3-opus"  |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "claude-3-opus"
+
+  Scenario: Une regle sans separateur vise un nom a toute profondeur
+    Given a temporary directory with the following files:
+      | path                 | content                  |
+      | .llm-scan-ignore     | *.md                     |
+      | ODS/Mandat/audit.md  | model = "gpt-4o"         |
+      | app.py               | MODEL = "claude-3-opus"  |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "claude-3-opus"
+
+  Scenario: Une ligne commentee n'exclut rien
+    Given a temporary directory with the following files:
+      | path              | content            |
+      | .llm-scan-ignore  | # *\n\n            |
+      | app.py            | MODEL = "gpt-4o"   |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
+
+  Scenario: Un depot sans fichier d'exclusion reste scanne en entier
+    Given a temporary directory with the following files:
+      | path              | content            |
+      | app.py            | MODEL = "gpt-4o"   |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches

@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
+from fnmatch import fnmatchcase
 from pathlib import Path
 
 from src.models import ScanMatch, ScanResult
@@ -76,6 +78,28 @@ SCANNABLE_FILENAMES: frozenset[str] = frozenset(
 # Max file size to scan (1 MB)
 MAX_FILE_SIZE: int = 1_048_576
 
+# Fichier d'exclusion depose a la racine du depot scanne.
+#
+# Un depot peut contenir des noms de modeles sans contenir un seul appel de
+# modele : offres de service, audits, comptes rendus. Un nom de modele y decrit
+# la solution proposee au client ou l'existant audite, jamais une configuration.
+# Le scanner ne peut pas trancher depuis le texte ; le depot, lui, le sait, et
+# l'ecrit dans ce fichier.
+IGNORE_FILE_NAME = ".llm-scan-ignore"
+
+
+@dataclass(frozen=True)
+class IgnoreRule:
+    """Une ligne du fichier d'exclusion.
+
+    `negated` porte les lignes prefixees de `!`, qui reinjectent un chemin exclu
+    par une regle precedente. C'est ce qui rend exprimable le cas « tout ce
+    depot est de la documentation, sauf ce dossier de code ».
+    """
+
+    pattern: str
+    negated: bool
+
 
 def _should_scan_file(path: Path) -> bool:
     """Determine if a file should be scanned based on extension and name."""
@@ -87,6 +111,63 @@ def _should_scan_file(path: Path) -> bool:
 def _should_skip_dir(dirname: str) -> bool:
     """Determine if a directory should be skipped."""
     return dirname in EXCLUDED_DIRS or dirname.endswith(".egg-info")
+
+
+def load_ignore_rules(scan_path: Path) -> list[IgnoreRule]:
+    """Lit les regles d'exclusion a la racine du depot scanne.
+
+    Syntaxe reduite de .gitignore : une regle par ligne, `#` en commentaire,
+    lignes vides ignorees, `!` pour reinjecter. Un fichier absent ou illisible
+    ne donne aucune regle : l'exclusion est une option, pas un prerequis.
+    """
+    ignore_file = scan_path / IGNORE_FILE_NAME
+    try:
+        content = ignore_file.read_text(encoding="utf-8", errors="ignore")
+    except OSError:
+        return []
+
+    rules: list[IgnoreRule] = []
+    for raw_line in content.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+        negated = line.startswith("!")
+        pattern = line[1:].strip() if negated else line
+        if pattern:
+            rules.append(IgnoreRule(pattern=pattern, negated=negated))
+
+    if rules:
+        logger.info("%s: %d regle(s) d'exclusion chargee(s)", IGNORE_FILE_NAME, len(rules))
+    return rules
+
+
+def _rule_matches(relative_path: str, pattern: str) -> bool:
+    """Vrai si un chemin relatif POSIX est vise par une regle d'exclusion."""
+    target = pattern.rstrip("/")
+    if not target:
+        return False
+    # `docs/` comme `docs` visent aussi tout ce qui se trouve dessous.
+    if fnmatchcase(relative_path, target) or fnmatchcase(relative_path, f"{target}/*"):
+        return True
+    # Une regle sans separateur vise un nom, a n'importe quelle profondeur :
+    # `*.md` exclut la documentation partout, `Mandat` exclut chaque dossier qui
+    # porte ce nom. Une regle avec separateur reste ancree a la racine.
+    if "/" not in target:
+        return any(fnmatchcase(part, target) for part in relative_path.split("/"))
+    return False
+
+
+def is_ignored(relative_path: str, rules: list[IgnoreRule]) -> bool:
+    """Applique les regles dans l'ordre du fichier ; la derniere qui matche gagne.
+
+    L'ordre compte, comme dans .gitignore : `*` suivi de `!src/` exclut tout le
+    depot sauf le code, alors que l'ordre inverse n'exclurait plus rien.
+    """
+    ignored = False
+    for rule in rules:
+        if _rule_matches(relative_path, rule.pattern):
+            ignored = not rule.negated
+    return ignored
 
 
 def scan_directory(scan_path: Path, repo_name: str) -> ScanResult:
@@ -101,11 +182,18 @@ def scan_directory(scan_path: Path, repo_name: str) -> ScanResult:
     """
     seen: set[tuple[str, str, str]] = set()  # (model, file, match_type) for dedup
     matches: list[ScanMatch] = []
+    rules = load_ignore_rules(scan_path)
+    ignored_files = 0
 
     for file_path in _walk_files(scan_path):
-        relative_path = str(file_path.relative_to(scan_path))
+        relative_path = file_path.relative_to(scan_path).as_posix()
+        if is_ignored(relative_path, rules):
+            ignored_files += 1
+            continue
         _scan_file(file_path, relative_path, seen, matches)
 
+    if ignored_files:
+        logger.info("%s: %d fichier(s) exclu(s) du scan", IGNORE_FILE_NAME, ignored_files)
     logger.info("Scanned %s: found %d unique matches", repo_name, len(matches))
     return ScanResult(repo_name=repo_name, matches=matches)
 

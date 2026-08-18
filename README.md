@@ -358,6 +358,39 @@ configuré, le journal le dit explicitement au lieu de laisser un code d'erreur 
 
 Les issues sont désactivées par défaut sur les forks GitHub. L'action échouera si elle détecte des modèles dépréciés mais ne peut pas créer d'issues. Activez les issues dans **Settings > General > Features > Issues** du repo.
 
+### Exclure des chemins avec `.llm-scan-ignore`
+
+Un dépôt peut nommer des modèles sans en appeler un seul : offres de service,
+audits, comptes rendus, SOW. Le nom du modèle y décrit la solution proposée au
+client ou l'existant audité, pas une configuration. Le scanner ne peut pas
+trancher depuis le texte ; le dépôt, lui, le sait. Il le déclare dans un fichier
+`.llm-scan-ignore` **à sa racine**.
+
+Syntaxe réduite de `.gitignore` :
+
+| Ligne | Effet |
+|---|---|
+| `# commentaire` | ignorée, comme les lignes vides |
+| `*` | exclut tout le dépôt |
+| `docs/` ou `docs` | exclut le dossier et tout ce qui se trouve dessous |
+| `*.md` | exclut ce nom à n'importe quelle profondeur |
+| `ODS/Mandat/*` | motif avec séparateur : ancré à la racine du dépôt |
+| `!src/` | réinjecte un chemin exclu par une règle précédente |
+
+L'ordre compte : la dernière règle qui correspond gagne. Un dépôt de documents
+qui héberge aussi du code s'écrit donc ainsi, et pas dans l'autre sens.
+
+```
+# Ce dépôt ne contient que des documents de mandat, sauf src/ qui appelle un modèle.
+*
+!src/
+```
+
+Une exclusion large rend le code du dépôt invisible au scanner : une dépréciation
+ne lèvera plus rien. Écrire dans le fichier ce qui doit déclencher son retrait
+(l'arrivée de code qui appelle réellement un modèle) évite de le découvrir le jour
+de l'arrêt du modèle.
+
 ---
 
 ## Développement et maintenance du repo
@@ -443,7 +476,7 @@ data/
   registry.json          # Registre JSON des modeles deprecies
 src/
   patterns.py            # Patterns regex pour la detection de modeles
-  scanner.py             # Parcours de repertoire et scan de fichiers
+  scanner.py             # Parcours de repertoire, exclusions .llm-scan-ignore, scan
   models.py              # Modeles de donnees (ScanMatch, ScanResult)
   deprecations.py        # Chargement du registre + gestion des suffixes de date
   deprecation_feed.py    # Flux live depuis deprecations.info
