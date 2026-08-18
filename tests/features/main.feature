@@ -50,11 +50,13 @@ Feature: CLI entry point and orchestration
       | src/chatbot/embedding.py              | from openai import OpenAI\nembedding = OpenAI(model="text-embedding-ada-002")                              |
       | tests/unit_testing/test_chain.py      | mock_llm = OpenAI(model="gpt-4", temperature=0)                                                           |
     When I scan and check deprecations for repo "librairies-martin-chatbot"
-    Then I should find at least 4 deprecated references
+    Then I should find at least 3 deprecated references
     And deprecated models should include "gpt-4o-mini"
     And deprecated models should include "gpt-4o"
     And deprecated models should include "text-embedding-ada-002"
-    And deprecated models should include "gpt-4"
+    # Le `gpt-4` de la fixture ne sert qu'a faire passer un test : rien ne
+    # l'appelle, et le migrer ne change rien a ce qui repond en production.
+    And deprecated models should not include "gpt-4"
 
   Scenario: End-to-end yvan style project has no deprecations
     Given a temporary directory with the following files:
