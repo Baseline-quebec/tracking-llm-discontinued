@@ -389,6 +389,24 @@ Hors de ces marques, un nom de modèle est cité dans une phrase, il n'y est pas
 déclaré. Une configuration réellement documentée reste vue, parce qu'on l'écrit
 en code — `MODEL="gpt-4o"` au fil d'une phrase, ou un bloc d'exemple.
 
+Au fil du texte, les backticks à eux seuls ne suffisent pas : ils disent « ceci
+est un terme technique », pas « ceci s'exécute ». On y met un chemin, une
+commande, un nom de fonction — et un nom de modèle. Un span qui ne porte que le
+nom du modèle le cite donc, exactement comme la phrase autour de lui. Une
+déclaration porte autre chose que le nom : une affectation
+(`` `MODEL="gpt-4o"` ``), une paire clé/valeur (`` `model: gpt-4o` ``), un
+drapeau (`` `--model gpt-4o` ``), un appel (`` `ChatOpenAI(model="gpt-4o")` ``).
+Ce sont les blancs, le signe égal et les guillemets qui trahissent cette forme.
+À l'intérieur d'un bloc clôturé la question ne se pose pas : l'auteur y a
+délimité du code, pas un mot.
+
+L'issue #40 de `gabarits-slides` portait sur `gpt-4o-mini` dans une planche
+décrivant l'architecture d'un système audité chez un client — « Un
+**superviseur** (`` `gpt-4o-mini` ``) route vers **6 spécialistes** ». Rien n'y
+est configuré, et la migration ne se ferait pas là. Sur ce dépôt, la règle passe
+de trois signalements à un : le seul restant est un `model="…"` dans un extrait
+Python.
+
 L'issue #77 d'`agents-support` listait trois fichiers pour `gpt-4o` : un seul le
 configurait. Les deux autres en parlaient — une fiche client résumant les
 technologies d'un mandat livré en 2024, une étude de cas racontant une bascule.
@@ -398,8 +416,9 @@ les trois vraies configurations.
 
 `.txt` reste hors de cette règle, faute d'une convention qui y sépare le code de
 la prose ; un fichier de notes se déclare dans `.llm-scan-ignore`. Un tableau
-Markdown dont la cellule ne porte pas de backticks est de la prose lui aussi :
-`| Modèle | gpt-4o |` n'est plus signalé, `` | Modèle | `gpt-4o` | `` l'est.
+Markdown est de la prose lui aussi, backticks ou non : ni `| Modèle | gpt-4o |`
+ni `` | Modèle | `gpt-4o` | `` ne sont signalés, alors que
+`` | Défaut | `MODEL=gpt-4o` | `` l'est.
 
 **Les fichiers et dossiers de test.** Un modèle fixé dans une fixture sert à
 faire passer un test ; il n'est appelé par aucun service, et le migrer ne change

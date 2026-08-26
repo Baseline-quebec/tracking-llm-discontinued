@@ -181,8 +181,8 @@ Feature: Repository file scanner
   # par `#` n'est pas ecartee comme du code desactive.
   Scenario: A markdown heading is not a comment
     Given a temporary directory with the following files:
-      | path      | content                            |
-      | guide.md  | # Modele retenu : `gpt-4o`         |
+      | path      | content                             |
+      | guide.md  | # Defaut : `MODEL="gpt-4o"`          |
     When I scan the directory for repo "test-repo"
     Then I should find 1 scan matches
     And the results should contain model "gpt-4o"
@@ -205,6 +205,27 @@ Feature: Repository file scanner
       | cas/collecte.md    | Le CHANGELOG de la v0.4.0 porte la ligne « switch to gpt-4o », le         |
       | notes.md           | On avait evalue claude-3-opus avant de trancher, dit le compte rendu      |
 
+  # Au fil d'une phrase, les backticks marquent un terme technique, pas une
+  # declaration : on y met un chemin, une commande, un nom de modele. Un span
+  # qui ne porte que le nom du modele le cite donc, comme la phrase autour.
+  # La premiere ligne vient de l'issue #40 de gabarits-slides, ouverte sur une
+  # planche decrivant l'architecture d'un systeme audite chez un client.
+  Scenario Outline: A model merely backticked in a sentence is not a configuration
+    Given a temporary directory with the following files:
+      | path        | content            |
+      | src/app.py  | model = "gpt-4o"   |
+      | <planche>   | <prose>            |
+    When I scan the directory for repo "test-repo"
+    Then I should find 1 scan matches
+    And the results should contain model "gpt-4o"
+
+    Examples:
+      | planche          | prose                                                            |
+      | evolia-audit.md  | - Un **superviseur** (`gpt-4o-mini`) route vers 6 specialistes    |
+      | guide.md         | # Modele retenu : `gpt-4o-mini`                                   |
+      | fiches/pile.md   | La pile repose sur `gpt-4o-mini` et `text-embedding-ada-002`.     |
+      | comparatif.md    | \| Modele \| `gpt-4o-mini` \| 0,15 USD \|                            |
+
   # Une configuration documentee s'ecrit en code : elle reste vue.
   Scenario Outline: A model written as markdown code is a declaration
     Given a temporary directory with the following files:
@@ -217,6 +238,9 @@ Feature: Repository file scanner
     Examples:
       | contenu                                                        |
       | Le fichier `.env` fixe `COMPLETION_MODEL="gpt-4o"` par defaut. |
+      | Le defaut est `model: gpt-4o`, surchargeable par variable.      |
+      | Lancer `--model gpt-4o` pour forcer le modele.                  |
+      | On instancie `ChatOpenAI(model="gpt-4o")` au demarrage.        |
       | Configuration :\n\n```yaml\nmodel: "gpt-4o"\n```\n         |
       | Exemple :\n\n~~~\nMODEL=gpt-4o\n~~~\n                      |
 

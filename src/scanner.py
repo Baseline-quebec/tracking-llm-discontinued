@@ -171,8 +171,9 @@ _MARQUEURS_COMMENTAIRE: dict[str, tuple[str, ...]] = {
 # ligne "switch to gpt-4o" »). Ni l'une ni l'autre ne se migre : corriger ce
 # texte reecrirait un compte rendu.
 #
-# Une configuration reellement documentee reste vue, parce qu'on l'ecrit en
-# code : `MODEL="gpt-4o"` au fil d'une phrase, ou un bloc cloture d'exemple.
+# Une configuration reellement documentee reste vue, parce qu'on l'ecrit sous
+# la forme d'une declaration : `MODEL="gpt-4o"` au fil d'une phrase, ou un bloc
+# cloture d'exemple. Voir _MARQUES_DE_DECLARATION pour le span au fil du texte.
 # `.txt` reste hors de cette regle, faute d'une convention qui y separe le code
 # de la prose ; un fichier de notes se declare dans `.llm-scan-ignore`.
 _EXTENSIONS_PROSE: frozenset[str] = frozenset({".md"})
@@ -183,6 +184,26 @@ _CLOTURE_BLOC: re.Pattern[str] = re.compile(r"^ {0,3}(?P<marque>`{3,}|~{3,})")
 
 # Un span de code au fil du texte : n backticks, du contenu, n backticks.
 _SPAN_CODE: re.Pattern[str] = re.compile(r"(`+)(?P<code>[^`]+)\1")
+
+# Au fil d'une phrase, les backticks ne disent pas « ceci s'execute » : ils
+# disent « ceci est un terme technique ». On y met un chemin, une commande, un
+# nom de fonction -- et un nom de modele. Un span qui ne contient que le nom du
+# modele le cite donc, exactement comme la phrase autour de lui.
+#
+# Le 2026-08-25, l'issue #40 de gabarits-slides portait sur `gpt-4o-mini` a la
+# ligne 182 d'evolia-audit.md : « Un **superviseur** (`gpt-4o-mini`) route vers
+# **6 specialistes** ». C'est une planche qui decrit l'architecture d'un systeme
+# audite chez un client ; rien n'y est configure, et la migration ne se ferait
+# pas ici de toute facon.
+#
+# Une declaration se reconnait a sa forme : elle porte autre chose que le nom du
+# modele. Une affectation (`MODEL="gpt-4o"`), une paire cle/valeur
+# (`model: gpt-4o`), un drapeau (`--model gpt-4o`), un appel
+# (`ChatOpenAI(model="gpt-4o")`). Ce sont les blancs, le signe egal et les
+# guillemets qui trahissent cette forme ; un nom de modele seul n'en a aucun.
+#
+# Un bloc cloture n'est pas concerne : l'auteur y a delimite du code, pas un mot.
+_MARQUES_DE_DECLARATION: re.Pattern[str] = re.compile(r"[\s=\"\']")
 
 
 def _est_fichier_de_test(path: Path) -> bool:
@@ -229,8 +250,16 @@ def _est_ligne_commentee(ligne: str, marqueurs: tuple[str, ...]) -> bool:
     return ligne.lstrip().startswith(marqueurs)
 
 
+def _est_declaration(code: str) -> bool:
+    """Vrai si un span de code en porte la forme, et pas seulement le nom.
+
+    `MODEL="gpt-4o"` declare, `gpt-4o` cite.
+    """
+    return _MARQUES_DE_DECLARATION.search(code.strip()) is not None
+
+
 def _masquer_hors_code(ligne: str) -> str:
-    """Ne laisse subsister d'une ligne de prose que le contenu ecrit en code.
+    """Ne laisse subsister d'une ligne de prose que ce qui declare un modele.
 
     Le masquage remplace le reste par des espaces, donc les positions sont
     conservees : la detection de contexte raisonne sur les caracteres voisins,
@@ -240,6 +269,8 @@ def _masquer_hors_code(ligne: str) -> str:
     masquee = [" "] * len(ligne)
     for span in _SPAN_CODE.finditer(ligne):
         debut, fin = span.span("code")
+        if not _est_declaration(ligne[debut:fin]):
+            continue
         masquee[debut:fin] = ligne[debut:fin]
     return "".join(masquee)
 
