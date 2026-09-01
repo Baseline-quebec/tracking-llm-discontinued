@@ -89,12 +89,18 @@ def main(argv: list[str] | None = None) -> None:
 
     # Step 3: Create issues for deprecated models
     assignees = [a.strip() for a in args.assignees.split(",") if a.strip()] or None
+    # Le depot est vise EXPLICITEMENT. L'etape de l'action s'execute depuis le
+    # repertoire de l'action (pour que `python -m src.main` ne soit pas masque
+    # par un paquet `src/` du depot analyse) : gh n'a donc plus de depot a
+    # deduire du repertoire courant, et chaque appel echouait des qu'un modele
+    # deprecie etait trouve.
     issues_created, issues_failed = create_issues(
         alerts,
         assignees=assignees,
         dry_run=args.dry_run,
         webhook_url=args.webhook_url or None,
         repo_name=args.repo_name,
+        target_repo=args.repo_name,
     )
 
     # Fail if any issues could not be created (e.g. issues disabled on repo)

@@ -81,10 +81,12 @@ def create_issues(
     Groups alerts by model so each model gets at most one issue.
     Skips creation if an open issue already exists for the model.
 
-    `target_repo` routes every gh call to an explicit repository, which the
-    organisation-wide sweep needs since it scans clones rather than the
-    checkout it runs from. Left as None, gh infers the repository from the
-    working directory, which is the behaviour the per-repo action relies on.
+    `target_repo` routes every gh call to an explicit repository. Les deux
+    appelants le passent : le balayage d'organisation, qui scanne des clones
+    plutot que la copie d'ou il tourne, et l'action par depot, qui s'execute
+    depuis le repertoire de l'action et non depuis le depot analyse. Laisse a
+    None, gh deduit le depot du repertoire courant, ce qui ne vaut que si ce
+    repertoire est bien celui du depot vise.
 
     Returns (issues_created, issues_failed).
     """
