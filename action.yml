@@ -60,6 +60,14 @@ runs:
     - name: Run LLM scanner
       id: scan
       shell: bash
+      # `python -m src.main` place le repertoire courant en tete de sys.path,
+      # AVANT le PYTHONPATH ci-dessous. Or le repertoire courant par defaut est
+      # le workspace du depot analyse : tout depot qui possede son propre
+      # paquet `src/` (layout src, tres courant en Python) masquait alors le
+      # `src/` de cette action, et le scan echouait sur
+      # « No module named src.main ». On se place donc dans le repertoire de
+      # l'action ; le depot analyse reste vise par --scan-path, qui est absolu.
+      working-directory: ${{ github.action_path }}
       env:
         SCAN_REPO_NAME: ${{ inputs.repo-name }}
         SCAN_PATH: ${{ github.workspace }}
