@@ -137,10 +137,12 @@ jobs:
             5. Execute le linter : ruff check src/ tests/ --fix && ruff format src/ tests/
             6. Si des changements ont ete faits, commit avec le message :
                "feat: update patterns and tests for new registry models"
+               puis pousse-le sur la branche courante : git push
+               Un commit non pousse est perdu a la fin du job.
             7. Si tout passe sans changement, ne fais rien.
 
           claude_args: |
-            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(python:*),Bash(pip:*),Bash(ruff:*),Bash(git:*),Bash(gh pr comment:*)"
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(python:*),Bash(PYTHONPATH=. python:*),Bash(pip:*),Bash(ruff:*),Bash(git:*),Bash(gh pr comment:*)"
 
       - name: Verifier le resultat de la validation Claude
         if: steps.push-branch.outputs.branch != '' && steps.claude-validation.outcome == 'failure'
