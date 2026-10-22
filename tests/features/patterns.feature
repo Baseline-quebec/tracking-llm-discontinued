@@ -125,6 +125,12 @@ Feature: LLM model pattern detection
       | model = "gpt-4o-mini-search-preview-2025-03-11"  | gpt-4o-mini-search-preview-2025-03-11   |
       | model = "gpt-4o-search-preview-2025-03-11"       | gpt-4o-search-preview-2025-03-11   |
       | model = "gpt-4o-mini-tts-2025-03-20"             | gpt-4o-mini-tts-2025-03-20         |
+      | model = "gpt-4o-transcribe" | gpt-4o-transcribe |
+      | model = "gpt-4o-transcribe-diarize" | gpt-4o-transcribe-diarize |
+      | model = "gpt-5.4-cyber" | gpt-5.4-cyber |
+      | model = "tts-1" | tts-1 |
+      | model = "tts-1-hd" | tts-1-hd |
+      | model = "whisper-1" | whisper-1 |
       | model = "gpt-image-1"                            | gpt-image-1                        |
       | model = "gpt-image-1-mini"                       | gpt-image-1-mini                   |
       | model = "gpt-image-1.5"                          | gpt-image-1.5                      |
@@ -227,6 +233,8 @@ Feature: LLM model pattern detection
     Examples:
       | line                                                     | model                                           |
       | model = "gemini-2.5-pro"                                | gemini-2.5-pro                                  |
+      | model = "gemini-2.5-computer-use-preview-10-2025" | gemini-2.5-computer-use-preview-10-2025 |
+      | model = "gemini-omni-flash-preview" | gemini-omni-flash-preview |
       | model: gemini-2.5-flash                                 | gemini-2.5-flash                                |
       | model = "gemini-2.5-pro-preview-03-25"                  | gemini-2.5-pro-preview-03-25                    |
       | model: gemini-2.5-flash-preview-04-17                   | gemini-2.5-flash-preview-04-17                  |
