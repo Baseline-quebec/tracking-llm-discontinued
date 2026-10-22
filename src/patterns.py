@@ -58,7 +58,7 @@ def _build_patterns() -> list[ModelPattern]:
     _add(
         "openai",
         "llm",
-        r"\bgpt-5(?:\.\d)?(?:-(?:mini|nano|pro|codex|chat))?"
+        r"\bgpt-5(?:\.\d)?(?:-(?:mini|nano|pro|codex|chat|cyber))?"
         r"(?:-(?:latest|mini|max)|-\d{4}-\d{2}-\d{2})?\b",
     )
     _add("openai", "llm", r"\bgpt-4\.5-preview\b")
@@ -71,7 +71,11 @@ def _build_patterns() -> list[ModelPattern]:
         "llm",
         r"\bgpt-4o-mini-(?:audio|realtime|search)(?:-preview)?(?:-\d{4}-\d{2}-\d{2})?\b",
     )
-    _add("openai", "llm", r"\bgpt-4o-mini-(?:tts|transcribe)(?:-\d{4}-\d{2}-\d{2})?\b")
+    _add(
+        "openai",
+        "llm",
+        r"\bgpt-4o(?:-mini)?-(?:tts|transcribe)(?:-diarize)?(?:-\d{4}-\d{2}-\d{2})?\b",
+    )
     _add("openai", "llm", r"\bgpt-4o(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")
     # Suffixe `-completions` : identifiants d'endpoint publies par deprecations.info
     # (ex: gpt-4-turbo-completions), distincts du modele servi via /chat/completions.
@@ -115,6 +119,9 @@ def _build_patterns() -> list[ModelPattern]:
         context_required=True,
     )
     _add("openai", "llm", r"\bdall-e-[23]\b")
+    # Audio models: short names, so a context keyword must be nearby.
+    _add("openai", "llm", r"\btts-1(?:-hd)?(?:-\d{4})?\b", context_required=True)
+    _add("openai", "llm", r"\bwhisper-1\b", context_required=True)
     _add("openai", "llm", r"\bsora-\d+(?:-pro)?(?:-\d{4}-\d{2}-\d{2})?\b")
     # Fine-tuned model variants (ft- prefix)
     _add(
@@ -160,6 +167,8 @@ def _build_patterns() -> list[ModelPattern]:
     _add("google", "llm", r"\bgemini-robotics-er-\d+[\.-]\d+(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-2[\.-]5-flash(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-2[\.-]5-pro(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bgemini-2[\.-]5-computer-use(?:-[a-z0-9]+)*\b")
+    _add("google", "llm", r"\bgemini-omni(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-2[\.-]0-flash(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-2[\.-]0-pro(?:-[a-z0-9]+)*\b")
     _add("google", "llm", r"\bgemini-1[\.-]5-pro(?:-[a-z0-9]+)*\b")
