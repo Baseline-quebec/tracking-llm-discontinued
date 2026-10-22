@@ -104,7 +104,7 @@ jobs:
         id: claude-validation
         if: steps.push-branch.outputs.branch != ''
         continue-on-error: true
-        uses: anthropics/claude-code-action@6c0083bb7289c31716797a039b6367b3079cc46e # v1
+        uses: anthropics/claude-code-action@db77d4d3c98f3f6380e7cd45ffba2342a3dbde3c # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           # Le jeton de l'App, pour que le commit correctif de Claude declenche
