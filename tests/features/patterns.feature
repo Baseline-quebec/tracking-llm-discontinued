@@ -134,6 +134,7 @@ Feature: LLM model pattern detection
       | model = "gpt-image-1"                            | gpt-image-1                        |
       | model = "gpt-image-1-mini"                       | gpt-image-1-mini                   |
       | model = "gpt-image-1.5"                          | gpt-image-1.5                      |
+      | model = "gpt-image-1.5-2025-12-16"               | gpt-image-1.5-2025-12-16           |
       | model = "chatgpt-image-latest"                   | chatgpt-image-latest               |
       | model = "gpt-audio-mini-2025-10-06"              | gpt-audio-mini-2025-10-06          |
       | model = "gpt-realtime-mini-2025-10-06"           | gpt-realtime-mini-2025-10-06       |
