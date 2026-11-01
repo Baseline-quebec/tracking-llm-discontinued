@@ -96,7 +96,7 @@ def _build_patterns() -> list[ModelPattern]:
     _add("openai", "llm", r"\bgpt-3\.5-turbo-16k(?:-\d{4})?\b")
     _add("openai", "llm", r"\bgpt-3\.5-turbo(?:-\d{4})?(?:-completions)?\b")
     _add("openai", "llm", r"\bgpt-(?:audio|realtime)(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")
-    _add("openai", "llm", r"\bgpt-image-\d+(?:\.\d+)?(?:-mini)?\b")
+    _add("openai", "llm", r"\bgpt-image-\d+(?:\.\d+)?(?:-mini)?(?:-\d{4}-\d{2}-\d{2})?\b")
     _add("openai", "llm", r"\bchatgpt-(?:4o|image)-latest\b")
     _add(
         "openai",
