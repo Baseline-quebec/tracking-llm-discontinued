@@ -241,6 +241,7 @@ flowchart TD
 | gpt-5.4-cyber | openai | shutdown | 2026-10-01 |
 | gpt-5.4-nano | openai | retiring | 2027-04-01 |
 | gpt-5.4-nano-2026-03-17 | openai | retiring | 2027-04-01 |
+| gpt-5.5-cyber-preview | openai | retiring | 2027-02-01 |
 | gpt-audio | openai | retiring | 2027-01-20 |
 | gpt-audio-2025-08-28 | openai | retiring | 2027-01-20 |
 | gpt-audio-mini | openai | retiring | 2027-01-20 |
@@ -250,6 +251,8 @@ flowchart TD
 | gpt-image-1-mini | openai | retiring | 2026-12-01 |
 | gpt-image-1.5 | openai | retiring | 2026-12-01 |
 | gpt-image-1.5-2025-12-16 | openai | retiring | 2026-12-01 |
+| gpt-image-2 | openai | retiring | 2027-02-10 |
+| gpt-image-2-2026-04-21 | openai | retiring | 2027-02-10 |
 | gpt-realtime | openai | retiring | 2027-01-20 |
 | gpt-realtime-2025-08-28 | openai | retiring | 2027-01-20 |
 | gpt-realtime-mini | openai | retiring | 2027-01-20 |

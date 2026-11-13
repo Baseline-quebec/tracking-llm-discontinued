@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-11-01T06:11:14.803825+00:00",
+  "updated_at": "2026-11-12T16:45:47.092779+00:00",
   "models": [
     {
       "model": "claude-1.0",
@@ -1268,6 +1268,12 @@
       "shutdown_date": "2027-04-01"
     },
     {
+      "model": "gpt-5.5-cyber-preview",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2027-02-01"
+    },
+    {
       "model": "gpt-audio",
       "provider": "openai",
       "status": "retiring",
@@ -1320,6 +1326,18 @@
       "provider": "openai",
       "status": "retiring",
       "shutdown_date": "2026-12-01"
+    },
+    {
+      "model": "gpt-image-2",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2027-02-10"
+    },
+    {
+      "model": "gpt-image-2-2026-04-21",
+      "provider": "openai",
+      "status": "retiring",
+      "shutdown_date": "2027-02-10"
     },
     {
       "model": "gpt-realtime",

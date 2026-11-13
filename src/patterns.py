@@ -59,7 +59,7 @@ def _build_patterns() -> list[ModelPattern]:
         "openai",
         "llm",
         r"\bgpt-5(?:\.\d)?(?:-(?:mini|nano|pro|codex|chat|cyber))?"
-        r"(?:-(?:latest|mini|max)|-\d{4}-\d{2}-\d{2})?\b",
+        r"(?:-(?:latest|mini|max|preview)|-\d{4}-\d{2}-\d{2})?\b",
     )
     _add("openai", "llm", r"\bgpt-4\.5-preview\b")
     _add("openai", "llm", r"\bgpt-4\.1(?:-(?:mini|nano))?(?:-\d{4}-\d{2}-\d{2})?\b")
